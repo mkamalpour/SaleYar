@@ -4,12 +4,10 @@
 
 SaleYar reads Holoo invoice exports and tells shop owners what to buy, what to avoid, and why — in plain Persian or English. No cloud. No internet required after install. Your data never leaves your computer.
 
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║               ⚡ Offline Business Intelligence ⚡           ║
-║                  ═══ MADE BY KamalAi ═══                     ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
+
+          ⚡ Offline Business Intelligence ⚡          
+                  MADE BY KamalAi                     
+
 
 ## ✨ What It Does
 
