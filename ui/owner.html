@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SaleYar | Shop Owner Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app { display: flex; height: 100vh; }
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .logo { padding: 30px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo h1 { font-size: 24px; font-weight: 700; }
+        .logo p { font-size: 12px; opacity: 0.7; margin-top: 5px; }
+        .nav-menu { flex: 1; padding: 24px 16px; overflow-y: auto; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: rgba(255,255,255,0.7);
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: #28a745; color: white; }
+        .nav-item i { width: 20px; font-size: 18px; }
+        .nav-item span { font-size: 14px; font-weight: 500; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .top-bar {
+            background: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .page-title { font-size: 20px; font-weight: 600; }
+        .owner-controls {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .ctrl {
+            display: flex;
+            flex-direction: column;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        .ctrl input, .ctrl select {
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 13px;
+            margin-top: 2px;
+            width: 130px;
+        }
+        .upload-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 34px;
+        }
+        .status {
+            font-size: 12px;
+            background: #f8f9fa;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #6c757d;
+        }
+        .global-search {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 30px;
+            padding: 6px 15px;
+            border: 1px solid #e9ecef;
+            width: 240px;
+        }
+        .global-search i { color: #6c757d; margin-right: 8px; }
+        .global-search input { border: none; background: none; outline: none; width: 100%; font-size: 13px; }
+        .content-area { flex: 1; overflow-y: auto; padding: 24px; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+        .stat-value { font-size: 28px; font-weight: 700; }
+        .stat-label { font-size: 13px; color: #6c757d; }
+        /* FIXED TABLE STYLES */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 14px 16px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: left;
+        }
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: left;
+        }
+        .data-table tr:hover { background: #f8f9fa; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-danger { background: #fee2e2; color: #dc2626; }
+        .badge-warning { background: #fff3cd; color: #fd7e14; }
+        .badge-success { background: #d4edda; color: #28a745; }
+        .badge-info { background: #d1ecf1; color: #17a2b8; }
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-spinner {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e9ecef;
+            border-top-color: #28a745;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .llm-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 200;
+        }
+        .llm-header {
+            padding: 15px;
+            background: #1a1a2e;
+            color: white;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .llm-messages {
+            height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #fafbfc;
+        }
+        .message-user {
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            max-width: 80%;
+            margin-left: auto;
+        }
+        .message-bot {
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            max-width: 80%;
+        }
+        .llm-input-area {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+            border-top: 1px solid #e9ecef;
+        }
+        .llm-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+        }
+        .llm-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 199;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .sidebar span:not(.nav-item i) { display: none; }
+            .owner-controls .ctrl input, .owner-controls .ctrl select { width: 100px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="sidebar">
+        <div class="logo"><h1>🛍️ SaleYar</h1><p>Shop Intelligence</p></div>
+        <div class="nav-menu">
+            <div class="nav-item active" data-tab="overview"><i class="fas fa-chart-line"></i><span>Overview</span></div>
+            <div class="nav-item" data-tab="orders"><i class="fas fa-shopping-cart"></i><span>Purchase Orders</span></div>
+            <div class="nav-item" data-tab="forecast"><i class="fas fa-chart-bar"></i><span>Forecast</span></div>
+            <div class="nav-item" data-tab="products"><i class="fas fa-box"></i><span>Products</span></div>
+            <div class="nav-item" data-tab="segments"><i class="fas fa-tags"></i><span>Segments</span></div>
+            <div class="nav-item" data-tab="basket"><i class="fas fa-handshake"></i><span>Basket Rules</span></div>
+            <div class="nav-item" data-tab="inventory"><i class="fas fa-warehouse"></i><span>Inventory</span></div>
+            <div class="nav-item" data-tab="customers"><i class="fas fa-users"></i><span>Customers & ROI</span></div>
+            <div class="nav-item" data-tab="settings"><i class="fas fa-cog"></i><span>Settings</span></div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title" id="pageTitle">Overview</div>
+            <div class="global-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="globalSearch" placeholder="Search products...">
+            </div>
+            <div class="owner-controls">
+                <div class="ctrl"><label>Shop ID</label><input type="text" id="shopId" value="default" style="width:100px"></div>
+                <div class="ctrl"><label>Budget (Toman)</label><input type="number" id="budget" value="100000000" step="1000000" style="width:120px"></div>
+                <div class="ctrl"><label>Goal</label><select id="goal"><option value="maximize_profit">Max Profit</option><option value="cover_customers">Cover Customers</option><option value="reduce_risk">Reduce Risk</option></select></div>
+                <div class="ctrl"><label>Language</label><select id="lang"><option value="en">English</option><option value="fa">فارسی</option></select></div>
+                <button class="upload-btn" id="uploadBtn"><i class="fas fa-upload"></i> Upload</button>
+                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none">
+                <div class="status" id="status">Ready</div>
+            </div>
+        </div>
+        <div class="content-area" id="contentArea">
+            <div style="text-align:center; padding:50px;"><i class="fas fa-cloud-upload-alt" style="font-size:48px;color:#cbd5e1;"></i><p>Upload a CSV/Excel file to start</p></div>
+        </div>
+    </div>
+</div>
+<div class="llm-toggle" id="llmToggle"><i class="fas fa-robot"></i></div>
+<div class="llm-panel" id="llmPanel">
+    <div class="llm-header"><span><i class="fas fa-robot"></i> AI Advisor</span><i class="fas fa-times" id="closeLlm" style="cursor:pointer"></i></div>
+    <div class="llm-messages" id="llmMessages"><div class="message-bot">Ask me about your shop – stock, orders, top products, or risks.</div></div>
+    <div class="llm-input-area"><input type="text" id="llmInput" class="llm-input" placeholder="Ask a question..."><button class="upload-btn" id="llmSend" style="background:#28a745;">Send</button></div>
+</div>
+<div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"><div class="spinner"></div><p>Analyzing your shop...</p></div></div>
+
+<script>
+    // ==================== STATE ====================
+    let report = null;
+    let inventory = {};
+    let currentTab = "overview";
+    let searchTerm = "";
+
+    const contentArea = document.getElementById('contentArea');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.getElementById('fileInput');
+    const statusDiv = document.getElementById('status');
+    const globalSearchInput = document.getElementById('globalSearch');
+    const llmToggle = document.getElementById('llmToggle');
+    const llmPanel = document.getElementById('llmPanel');
+    const closeLlm = document.getElementById('closeLlm');
+    const llmSend = document.getElementById('llmSend');
+    const llmInput = document.getElementById('llmInput');
+    const llmMessages = document.getElementById('llmMessages');
+
+    let apiBase = localStorage.getItem('saleYar_apiBase') || 'http://localhost:8000';
+    let apiKey = localStorage.getItem('saleYar_apiKey') || 'kamal';
+    let llmMode = localStorage.getItem('saleYar_llmMode') || 'keyword'; // 'keyword' or 'real'
+    // Talk mode: true = conversational (short, natural), false = bullet points
+    let talkMode = localStorage.getItem('saleYar_talkMode') === 'true';
+    if (localStorage.getItem('saleYar_talkMode') === null) {
+        talkMode = true;  // default to conversational for HTML dashboard
+        localStorage.setItem('saleYar_talkMode', 'true');
+    }
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+            currentTab = item.dataset.tab;
+            const titles = { overview:'Overview', orders:'Purchase Orders', forecast:'Forecast', products:'Products', segments:'Segments', basket:'Basket Rules', inventory:'Inventory', customers:'Customers & ROI', settings:'Settings' };
+            document.getElementById('pageTitle').innerText = titles[currentTab] || 'Overview';
+            renderCurrentTab();
+        });
+    });
+
+    globalSearchInput.addEventListener('input', (e) => { searchTerm = e.target.value.toLowerCase(); renderCurrentTab(); });
+
+    function getApiConfig() { return { base: apiBase, key: apiKey }; }
+    function saveApiConfig(base, key) { apiBase = base; apiKey = key; localStorage.setItem('saleYar_apiBase', base); localStorage.setItem('saleYar_apiKey', key); }
+
+    async function uploadAndAnalyze(file) {
+        const { base, key } = getApiConfig();
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('shop_id', document.getElementById('shopId').value);
+        formData.append('budget', document.getElementById('budget').value);
+        formData.append('goal', document.getElementById('goal').value);
+        formData.append('language', document.getElementById('lang').value);
+
+        try {
+            statusDiv.innerText = 'Uploading...';
+            const res = await fetch(`${base}/analyze`, {
+                method: 'POST',
+                headers: { 'X-API-Key': key },
+                body: formData
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+            const job = await res.json();
+            if (!job.job_id) throw new Error('No job_id returned');
+            statusDiv.innerText = 'Processing...';
+            let attempts = 0;
+            const interval = setInterval(async () => {
+                attempts++;
+                try {
+                    const pollRes = await fetch(`${base}/result/${job.job_id}`, { headers: { 'X-API-Key': key } });
+                    const data = await pollRes.json();
+                    if (data.status === 'done') {
+                        clearInterval(interval);
+                        if (data.result && data.result.report) {
+                            report = data.result.report;
+                            inventory = data.result.inventory || {};
+                        } else if (data.result) {
+                            report = data.result;
+                            inventory = data.inventory || {};
+                        } else {
+                            report = data;
+                            inventory = data.inventory || {};
+                        }
+                        statusDiv.innerText = '✅ Ready';
+                        loadingOverlay.style.display = 'none';
+                        renderCurrentTab();
+                        addBotMessage("Analysis complete! Ask me about stock, orders, or top products.");
+                    } else if (data.status === 'error') {
+                        clearInterval(interval);
+                        throw new Error(data.error || 'Processing error');
+                    } else if (attempts > 60) {
+                        clearInterval(interval);
+                        throw new Error('Timeout after 3 minutes');
+                    }
+                } catch (err) {
+                    clearInterval(interval);
+                    throw err;
+                }
+            }, 3000);
+        } catch (err) {
+            statusDiv.innerText = '❌ Error';
+            loadingOverlay.style.display = 'none';
+            alert(`Error: ${err.message}`);
+        }
+    }
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async (e) => {
+        if (!e.target.files.length) return;
+        loadingOverlay.style.display = 'flex';
+        await uploadAndAnalyze(e.target.files[0]);
+        loadingOverlay.style.display = 'none';
+    });
+
+    function getProducts() { return report?.products || []; }
+    function getOrders() { return report?.purchase_order || report?.order || []; }
+    function getBasketRules() { return report?.basket_rules || []; }
+    function getCustomers() { return report?.customers || {}; }
+    function filterItems(items, field = 'product') {
+        if (!searchTerm) return items;
+        return items.filter(i => (i[field] || '').toLowerCase().includes(searchTerm));
+    }
+
+    function renderCurrentTab() {
+        if (!report) {
+            contentArea.innerHTML = '<div style="text-align:center; padding:50px;"><i class="fas fa-cloud-upload-alt" style="font-size:48px;color:#cbd5e1;"></i><p>Upload a CSV/Excel file to start</p></div>';
+            return;
+        }
+        switch(currentTab) {
+            case 'overview': renderOverview(); break;
+            case 'orders': renderOrders(); break;
+            case 'forecast': renderForecast(); break;
+            case 'products': renderProducts(); break;
+            case 'segments': renderSegments(); break;
+            case 'basket': renderBasket(); break;
+            case 'inventory': renderInventory(); break;
+            case 'customers': renderCustomers(); break;
+            case 'settings': renderSettings(); break;
+        }
+    }
+
+    // FIXED: All tables now use proper <table> HTML
+    function renderOverview() {
+        const products = getProducts();
+        const revenue = products.reduce((s,p) => s + (p.total_revenue || 0), 0);
+        const profit = products.reduce((s,p) => s + (p.total_profit || 0), 0);
+        const health = report.health_score || 85;
+        const top5 = [...products].sort((a,b) => (b.total_revenue||0) - (a.total_revenue||0)).slice(0,5);
+        const urgentOrders = getOrders().filter(o => o.qty > 0 && (o.current_stock || 0) === 0);
+        const actions = report.priority_actions || [];
+        
+        let html = `<div class="stats-grid">
+            <div class="stat-card"><div class="stat-value">${health}/100</div><div class="stat-label">Health Score</div></div>
+            <div class="stat-card"><div class="stat-value">${(revenue/1e6).toFixed(1)}M</div><div class="stat-label">Revenue (Toman)</div></div>
+            <div class="stat-card"><div class="stat-value">${(profit/1e6).toFixed(1)}M</div><div class="stat-label">Profit</div></div>
+            <div class="stat-card"><div class="stat-value">${products.length}</div><div class="stat-label">Products</div></div>
+        </div>`;
+        
+        if (actions.length) {
+            html += `<div style="background:white; border-radius:16px; padding:16px; margin-bottom:20px;"><h3>🎯 Priority Actions</h3>`;
+            actions.slice(0,3).forEach(a => {
+                html += `<div style="border-left:3px solid ${a.urgency==='🔴'?'#dc2626':'#f59e0b'}; padding:8px 12px; margin:8px 0;"><strong>${a.title}</strong><br>${a.description}</div>`;
+            });
+            html += `</div>`;
+        }
+        
+        if (urgentOrders.length) {
+            html += `<div style="background:white; border-radius:16px; padding:16px; margin-bottom:20px;"><h3>🔴 Out of Stock – Order Now</h3>
+            <table class="data-table">
+                <thead><tr><th>Product</th><th>Buy Qty</th><th>Cost</th></tr></thead>
+                <tbody>`;
+            urgentOrders.forEach(o => {
+                html += `<tr><td><strong>${o.product}</strong></td><td>${o.qty}</td><td>${((o.unit_cost||0)*o.qty).toLocaleString()} T</td></tr>`;
+            });
+            html += `</tbody></table></div>`;
+        }
+        
+        html += `<div style="background:white; border-radius:16px; padding:16px;"><h3>🏆 Top 5 by Revenue</h3>
+        <table class="data-table">
+            <thead><tr><th>Product</th><th>Revenue (M)</th><th>Margin %</th></tr></thead>
+            <tbody>`;
+        top5.forEach(p => {
+            html += `<tr><td><strong>${p.product}</strong></td><td>${((p.total_revenue||0)/1e6).toFixed(1)}</td><td>${(p.profit_margin||0).toFixed(1)}%</td></tr>`;
+        });
+        html += `</tbody></table></div>`;
+        contentArea.innerHTML = html;
+    }
+
+    function renderOrders() {
+        let orders = getOrders();
+        orders = filterItems(orders, 'product');
+        if (!orders.length) {
+            contentArea.innerHTML = '<div style="background:white; border-radius:16px; padding:20px;">No purchase recommendations.</div>';
+            return;
+        }
+        const total = orders.reduce((s,o) => s + (o.qty * (o.unit_cost||0)), 0);
+        let html = `<div style="background:white; border-radius:16px; padding:16px; margin-bottom:20px;">
+            <h3>🛒 Recommended Orders</h3>
+            <p><strong>Total cost: ${total.toLocaleString()} Toman</strong></p>
+            <button id="copyOrdersBtn" style="background:#6c757d; margin-top:10px; padding:6px 12px; border-radius:8px;"><i class="fas fa-copy"></i> Copy</button>
+            <button id="exportOrdersBtn" style="background:#17a2b8; padding:6px 12px; border-radius:8px;"><i class="fas fa-download"></i> CSV</button>
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Product</th><th>Stock</th><th>Buy</th><th>Unit Cost</th><th>Total</th><th>Why</th></tr></thead>
+            <tbody>`;
+        orders.forEach(o => {
+            html += `<tr><td><strong>${o.product}</strong></td><td>${o.current_stock||0}</td><td>${o.qty}</td><td>${(o.unit_cost||0).toLocaleString()}</td><td>${(o.qty*(o.unit_cost||0)).toLocaleString()}</td><td>${o.reason||''}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        contentArea.innerHTML = html;
+        document.getElementById('copyOrdersBtn')?.addEventListener('click', () => {
+            const text = orders.map(o => `${o.product}: ${o.qty} units`).join('\n');
+            navigator.clipboard.writeText(text);
+            alert('Copied');
+        });
+        document.getElementById('exportOrdersBtn')?.addEventListener('click', () => {
+            let csv = "Product,Stock,Buy,Cost,Reason\n";
+            orders.forEach(o => csv += `"${o.product}",${o.current_stock||0},${o.qty},${o.qty*(o.unit_cost||0)},"${o.reason||''}"\n`);
+            const blob = new Blob([csv], {type:'text/csv'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'saleYar_orders.csv'; a.click();
+            URL.revokeObjectURL(a.href);
+        });
+    }
+
+    function renderForecast() {
+        let products = getProducts().filter(p => p.forecast && p.forecast.h30 > 0);
+        products = filterItems(products, 'product');
+        if (!products.length) { contentArea.innerHTML = '<div>No forecast data.</div>'; return; }
+        let html = `<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;">`;
+        products.slice(0,30).forEach(p => {
+            html += `<div style="background:white; border-radius:16px; padding:16px;">
+                <h4>${p.product}</h4>
+                <div style="font-size:28px; font-weight:700;">${p.forecast.h30.toFixed(0)}</div>
+                <div>30‑day demand</div>
+                <div>60d: ${p.forecast.h60?.toFixed(0) || 0} | 90d: ${p.forecast.h90?.toFixed(0) || 0}</div>
+                <div><span class="badge ${p.forecast.confidence==='High'?'badge-success':'badge-warning'}">${p.forecast.confidence||'Medium'} confidence</span></div>
+            </div>`;
+        });
+        html += `</div>`;
+        contentArea.innerHTML = html;
+    }
+
+    function renderProducts() {
+        let products = getProducts();
+        products = filterItems(products, 'product');
+        let html = `<table class="data-table">
+            <thead><tr><th>Rank</th><th>Product</th><th>Segment</th><th>Revenue (M)</th><th>Margin</th><th>Risk</th><th>Last Sale</th></tr></thead>
+            <tbody>`;
+        products.slice(0,100).forEach((p,i) => {
+            html += `<tr>
+                <td>${p.rank||i+1}</td>
+                <td><strong>${p.product}</strong></td>
+                <td><span class="badge ${p.segment==='Star'?'badge-success':p.segment==='Deadweight'?'badge-danger':'badge-info'}">${p.segment||'Individual'}</span></td>
+                <td>${((p.total_revenue||0)/1e6).toFixed(1)}</td>
+                <td>${(p.profit_margin||0).toFixed(1)}%</td>
+                <td>${(p.risk_score||0).toFixed(0)}</td>
+                <td>${p.days_since_last_sale||0}d</td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        contentArea.innerHTML = html;
+    }
+
+    function renderSegments() {
+        const products = getProducts();
+        const segMap = {};
+        products.forEach(p => { const seg = p.segment || 'Individual'; if (!segMap[seg]) segMap[seg] = []; segMap[seg].push(p.product); });
+        let html = `<div class="stats-grid">`;
+        Object.entries(segMap).forEach(([seg,list]) => {
+            html += `<div class="stat-card"><div class="stat-value">${list.length}</div><div class="stat-label">${seg}</div></div>`;
+        });
+        html += `</div>`;
+        for (const [seg,list] of Object.entries(segMap)) {
+            if (list.length) {
+                html += `<div style="background:white; border-radius:16px; padding:16px; margin-bottom:16px;"><h3>${seg}</h3><p>${list.slice(0,30).join(', ')}${list.length>30?` +${list.length-30} more` : ''}</p></div>`;
+            }
+        }
+        contentArea.innerHTML = html;
+    }
+
+    function renderBasket() {
+        const rules = getBasketRules().slice(0,30);
+        if (!rules.length) { contentArea.innerHTML = '<div>Not enough data for basket analysis.</div>'; return; }
+        let html = `<table class="data-table"><thead><tr><th>If Buys</th><th>Also Buys</th><th>Confidence</th><th>Lift</th></tr></thead><tbody>`;
+        rules.forEach(r => {
+            html += `<tr><td>${r.antecedent?.join(' + ')}</td><td>${r.consequent?.join(' + ')}</td><td>${(r.confidence*100).toFixed(0)}%</td><td>${r.lift?.toFixed(2)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        contentArea.innerHTML = html;
+    }
+
+    function renderInventory() {
+        let inv = Object.entries(inventory);
+        if (searchTerm) inv = inv.filter(([p]) => p.toLowerCase().includes(searchTerm));
+        const out = inv.filter(([_,q]) => q === 0).length;
+        const low = inv.filter(([_,q]) => q > 0 && q < 20).length;
+        let html = `<div class="stats-grid">
+            <div class="stat-card"><div class="stat-value">${out}</div><div class="stat-label">Out of Stock</div></div>
+            <div class="stat-card"><div class="stat-value">${low}</div><div class="stat-label">Low (<20)</div></div>
+        </div>
+        <table class="data-table"><thead><tr><th>Product</th><th>Stock</th><th>Status</th></tr></thead><tbody>`;
+        inv.forEach(([p,q]) => {
+            html += `<tr><td><strong>${p}</strong></td><td>${q}</td><td>${q===0?'🔴 OUT':q<20?'🟡 LOW':'✅ OK'}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        contentArea.innerHTML = html;
+    }
+
+    function renderCustomers() {
+        const cust = getCustomers();
+        const segs = cust.summary || {};
+        const roi = report.shop_roi || 0;
+        const vsBank = report.vs_bank || 0;
+        const champion = cust.champion_products || [];
+        let html = `<div class="stats-grid">`;
+        Object.entries(segs).forEach(([s,c]) => {
+            html += `<div class="stat-card"><div class="stat-value">${c}</div><div class="stat-label">${s}</div></div>`;
+        });
+        html += `</div>
+        <div style="background:white; border-radius:16px; padding:16px; margin-bottom:20px;"><h3>💰 ROI</h3>
+        <p>Shop ROI: <strong>${roi.toFixed(1)}%</strong> | vs Bank (23%): ${vsBank>0?'✅ Ahead':'⚠️ Behind'} (${vsBank>0?`+${vsBank.toFixed(1)}%`:`${vsBank.toFixed(1)}%`})</p></div>
+        <div style="background:white; border-radius:16px; padding:16px;"><h3>🏆 Champion Products</h3><ul>${champion.map(p=>`<li>${p}</li>`).join('')}</ul></div>`;
+        contentArea.innerHTML = html;
+    }
+
+    function renderSettings() {
+        const talkModeStored = localStorage.getItem('saleYar_talkMode') === 'true';
+        contentArea.innerHTML = `
+            <div style="background:white; border-radius:16px; padding:24px; max-width:500px;">
+                <h3>⚙️ Advanced Settings (API Connection & AI)</h3>
+                <div style="margin:15px 0;">
+                    <label>API Base URL</label>
+                    <input type="text" id="setApiUrl" value="${apiBase}" style="width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
+                </div>
+                <div style="margin:15px 0;">
+                    <label>API Key</label>
+                    <input type="text" id="setApiKey" value="${apiKey}" style="width:100%; padding:8px; border-radius:8px;">
+                </div>
+                <div style="margin:15px 0;">
+                    <label>🤖 AI Advisor Mode</label>
+                    <select id="llmModeSelect" style="width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
+                        <option value="keyword" ${llmMode === 'keyword' ? 'selected' : ''}>Keyword‑based (fast, offline)</option>
+                        <option value="real" ${llmMode === 'real' ? 'selected' : ''}>Real LLM (requires backend /llm/ask)</option>
+                    </select>
+                </div>
+                <div style="margin:15px 0;">
+                    <label>💬 Talk Mode (Conversational, short answers)</label>
+                    <input type="checkbox" id="talkModeCheckbox" ${talkModeStored ? 'checked' : ''}>
+                    <p style="font-size:12px; color:#6c757d; margin-top:5px;">When ON, AI gives very short natural answers (talk=True). When OFF, gives 4 bullet points (talk=False).</p>
+                </div>
+                <button id="saveSettingsBtn" class="upload-btn">Save</button>
+            </div>`;
+        
+        document.getElementById('saveSettingsBtn')?.addEventListener('click', () => {
+            const newBase = document.getElementById('setApiUrl').value;
+            const newKey = document.getElementById('setApiKey').value;
+            const newMode = document.getElementById('llmModeSelect').value;
+            const newTalk = document.getElementById('talkModeCheckbox').checked;
+            saveApiConfig(newBase, newKey);
+            llmMode = newMode;
+            talkMode = newTalk;
+            localStorage.setItem('saleYar_llmMode', newMode);
+            localStorage.setItem('saleYar_talkMode', newTalk);
+            alert('Settings saved. AI Advisor mode will change immediately.');
+            renderSettings();
+        });
+    }
+
+    // LLM functions (unchanged, work fine)
+    function addBotMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'message-bot';
+        div.innerHTML = marked.parse(text);   // ✅ allows markdown / HTML
+        llmMessages.appendChild(div);
+        llmMessages.scrollTop = llmMessages.scrollHeight;
+    }
+    function addUserMessage(text) {
+        const div = document.createElement('div'); div.className = 'message-user'; div.innerText = text;
+        llmMessages.appendChild(div); llmMessages.scrollTop = llmMessages.scrollHeight;
+    }
+// ==================== ENHANCED SMART ADVISOR ====================
+    function smartAnswer(question) {
+        if (!report) return "Please upload a file first.";
+        
+        const q = question.toLowerCase().trim();
+        const products = getProducts();
+        const orders = getOrders().filter(o => o.qty > 0);
+        const inv = inventory;
+        const forecast = (p) => p.forecast?.h30 || 0;
+        
+        // 1. Check for specific product mention
+        const mentionedProduct = products.find(p => q.includes(p.product.toLowerCase()));
+        if (mentionedProduct) {
+            const p = mentionedProduct;
+            const stock = inv[p.product] || 0;
+            const dailySale = p.daily_sales || (p.forecast?.h30 / 30) || 0;
+            const daysLeft = dailySale > 0 ? Math.floor(stock / dailySale) : (stock > 0 ? 999 : 0);
+            const margin = p.profit_margin || 0;
+            const segment = p.segment || 'Individual';
+            let advice = "";
+            if (stock === 0 && dailySale > 0) advice = "🔴 Out of stock – order immediately.";
+            else if (stock > 0 && daysLeft < 7) advice = `🟡 Only ${daysLeft} days left – reorder this week.`;
+            else if (stock > 200) advice = "🛑 Overstock – consider a promotion.";
+            else advice = "✅ Stock level is healthy.";
+            return `**${p.product}** (${segment})\n- Stock: ${stock} units\n- Daily sale: ~${dailySale.toFixed(1)}\n- Days left: ${daysLeft === 999 ? '∞' : daysLeft}\n- Margin: ${margin.toFixed(1)}%\n- ${advice}`;
+        }
+        
+        // 2. Question type detection (using keyword sets)
+        const contains = (words) => words.some(w => q.includes(w));
+        
+        // Order / purchase advice
+        if (contains(['order', 'buy', 'purchase', 'restock', 'reorder'])) {
+            const urgent = orders.filter(o => (o.current_stock || 0) === 0);
+            const soon = orders.filter(o => (o.current_stock || 0) > 0 && (o.current_stock || 0) < 20);
+            let reply = "";
+            if (urgent.length) {
+                reply += `🔴 **Order these NOW** (out of stock):\n${urgent.map(o => `  - ${o.product}: ${o.qty} units`).join('\n')}\n\n`;
+            }
+            if (soon.length) {
+                reply += `🟡 **Order soon** (low stock):\n${soon.map(o => `  - ${o.product}: ${o.qty} units`).join('\n')}\n\n`;
+            }
+            if (!urgent.length && !soon.length) {
+                reply += "✅ No urgent orders. All products have sufficient stock.\n";
+            }
+            reply += `\n💡 **Tip**: Use the Purchase Orders tab to copy or export the full list.`;
+            return reply;
+        }
+        
+        // Inventory / stock
+        if (contains(['stock', 'inventory', 'warehouse', 'supply', 'shelf'])) {
+            const out = Object.entries(inv).filter(([_,q]) => q === 0).map(([p]) => p);
+            const low = Object.entries(inv).filter(([_,q]) => q > 0 && q < 20).map(([p]) => p);
+            const over = Object.entries(inv).filter(([_,q]) => q > 200).map(([p]) => p);
+            let reply = "";
+            if (out.length) reply += `🔴 **Out of stock**: ${out.slice(0,5).join(', ')}${out.length>5 ? ` +${out.length-5} more` : ''}\n`;
+            if (low.length) reply += `🟡 **Low stock (<20)**: ${low.slice(0,5).join(', ')}${low.length>5 ? ` +${low.length-5} more` : ''}\n`;
+            if (over.length) reply += `🛑 **Overstock (>200)**: ${over.slice(0,5).join(', ')} – run a sale.\n`;
+            if (!out.length && !low.length && !over.length) reply += "✅ Inventory levels are balanced.\n";
+            return reply;
+        }
+        
+        // Top / best / leaders
+        if (contains(['top', 'best', 'leader', 'highest', 'most profitable', 'best seller'])) {
+            const sorted = [...products].sort((a,b) => (b.total_revenue||0) - (a.total_revenue||0));
+            const top3Rev = sorted.slice(0,3);
+            const topMargin = [...products].sort((a,b) => (b.profit_margin||0) - (a.profit_margin||0))[0];
+            let reply = "🏆 **Top by revenue**:\n";
+            top3Rev.forEach((p,i) => reply += `${i+1}. ${p.product} – ${((p.total_revenue||0)/1e6).toFixed(1)}M Toman\n`);
+            reply += `\n💰 **Highest margin**: ${topMargin?.product} (${topMargin?.profit_margin?.toFixed(1)}%)\n`;
+            return reply;
+        }
+        
+        // Risk / dangerous / volatile
+        if (contains(['risk', 'risky', 'dangerous', 'volatile', 'unstable'])) {
+            const risky = products.filter(p => (p.risk_score||0) > 70).slice(0,5);
+            if (risky.length) {
+                return `⚠️ **High risk products** (score >70):\n${risky.map(p => `  - ${p.product}: risk ${p.risk_score?.toFixed(0)}`).join('\n')}\n\nRecommendation: order small quantities or use just‑in‑time.`;
+            } else {
+                return "✅ No high‑risk products detected. Your portfolio is stable.";
+            }
+        }
+        
+        // Profit / margin / roi
+        if (contains(['profit', 'margin', 'roi', 'return', 'earn'])) {
+            const avgMargin = products.reduce((s,p) => s + (p.profit_margin||0), 0) / (products.length || 1);
+            const bestMargin = products.sort((a,b) => (b.profit_margin||0) - (a.profit_margin||0))[0];
+            const worstMargin = products.sort((a,b) => (a.profit_margin||0) - (b.profit_margin||0))[0];
+            return `📈 **Average margin**: ${avgMargin.toFixed(1)}%\n⭐ **Best**: ${bestMargin?.product} (${bestMargin?.profit_margin?.toFixed(1)}%)\n💀 **Lowest**: ${worstMargin?.product} (${worstMargin?.profit_margin?.toFixed(1)}%)\n\nShop ROI: ${(report.shop_roi||0).toFixed(1)}% vs bank 23% – ${(report.vs_bank||0)>0 ? '✅ ahead' : '⚠️ behind'}.`;
+        }
+        
+        // Forecast / future / demand
+        if (contains(['forecast', 'future', 'demand', 'predict', 'trend'])) {
+            const highDemand = products.filter(p => (p.forecast?.h30||0) > 50).slice(0,3);
+            const lowDemand = products.filter(p => (p.forecast?.h30||0) > 0 && (p.forecast?.h30||0) < 10).slice(0,3);
+            let reply = "📊 **30‑day forecast**\n";
+            if (highDemand.length) reply += `🔥 High demand (>50 units): ${highDemand.map(p=>p.product).join(', ')}\n`;
+            if (lowDemand.length) reply += `❄️ Low demand (<10 units): ${lowDemand.map(p=>p.product).join(', ')}\n`;
+            reply += "\n💡 Use the Forecast tab to see detailed numbers.";
+            return reply;
+        }
+        
+        // Segment / category / type
+        if (contains(['segment', 'category', 'type', 'kind'])) {
+            const segCount = {};
+            products.forEach(p => { const s = p.segment || 'Individual'; segCount[s] = (segCount[s]||0)+1; });
+            let reply = "🏷️ **Product segments**:\n";
+            for (const [seg, count] of Object.entries(segCount)) {
+                reply += `  - ${seg}: ${count} products\n`;
+            }
+            reply += "\n⭐ Star = high profit & liquid, 💀 Deadweight = sell off, ⚠️ Risky = volatile";
+            return reply;
+        }
+        
+        // Basket / together / combo
+        if (contains(['basket', 'together', 'combo', 'also bought', 'frequently'])) {
+            const rules = getBasketRules().slice(0,3);
+            if (!rules.length) return "Not enough transactions to find basket rules.";
+            let reply = "🛒 **Frequently bought together**:\n";
+            rules.forEach(r => {
+                reply += `  - ${r.antecedent?.join(' + ')} → also ${r.consequent?.join(' + ')} (${(r.confidence*100).toFixed(0)}% confidence)\n`;
+            });
+            return reply;
+        }
+        
+        // Why / what happened / explain
+        if (contains(['why', 'what happened', 'explain', 'reason'])) {
+            const lowHealth = report.health_score < 50;
+            const highRiskCount = products.filter(p => (p.risk_score||0) > 70).length;
+            const outCount = Object.values(inv).filter(q => q === 0).length;
+            let reasons = [];
+            if (lowHealth) reasons.push("- Health score is low – check data quality or recent sales drop.");
+            if (highRiskCount) reasons.push(`- ${highRiskCount} products have high risk – review their volatility.`);
+            if (outCount) reasons.push(`- ${outCount} products are out of stock – order urgently.`);
+            if (!reasons.length) reasons.push("- Everything looks normal. No major issues detected.");
+            return "🔍 **Possible reasons**:\n" + reasons.join('\n');
+        }
+        
+        // Help / what can you do
+        if (contains(['help', 'what can you do', 'capabilities', 'what questions'])) {
+            return `🧠 **I can answer questions about**:
+    • Orders – "What should I order?"
+    • Stock – "Any out of stock?"
+    • Top products – "Best sellers"
+    • Risk – "High risk items"
+    • Profit – "Average margin"
+    • Forecast – "Future demand"
+    • Segments – "Product segments"
+    • Basket – "What sells together"
+    • Specific products – "Tell me about [product name]"
+    • Why – "Why is health low?"
+    Ask naturally – I'll understand.`;
+        }
+        
+        // Default fallback – more helpful than before
+        return `I'm not sure how to answer that. Try asking about:
+    • "What should I order?"
+    • "Any low stock?"
+    • "Top products"
+    • "High risk items"
+    • "Tell me about [product name]"
+    Or type "help" for all capabilities.`;
+    }
+    async function sendLlm() {
+        const question = llmInput.value.trim();
+        if (!question) return;
+
+        // Disable input and button
+        llmInput.disabled = true;
+        llmSend.disabled = true;
+        llmSend.style.opacity = '0.6';
+        llmSend.style.cursor = 'not-allowed';
+
+        addUserMessage(question);
+        llmInput.value = '';
+
+        const enableControls = () => {
+            llmInput.disabled = false;
+            llmSend.disabled = false;
+            llmSend.style.opacity = '';
+            llmSend.style.cursor = '';
+            llmInput.focus();
+        };
+
+        if (llmMode === 'real') {
+            try {
+                const { base, key } = getApiConfig();
+                const forecastsDict = {};
+                if (report && report.products) {
+                    report.products.forEach(p => {
+                        if (p.forecast) forecastsDict[p.product] = p.forecast;
+                    });
+                }
+
+                const response = await fetch(`${base}/llm/ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
+                    body: JSON.stringify({
+                        question: question,
+                        report_summary: report,
+                        inventory: inventory,
+                        forecasts: forecastsDict,
+                        talk: talkMode
+                    })
+                });
+                if (!response.ok) throw new Error(`LLM request failed: ${response.status}`);
+                const data = await response.json();
+                const answer = data.answer || "Sorry, I couldn't generate an answer.";
+                addBotMessage(answer);
+            } catch (err) {
+                console.error(err);
+                addBotMessage(`⚠️ Real LLM error: ${err.message}. Falling back to keyword mode.`);
+                const fallbackAnswer = smartAnswer(question);
+                addBotMessage(fallbackAnswer);
+            } finally {
+                enableControls();
+            }
+        } else {
+            const answer = smartAnswer(question);
+            addBotMessage(answer);
+            enableControls();
+        }
+    }
+
+    llmToggle.addEventListener('click', () => llmPanel.style.display = 'flex');
+    closeLlm.addEventListener('click', () => llmPanel.style.display = 'none');
+    llmSend.addEventListener('click', sendLlm);
+    llmInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendLlm(); });
+
+    renderCurrentTab();
+</script>
+</body>
+</html>

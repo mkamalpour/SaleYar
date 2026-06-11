@@ -1,0 +1,148 @@
+# SaleYar Merger Prompt – Updated for Pipeline Compatibility
+
+## Task
+Merge Sale + Purchase files into **one CSV** ready for the SaleYar pipeline.  
+Output must contain **exactly the first 10 columns** required by the pipeline (`invoice_id` through `transaction_type`) plus optional extra columns for audit.  
+All transaction types (`sale`, `return_sale`, `purchase`, `return_purchase`) are correctly assigned.
+
+---
+
+## Input Files (Expected Columns)
+
+**Sale (Customer invoices):**  
+`Fac_Code, Date, Time, mainG, subG, Article, No, Price, Discount, Customer, Comment`
+
+**Purchase (Supplier invoices):**  
+`Fac_Code, Date, Time, mainG, subG, Article, No, Price, Discount, DiscountPrc, Supply, SellPrice, Comment`
+
+(Column names may vary; the merger will map them using fuzzy matching.)
+
+---
+
+## Output Columns (15 total – first 10 are pipeline‑mandatory)
+
+| # | Column | Sale Row | Purchase Row |
+|---|--------|----------|--------------|
+| 1 | `invoice_id` | Fac_Code | Fac_Code |
+| 2 | `date` | Jalali→Gregorian | Jalali→Gregorian |
+| 3 | `product` | Article | Article |
+| 4 | `qty` | **absolute value** (sign only for `transaction_type`) | **absolute value** |
+| 5 | `buy_price` | Weighted average of **past** purchases (≤ sale date) | Price - Discount |
+| 6 | `sell_price` | Price - Discount | 0 |
+| 7 | `customer_id` | Customer | Supply |
+| 8 | `customer_segment` | mainG | mainG |
+| 9 | `product_category` | subG | subG |
+| 10 | `transaction_type` | `sale` if original `No` > 0, else `return_sale` | `purchase` if original `No` > 0, else `return_purchase` |
+| 11 | `discount_percent` | `""` | DiscountPrc |
+| 12 | `intended_price` | `""` | SellPrice |
+| 13 | `transaction_time` | Time | Time |
+| 14 | `discount_amount` | Discount | Discount |
+| 15 | `notes` | Comment | Comment |
+
+---
+
+## Critical Rules (Pipeline Expectation)
+
+1. **Quantity (`qty`) must be POSITIVE** in the output.  
+   - The original sign of `No` determines `transaction_type` only.  
+   - For sales: if `No > 0` → `sale`, else `return_sale` (and use `abs(No)`).  
+   - For purchases: if `No > 0` → `purchase`, else `return_purchase` (and use `abs(No)`).
+
+2. **buy_price for sales** is the **weighted average cost** of all **past** purchases of the same product (where `Date ≤ sale_date`).  
+   - If no past purchase exists, use `sell_price * (1 – default_margin_percent/100)` (default margin 35%).  
+   - Do **not** use future purchase prices.
+
+3. **Dates**: Convert Jalali dates (e.g., `1400.10.06`) to Gregorian (`2022-01-06`). If parsing fails, leave as original (pipeline will try to parse again).
+
+4. **Stock correction**: After merging all rows, compute net stock per product (`purchase + return_sale – sale – return_purchase`).  
+   - If net stock is **negative**, inject **opening stock rows** (`transaction_type = 'purchase'`) to bring net stock to at least `opening_stock_buffer` (default 50).  
+   - Use estimated `buy_price` from product costs or a default (e.g., 50 000 Tomans).  
+   - Log a warning for each injected product.
+
+5. **Price cleaning**: Remove thousand separators, convert Persian digits, and handle missing values robustly.
+
+---
+
+## Key Formulas
+
+### Weighted Average Buy Price (Sales)
+```python
+past = purchase_df[
+    (purchase_df['Article'] == product) & 
+    (purchase_df['Date'] <= sale_date) &
+    (purchase_df['No'] > 0)
+]
+if len(past) > 0:
+    actual_prices = past['Price'] - past['Discount']
+    buy_price = (past['No'] * actual_prices).sum() / past['No'].sum()
+else:
+    buy_price = sell_price * (1 - DEFAULT_MARGIN_PERCENT / 100)
+```
+
+### Date Conversion (Jalali → Gregorian)
+```python
+# For 1400.10.06
+jdatetime.date(1400, 10, 6).togregorian().isoformat()  # → 2022-01-06
+```
+
+### Opening Stock Injection
+```python
+net_stock[product] = purchases + return_sales - sales - return_purchases
+if net_stock[product] < 0:
+    missing = abs(net_stock[product]) + OPENING_STOCK_BUFFER
+    add purchase row with qty = missing, buy_price = estimated_cost
+```
+
+---
+
+## Transaction Type Mapping (Inventory Effect)
+
+| Source | Original qty | transaction_type | Stock effect |
+|--------|--------------|------------------|--------------|
+| Sale | > 0 | `sale` | decrease |
+| Sale | < 0 | `return_sale` | increase |
+| Purchase | > 0 | `purchase` | increase |
+| Purchase | < 0 | `return_purchase` | decrease |
+
+---
+
+## Example Output (After all fixes)
+
+```csv
+invoice_id,date,product,qty,buy_price,sell_price,customer_id,customer_segment,product_category,transaction_type,discount_percent,intended_price,transaction_time,discount_amount,notes
+OPENING,2025-01-01,Rice,150,50000,0,SYSTEM,Opening,General,purchase,,,00:00,0,Opening stock (was -100)
+57075,2022-01-06,Saffron,7,1401000,1531000,C0253,General,Snacks,sale,,,14:30,50000,Special discount
+57077,2022-01-08,Rice,100,35000,0,SUP123,General,Staple,purchase,0,55000,10:00,0,
+```
+
+**Note:** The first row (`OPENING`) is automatically added by the merger to fix negative stock.
+
+---
+
+## Configuration (User‑controllable via UI)
+
+- `inject_opening_stock` : `True` (recommended)  
+- `default_margin_percent` : `35.0` (fallback when no purchase history)  
+- `opening_stock_buffer` : `50` (extra units to add beyond the deficit)  
+- `use_fuzzy_matching` : `True` (for column name mapping)
+
+These can be adjusted in the merger UI.
+
+---
+
+## Requirements Checklist (Fulfilled)
+
+| Requirement | Status |
+|-------------|--------|
+| 4 transaction types only | ✅ |
+| Positive qty in output | ✅ |
+| Weighted average from past purchases only | ✅ |
+| No future prices | ✅ |
+| Jalali→Gregorian dates | ✅ |
+| Discount applied to prices | ✅ |
+| Opening stock injection for negative net stock | ✅ |
+| First 10 columns = pipeline standard | ✅ |
+
+---
+
+**This merger produces a CSV that the SaleYar pipeline can consume directly – no further inventory fixes needed inside the pipeline.** 🚀

@@ -1,0 +1,178 @@
+{
+  "companyName": "TECHSA Smart Group",
+  "companyWebsite": "www.techsagroup.ir",
+  "companyAddress": "Babolsar, Pasdaran St., Mazandaran University Growth Center",
+  "documentDate": "fall 1043",
+  "introduction": "With the increasing growth of data in businesses and the importance of analyzing them, accounting software is considered one of the main sources of financial information. The goal of this project is to collaborate with accounting software manufacturing companies to provide comprehensive and accurate analytical tools for their users, helping them to better understand their business situation and make more optimal decisions. While accounting software usually only provides simple reports from data and does not benefit from advanced analysis or relationships between data, our proposed product gives businesses the ability to gain a more comprehensive view by using deep analysis and examining hidden relationships between data. This unique capability helps businesses make smarter and more accurate decisions and move on the path of progress and success.",
+  "objectives": [
+    {
+      "objectiveNumber": 1,
+      "description": "Improving financial and sales decision-making by providing comprehensive and optimized analyses of accounting data."
+    },
+    {
+      "objectiveNumber": 2,
+      "description": "Improving data transparency by identifying and reporting contradictory information."
+    },
+    {
+      "objectiveNumber": 3,
+      "description": "Improving business profitability and efficiency by using precise modeling to optimize the product portfolio."
+    },
+    {
+      "objectiveNumber": 4,
+      "description": "Predicting future trends by analyzing past data and examining correlations and profitability trends."
+    }
+  ],
+  "analyticalServices": [
+    {
+      "serviceCode": "2-1",
+      "serviceName": "Summary of Supply and Sales Status",
+      "serviceDescription": "Providing a comprehensive analysis of the volume and value of sales and supply with the aim of understanding the current state of the business."
+    },
+    {
+      "serviceCode": "2-2",
+      "serviceName": "Top Sales Report",
+      "serviceDescription": "Categorizing the best sales based on volume, demand, and profitability."
+    },
+    {
+      "serviceCode": "2-3",
+      "serviceName": "Data Discrepancy Report",
+      "serviceDescription": "Identifying and documenting contradictory cases in the data to resolve issues and improve transparency."
+    },
+    {
+      "serviceCode": "2-4",
+      "serviceName": "Sales Time Series Analysis",
+      "serviceDescription": "Identifying changing trends in sales and their impact on the business over time."
+    },
+    {
+      "serviceCode": "2-5",
+      "serviceName": "Product Profile",
+      "subServices": [
+        {
+          "name": "Profitability Rank",
+          "description": "The share of each product in the total profit of the business."
+        },
+        {
+          "name": "Number of Price Changes",
+          "description": "The number of price changes in purchases and sales."
+        },
+        {
+          "name": "Average Percentage of Price Changes and Profit",
+          "description": "The extent of price changes and the average profit percentage."
+        },
+        {
+          "name": "Conversion Rate, Liquidity Ratio, and Hope Rate",
+          "description": "Key metrics for understanding the investment situation and capital turnover."
+        },
+        {
+          "name": "Liquidity (Fast Sales) Rate",
+          "description": "Indicates what percentage of a product is sold on average before the next purchase; the closer this percentage is to 100, the higher the demand for that product."
+        },
+        {
+          "name": "Best Selling Season",
+          "description": "It is examined whether the product in question has a distinct seasonal sale or has no seasonal dependency in sales."
+        },
+        {
+          "name": "Product Rank",
+          "description": "After ranking the products using modeling, the rank of the product in question in the product portfolio is determined."
+        },
+        {
+          "name": "Portfolio Weight",
+          "description": "The share of each product from the total value of inventory and its role in the sales portfolio."
+        }
+      ]
+    },
+    {
+      "serviceCode": "2-6",
+      "serviceName": "Product Correlation and Arrangement Model",
+      "serviceDescription": "Providing a model to identify the correlation between goods and their optimal combination."
+    },
+    {
+      "serviceCode": "2-7",
+      "serviceName": "Product Portfolio Optimization Model",
+      "serviceDescription": "Proposing an optimal arrangement and combination for the product portfolio with attention to business priorities and increasing profitability."
+    },
+    {
+      "serviceCode": "2-8",
+      "serviceName": "Profitability Trend Model",
+      "serviceDescription": "Identifying and predicting future business trends based on current data and analysis of past trends."
+    },
+    {
+      "serviceCode": "2-9",
+      "serviceName": "Risk and Return Analysis",
+      "serviceDescription": "Comparing the risk and return of the business with other financial markets and providing an outlook for its future."
+    },
+    {
+      "serviceName": "Management of conflicting data",
+      "serviceDescription": "Identification and reporting of conflicting cases in the data to improve the accuracy of financial reports."
+    },
+    {
+      "serviceName": "Product Profile Analysis",
+      "serviceDescription": "By paying attention to the type of products and the business class of each customer, a profile of the products is created and key indicators such as profitability, liquidity, and conversion rate are added to them."
+    },
+    {
+      "serviceName": "Optimal purchase suggestion based on budget",
+      "serviceDescription": "By using the extracted indicators and the analyses performed for each product, this system is able to suggest an optimal combination of products for each specific budget. This suggestion is designed in such a way that it will be able to meet different business objectives, including: maximizing profit in the shortest time, meeting the needs of more customers, increasing customer satisfaction with targeted and quality purchases, etc. This feature helps businesses to adopt smarter purchasing strategies by optimally allocating their budget and ultimately get closer to their goals."
+    }
+  ],
+  "partnershipBenefitsForAccountingCompanies": [
+    {
+      "benefitNumber": 1,
+      "description": "Increase customer satisfaction by offering new and valuable services to them."
+    },
+    {
+      "benefitNumber": 2,
+      "description": "Growth and development of the customer base by proposing a comprehensive and advanced system."
+    },
+    {
+      "benefitNumber": 3,
+      "description": "Increase the company's credibility by providing advanced analyses and helping to improve customers' profitability and performance."
+    }
+  ],
+  "projectScope": "In the initial stage, this collaboration will be focused on the retail versions of Holoo accounting software, considering its structure and needs. Financial and managerial analyses will be designed and optimized in a way that provides the best results and the most added value for this category of users. After the successful completion of this stage and evaluation of the results, the possibility of expanding and offering analytical services to other versions of Holoo software will also be reviewed.",
+  "targetSoftware": "Holoo",
+  "projectTimeline": [
+    {
+      "phaseNumber": 1,
+      "phaseName": "Analysis of needs and basic settings",
+      "duration": "1 month"
+    },
+    {
+      "phaseNumber": 2,
+      "phaseName": "Development and customization of services",
+      "duration": "4 months"
+    },
+    {
+      "phaseNumber": 3,
+      "phaseName": "Testing and evaluation",
+      "duration": "2 months"
+    }
+  ],
+  "financialProposal": "The financial proposal is based on the level of customization of services, the number of users, and the level of support agreed upon.",
+  "proposedServicesForTargetSoftware": [
+    {
+      "serviceName": "Description of proposed analytical services for Holoo",
+      "serviceDescription": "Considering that Holoo software covers a large part of small and medium-sized businesses, adding analytical services to these users can help strengthen decision-making, optimize financial management, and increase user profitability.",
+      "features": [
+        "Upgrading the summarization of supply and sales reports: Providing a comprehensive summary of the financial status, volume of supply and sales, and providing an accurate overview of the business activities of users.",
+        "Providing customized reports of top sales: Analyzing top products based on indicators such as sales volume, sales volume, and profitability, broken down by each category."
+      ]
+    }
+  ],
+  "differentiatingFeatures": "While accounting software usually only provides simple reports from data and does not benefit from advanced analysis or relationships between data, our proposed product gives businesses the ability to gain a more comprehensive view by using deep analysis and examining hidden relationships between data. This unique capability helps businesses make smarter and more accurate decisions and move on the path of progress and success.",
+  "initialTestingApproach": "It is proposed that this collaboration initially be for one of the popular user guilds of Holoo, such as the retail or manufacturing guild. This step helps to increase the accuracy and personalization of services, as well as a more accurate evaluation of the impact of analytical services.",
+  "benefitsForTargetCompany": [
+    {
+      "benefitName": "Increased customer satisfaction",
+      "benefitDescription": "Providing valuable and practical analyses to help improve financial management and enhance decision-making."
+    },
+    {
+      "benefitName": "Increased attraction of new customers",
+      "benefitDescription": "New analytical services can increase the appeal of Holoo software for businesses."
+    },
+    {
+      "benefitName": "Increased competitive power",
+      "benefitDescription": "Becoming a distinguished provider that benefits from advanced analyses."
+    }
+  ],
+  "conclusion": "This project is a unique opportunity for accounting software manufacturing companies to provide valuable analytical insights for users by using the existing data in their systems. We hope that with mutual cooperation, we will witness the growth and development of customer satisfaction and shared success in this field."
+}

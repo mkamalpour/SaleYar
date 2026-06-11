@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaleYar — Complete Pipeline | Business Intelligence for Iranian Shops</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --surface-alt: #EFEFEB;
+    --border: #DDD9D0;
+    --text: #1A1A18;
+    --muted: #6B6860;
+    --faint: #A09E98;
+    --accent: #2563EB;
+    --accent-bg: #EFF4FF;
+    --green: #16A34A;
+    --green-bg: #F0FDF4;
+    --red: #DC2626;
+    --red-bg: #FEF2F2;
+    --amber: #D97706;
+    --amber-bg: #FFFBEB;
+    --purple: #7C3AED;
+    --purple-bg: #F5F3FF;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .app { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .sidebar-logo-title { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text); }
+  .sidebar-logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); font-weight: 600; }
+  .nav-icon { font-size: 14px; width: 16px; text-align: center; }
+
+  .main {
+    flex: 1;
+    padding: 40px 48px;
+    max-width: 1100px;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .section-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--surface-alt); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  code {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 12px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  pre {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 12px;
+    background: var(--surface-alt);
+    padding: 20px 24px;
+    border-radius: 6px;
+    overflow-x: auto;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .overview-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; }
+  .overview-card-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .overview-card-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+
+  .stage-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 18px 20px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .stage-header:hover { background: var(--surface-alt); }
+  .stage-left { display: flex; align-items: flex-start; gap: 14px; }
+  .stage-num { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+  .stage-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .stage-tools { display: flex; flex-wrap: wrap; gap: 5px; }
+  .stage-badges { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .parallel-badge { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 7px; border-radius: 4px; background: var(--surface-alt); color: var(--muted); }
+  .chevron { font-size: 14px; color: var(--muted); transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+
+  .stage-body { padding: 20px; display: none; }
+  .stage-body.open { display: block; }
+
+  .stage-section-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+
+  .input-box {
+    padding: 10px 14px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .steps-list { list-style: none; margin-bottom: 14px; }
+  .steps-list li {
+    display: flex;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    border-bottom: 1px solid var(--border);
+  }
+  .steps-list li:last-child { border-bottom: none; }
+  .step-dot { flex-shrink: 0; margin-top: 6px; width: 5px; height: 5px; border-radius: 50%; }
+
+  .output-box {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .note-box {
+    padding: 10px 14px;
+    background: var(--amber-bg);
+    border: 1px solid #D9770640;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--amber);
+    line-height: 1.6;
+  }
+
+  .metrics-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .metric-chip { padding: 4px 10px; background: var(--accent-bg); color: var(--accent); border-radius: 4px; font-size: 12px; font-weight: 500; }
+
+  .modes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .mode-card { padding: 10px 12px; background: var(--surface-alt); border-radius: 6px; }
+  .mode-name { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .mode-desc { font-size: 12px; color: var(--muted); }
+
+  .output-items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+  .output-item { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; line-height: 1.5; }
+  .output-check { color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+  .banner { padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-top: 16px; }
+
+  .filetree { padding: 24px; color: var(--text); background: var(--surface-alt); font-size: 12px; border-radius: 6px; line-height: 1.8; font-family: "SF Mono", "Fira Code", Consolas, monospace; overflow-x: auto; white-space: pre; margin: 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-title">SaleYar</div>
+      <div class="sidebar-logo-sub">⚡ KamalAi – Production</div>
+    </div>
+    <div class="nav-item active" data-section="overview"><span class="nav-icon">◈</span> Overview</div>
+    <div class="nav-item" data-section="pipeline"><span class="nav-icon">⟶</span> 9 Stages</div>
+    <div class="nav-item" data-section="output"><span class="nav-icon">▤</span> Output</div>
+    <div class="nav-item" data-section="interfaces"><span class="nav-icon">⬡</span> Interfaces</div>
+    <div class="nav-item" data-section="htmldash"><span class="nav-icon">🌐</span> HTML Dashboard</div>
+    <div class="nav-item" data-section="llm"><span class="nav-icon">🤖</span> LLM Advisor</div>
+    <div class="nav-item" data-section="structure"><span class="nav-icon">⊟</span> Structure</div>
+    <div class="nav-item" data-section="stack"><span class="nav-icon">⚙</span> Stack</div>
+    <div class="nav-item" data-section="perf"><span class="nav-icon">◎</span> Performance</div>
+    <div class="nav-item" data-section="config"><span class="nav-icon">≡</span> Config</div>
+  </nav>
+
+  <main class="main">
+    <!-- OVERVIEW -->
+    <section class="section active" id="overview">
+      <div class="section-title">SaleYar — Business Intelligence for Iranian Shops</div>
+      <div class="section-sub">Offline · Private · Smart · 9‑stage pipeline · HTML dashboard · LLM Assistant · Never crashes</div>
+
+      <div class="overview-grid">
+        <div class="overview-card">
+          <div class="overview-card-title">What Makes SaleYar Different</div>
+          <div class="overview-card-text">
+            • <strong>Offline & private</strong> – no cloud, no fees<br>
+            • <strong>Pure HTML dashboard</strong> – fast, responsive, no Gradio for owners<br>
+            • <strong>LLM Assistant with Talk Mode</strong> – conversational or bullet‑point answers<br>
+            • <strong>Markdown support</strong> – bold, lists, italics in AI responses<br>
+            • <strong>Unified score</strong> – one number for ranking and purchase order<br>
+            • <strong>MD5 cache per shop</strong> – same file = instant results<br>
+            • <strong>Integer optimization</strong> – whole quantities via OR‑Tools<br>
+            • <strong>Critical basket pairs</strong> – hard constraints in optimizer<br>
+          </div>
+        </div>
+
+        <div class="overview-card">
+          <div class="overview-card-title">How It Runs</div>
+          <div class="overview-card-text">
+            Upload a file → MD5 hash → cache check.<br>
+            <strong>Cache hit</strong> → results in &lt;1 second.<br>
+            <strong>Cache miss</strong> → runs 9 stages fresh, saves per‑shop models.<br>
+            HTML dashboard polls API every 3 seconds. Never crashes.
+          </div>
+        </div>
+
+        <div class="overview-card">
+          <div class="overview-card-title">Three Interfaces</div>
+          <div class="overview-card-text">
+            🏪 <strong>HTML Owner Dashboard</strong> – 9 tabs, search, real‑time, LLM<br>
+            🔧 <strong>Gradio Developer UI</strong> – full debugging, always bullet‑point LLM<br>
+            ⌨️ <strong>Terminal</strong> – command line, rich tables<br>
+            📡 <strong>FastAPI</strong> – REST endpoints, API key auth
+          </div>
+        </div>
+
+        <div class="overview-card">
+          <div class="overview-card-title">Advanced Capabilities</div>
+          <div class="overview-card-text">
+            • <strong>Talk Mode</strong> – toggle between short conversational (max 10 words) and 4 bullet points<br>
+            • <strong>Micro‑summary vs full summary</strong> – talk mode uses health, revenue, out‑of‑stock, top seller<br>
+            • <strong>Tab guide for LLM</strong> – AI knows all dashboard tabs and can direct users<br>
+            • <strong>Daily forecast arrays</strong> – 90 days of daily values for inventory simulation<br>
+            • <strong>transaction_type support</strong> – sale / purchase / return_sale / return_purchase<br>
+            • <strong>Auto‑detect seasonality</strong> – 7/30/365 days via numpy correlation
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead><tr><th>Condition</th><th>What Happens (no crash, always explains)</th></tr></thead>
+          <tbody>
+            <tr><td>Quality score below 40</td><td>Pipeline stops after Stage 1, returns detailed fix report only</td></tr>
+            <tr><td>Fewer than 50 transactions</td><td>Basket uses simple pair counting, not skipped</td></tr>
+            <tr><td>Fewer than 15 products</td><td>Segmentation uses rule‑based, products listed individually</td></tr>
+            <tr><td>Fewer than 3 customers</td><td>Customer analysis shows single‑customer details, not skipped</td></tr>
+            <tr><td>OR‑Tools infeasible</td><td>Constraints relaxed one by one, explanation in plain language</td></tr>
+            <tr><td>Missing library / file error</td><td>Log warning, skip stage, return everything else + explanation</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="banner" style="background: var(--green-bg); border: 1px solid #16A34A30; color: var(--green);">
+        ✓ Never crashes. Every skipped stage explains why, in plain Persian or English. Confidence scores on every number.
+      </div>
+    </section>
+
+    <!-- 9‑STAGE PIPELINE (same detailed content as before, but I'll keep it concise for brevity – the full pipeline data is already in the script) -->
+    <section class="section" id="pipeline">
+      <div class="section-title">9‑Stage Pipeline</div>
+      <div class="section-sub">All stages run sequentially. Per‑shop models saved under <code>models/shops/{shop_id}/</code>. MD5 cache for stages 2‑4.</div>
+      <div id="stages-container"></div>
+    </section>
+
+    <!-- OUTPUT -->
+    <section class="section" id="output">
+      <div class="section-title">Output Report</div>
+      <div class="section-sub">Complete, jargon‑free, in Persian or English. Every recommendation has a confidence percentage.</div>
+      <div class="output-items-grid" id="output-items"></div>
+      <div class="banner" style="background: var(--amber-bg); border: 1px solid #D9770640; color: var(--amber);">
+        ⚠ Low‑confidence predictions (e.g. sparse data forecasts) are flagged with a visible warning.
+      </div>
+    </section>
+
+    <!-- INTERFACES (updated) -->
+    <section class="section" id="interfaces">
+      <div class="section-title">Interfaces – Same Engine</div>
+      <div class="section-sub">Choose how you interact: HTML dashboard, Gradio developer UI, terminal, or API.</div>
+
+      <div style="font-weight:800;font-size:16px;margin-bottom:12px;">🏪 Owner Dashboard (HTML) – <code>python run.py --owner</code> (default)</div>
+      <div class="card" style="margin-bottom:24px;">
+        <div class="input-box" style="margin:0;">Pure HTML/CSS/JS dashboard. 9 tabs: Overview, Purchase Orders, Forecast, Products, Segments, Basket, Inventory, Customers & ROI, Settings. Global search, budget/goal/language controls, real‑time polling, copy/export orders, LLM Assistant with Talk Mode, markdown support, send button disable during requests. Settings saved in localStorage.</div>
+      </div>
+
+      <div style="font-weight:800;font-size:16px;margin-bottom:12px;">🔧 Developer UI (Gradio) – <code>python run.py --developer</code></div>
+      <div class="card" style="margin-bottom:24px;">
+        <div class="input-box" style="margin:0;">11 tabs with full data visibility: Health & Quality (charts), Product Rankings (search + rank column), Forecast, Segments, Basket Rules, Purchase Order, ROI & Customers, Inventory, Priority Actions, LLM Advisor (always 4 bullet points, no Talk Mode), JSON Report.</div>
+      </div>
+
+      <div style="font-weight:800;font-size:16px;margin-bottom:12px;">⌨️ Terminal Mode – <code>python run.py --terminal</code></div>
+      <div class="card" style="margin-bottom:24px;">
+        <div class="input-box" style="margin:0;">Command line, rich tables, no browser needed. Press Enter for defaults.</div>
+      </div>
+
+      <div style="font-weight:800;font-size:16px;margin-bottom:12px;">📡 FastAPI – <code>uvicorn api.main:app --host 0.0.0.0 --port 8000</code></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>POST</td><td><code>/analyze</code></td><td>Full pipeline (async, returns job_id)</td></tr>
+            <tr><td>GET</td><td><code>/result/{job_id}</code></td><td>Poll for completion</td></tr>
+            <tr><td>POST</td><td><code>/optimize</code></td><td>Optimizer only (&lt;2s)</td></tr>
+            <tr><td>POST</td><td><code>/basket</code></td><td>Basket analysis only</td></tr>
+            <tr><td>POST</td><td><code>/risk</code></td><td>Risk scoring only</td></tr>
+            <tr><td>POST</td><td><code>/llm/ask</code></td><td>LLM advisor – accepts <code>question</code>, <code>report_summary</code>, <code>inventory</code>, <code>forecasts</code>, <code>language</code>, <code>talk</code> (bool)</td></tr>
+            <tr><td>GET</td><td><code>/report/{shop_id}</code></td><td>Latest saved report</td></tr>
+            <tr><td>GET</td><td><code>/health/{shop_id}</code></td><td>Health score only</td></tr>
+            <tr><td>GET</td><td><code>/healthcheck</code></td><td>Server status, loaded models, uptime</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="banner" style="background:var(--green-bg); border-color:#16A34A30; color:var(--green);">
+        🔐 All API endpoints require <code>X-API-Key</code> header (default <code>kamal</code>). 403 on invalid key.
+      </div>
+    </section>
+
+    <!-- HTML DASHBOARD DETAILS -->
+    <section class="section" id="htmldash">
+      <div class="section-title">HTML Owner Dashboard – Full Specification</div>
+      <div class="section-sub">The main interface for shop owners. Replaces the old Gradio owner UI.</div>
+      <div class="card" style="padding:20px;">
+        <h3 style="margin-bottom:12px;">📑 9 Tabs</h3>
+        <ul style="margin-left:20px; margin-bottom:20px;">
+          <li><strong>Overview</strong> – health score, revenue, profit, top 5 products, urgent out‑of‑stock, priority actions.</li>
+          <li><strong>Purchase Orders</strong> – ALL products appear. Shows current stock, recommended qty (max 500), unit cost, total cost, plain reason. Copy list / export CSV.</li>
+          <li><strong>Forecast</strong> – 30/60/90 day demand, confidence badges, segment icons, actionable recommendations.</li>
+          <li><strong>Products</strong> – Ranked list (1,2,3…) with unified score, segment, revenue (M), profit (M), margin %, risk score (🟢🟡🔴), stock, last sale, risk explanation. Searchable.</li>
+          <li><strong>Segments</strong> – Counts and product lists for Star, Reliable, Seasonal, Deadweight, Risky, Outlier. Action descriptions.</li>
+          <li><strong>Basket Rules</strong> – Products bought together, confidence & lift. Critical pairs highlighted.</li>
+          <li><strong>Inventory</strong> – Current stock, days of coverage, status (OUT/LOW/OK/OVERSTOCK), actions (ORDER NOW, ORDER THIS WEEK, RUN SALE).</li>
+          <li><strong>Customers & ROI</strong> – Customer segments (Champions, Loyal, At‑Risk, Lost), shop ROI vs bank (23%) vs gold (35%), champion products.</li>
+          <li><strong>Settings</strong> – API Base URL, API Key, AI Advisor Mode (Keyword / Real LLM), Talk Mode checkbox. Settings saved in localStorage.</li>
+        </ul>
+        <h3 style="margin-bottom:12px;">🔍 Global Search & Real‑time Polling</h3>
+        <p>Search bar filters products, inventory, orders, forecast. Upload → async job → polls every 3 seconds → auto‑update with loading overlay.</p>
+        <h3 style="margin-bottom:12px;">💬 LLM Assistant (Floating Robot)</h3>
+        <ul style="margin-left:20px;">
+          <li><strong>Keyword mode</strong> – fast, offline, rule‑based (<code>smartAnswer</code>).</li>
+          <li><strong>Real LLM mode</strong> – calls <code>/llm/ask</code> (LM Studio / Ollama).</li>
+          <li><strong>Talk Mode toggle</strong> – ON → ultra‑short conversational answers (max 10 words), uses micro‑summary (health %, revenue/profit in millions, out‑of‑stock count, top seller). Greetings/thanks get no numbers. “How to find X?” → tells exact tab name. OFF → 4 bullet points, uses full summary.</li>
+          <li><strong>Markdown support</strong> – bot messages rendered with <code>marked.js</code> (<strong>bold</strong>, <em>italic</em>, bullet lists).</li>
+          <li><strong>Send button disabled</strong> during request, re‑enabled after response.</li>
+          <li><strong>Fallback</strong> – if Real LLM fails, falls back to keyword advisor.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- LLM ADVISOR DETAILS -->
+    <section class="section" id="llm">
+      <div class="section-title">LLM Advisor – How It Works</div>
+      <div class="section-sub">Optional natural language answers using local LLM (LM Studio or Ollama).</div>
+      <div class="card" style="padding:20px;">
+        <h3 style="margin-bottom:12px;">🧠 Two Modes</h3>
+        <ul style="margin-left:20px; margin-bottom:20px;">
+          <li><strong>Keyword mode</strong> – rule‑based, no internet, uses <code>smartAnswer</code> function. Fast and offline.</li>
+          <li><strong>Real LLM mode</strong> – sends a compact summary to <code>/llm/ask</code>. Supports LM Studio (<code>/api/v1/chat</code>) and Ollama (<code>/api/generate</code>).</li>
+        </ul>
+        <h3 style="margin-bottom:12px;">💬 Talk Mode</h3>
+        <ul style="margin-left:20px; margin-bottom:20px;">
+          <li><strong>ON</strong> – AI answers in 1 very short sentence (max 10 words). Uses <strong>micro‑summary</strong> (health %, revenue/profit in millions, out‑of‑stock count, top seller). Greetings/thanks get no numbers. “How to find X?” → tells exact tab name. “What can you do?” → suggests 1‑2 actions.</li>
+          <li><strong>OFF</strong> – AI gives 4 bullet points. Uses <strong>full summary</strong> (health, data quality, top 5 products, bottom 5, segments, inventory, forecast needs, basket rules, customer segments, priority actions, alerts, high‑risk products).</li>
+        </ul>
+        <h3 style="margin-bottom:12px;">📋 Summary Construction</h3>
+        <p>The micro‑summary is only 3‑4 lines: health %, revenue/profit in millions, out‑of‑stock count, top seller. The full summary is ~600‑800 tokens and includes everything. The LLM is also given a <strong>tab guide</strong> (list of all 9 tabs and what they contain) so it can direct users.</p>
+      </div>
+    </section>
+
+    <!-- PROJECT STRUCTURE (updated) -->
+    <section class="section" id="structure">
+      <div class="section-title">Project Structure</div>
+      <div class="section-sub">MD5 cache per shop – same file = instant results.</div>
+      <div class="card">
+        <pre class="filetree" id="file-tree"></pre>
+      </div>
+      <div class="banner" style="background:var(--accent-bg); border-color:#2563EB30;">
+  📁 <strong>Structure rule:</strong> One file per stage (stage1_cleaner.py … stage9_priority.py). Break one stage → nothing else breaks.
+   Per‑shop models saved under <code>models/shops/{shop_id}/</code>. Shared risk model (<code>lgbm_risk.pkl</code>)
+    loads once at startup. Owner interface is <code>ui/site.html</code> (replaces Gradio owner).
+      </div>
+    </section>
+
+    <!-- STACK (unchanged) -->
+    <section class="section" id="stack">
+      <div class="section-title">Technology Stack</div>
+      <div class="section-sub">All open source. Install once via conda + pip.</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Library</th><th>Install via</th><th>Purpose</th></tr></thead>
+          <tbody id="stack-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PERFORMANCE (updated) -->
+    <section class="section" id="perf">
+      <div class="section-title">Performance Benchmarks</div>
+      <div class="section-sub">Measured on a standard server (4 vCPU, 8GB RAM).</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Scenario</th><th>Time</th><th>Peak RAM</th></tr></thead>
+          <tbody>
+            <tr><td>Small shop (50 products), fresh analysis</td><td>3‑5 sec</td><td>~200 MB</td></tr>
+            <tr><td>Large shop (500 products), fresh</td><td>8‑12 sec</td><td>~350 MB</td></tr>
+            <tr><td>Identical file (cache hit)</td><td>&lt;1 sec</td><td>~50 MB</td></tr>
+            <tr><td>Optimizer only</td><td>&lt;2 sec</td><td>~50 MB</td></tr>
+            <tr><td>Health score only (cache hit)</td><td>0.5 sec</td><td>~10 MB</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CONFIG (same, but I'll include a concise version) -->
+    <section class="section" id="config">
+      <div class="section-title">Key Settings – config.py</div>
+      <div class="section-sub">All tunable values in one place. Update financial benchmarks from Central Bank of Iran.</div>
+      <div class="card">
+        <pre id="config-code"></pre>
+      </div>
+      <div class="banner" style="background:var(--red-bg);border:1px solid #DC262630;color:var(--red);">
+        ⚠️ Change <code>API_KEY</code> before exposing the API. Never commit .env to version control.
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// ========== DATA (updated to current config values and project structure) ==========
+
+const C = {
+  accent: "#2563EB", accentBg: "#EFF4FF",
+  green: "#16A34A", greenBg: "#F0FDF4",
+  red: "#DC2626", redBg: "#FEF2F2",
+  amber: "#D97706", amberBg: "#FFFBEB",
+  purple: "#7C3AED", purpleBg: "#F5F3FF",
+};
+
+const pipeline = [
+  {
+    num: "01", name: "Cleaner – Data Quality & Validation", color: C.accent,
+    tools: ["pandas", "IsolationForest", "LocalOutlierFactor", "rapidfuzz"],
+    input: "Holoo CSV export (any column order, Persian/English mixed, Jalali dates)",
+    steps: [
+      "Auto‑detects language (Persian/English), maps columns to internal schema using COLUMN_MAP",
+      "Converts Jalali dates to Gregorian, fixes encoding (Windows‑1256 → UTF‑8)",
+      "Deduplicates rows, flags impossible values (sell < buy, future dates)",
+      "Two anomaly detectors vote (IsolationForest + LOF) – flagged only if BOTH agree",
+      "Calculates data quality score (0–100): 100 − (errors / total rows) × 100",
+      "<strong>Score < 40 → pipeline stops immediately</strong>, returns exact rows to fix",
+      "Uploaded file deleted from disk after loading into memory (no data leak)",
+      "<strong>transaction_type column</strong> – normalizes & validates sale/purchase/return_sale/return_purchase",
+      "Handles returns (negative quantities), damaged goods (zero sell price), promotions (loss‑making sales)",
+      "Infers transaction_type if missing from data patterns"
+    ],
+    output: "847 clean rows · quality score 84/100 · 3 flagged rows explained · transaction_type added · pipeline continues",
+    outputColor: C.green,
+    note: "If quality is too low, the shop owner receives only the fix report – no analysis, no confusion."
+  },
+  {
+    num: "02", name: "KPIs – Product Metrics & Sufficiency", color: C.green,
+    tools: ["pandas", "numpy"],
+    input: "Clean rows from Stage 1",
+    steps: [
+      "Profit margin: (avg_sell − avg_buy) / avg_buy × 100",
+      "Liquidity rate – 0–100 based on stock turnover (monthly demand / average stock)",
+      "Price volatility (standard deviation of price changes over time)",
+      "Price change count – how many times price changed",
+      "Hope rate = margin × turnover speed (predicts future profitability)",
+      "Portfolio weight – revenue contribution percentage",
+      "Days since last sale – how long product has been idle",
+      "Best selling season – which quarter has highest sales (Q1–Q4)",
+      "Conversion rate – invoices containing this product / total invoices",
+      "Annual ROI – annualized return on investment: (total_profit/total_cost) × (365/date_range)",
+      "Daily sales – average units sold per day (used for inventory simulation)",
+      "Relative KPIs (product vs shop average) – enables cross‑shop comparability",
+      "<strong>Assigns data sufficiency: rich (30+ sales, 90+ days) / medium (10–30 sales) / sparse (<10 sales)</strong> – controls downstream models"
+    ],
+    output: "KPI table for all products · Rice=rich · Tea=medium · Lentils=sparse",
+    outputColor: C.green,
+    metrics: ["profit margin", "liquidity rate", "price volatility", "hope rate", "portfolio weight", "days since last sale", "best selling season", "price change count", "conversion rate", "annual ROI", "daily sales"]
+  },
+  {
+    num: "03", name: "Forecast – Demand Prediction (30/60/90 days)", color: C.purple,
+    tools: ["statsforecast (AutoTheta, AutoETS, SeasonalNaive)"],
+    input: "KPI table + sufficiency levels + historical sales (only sales, not purchases)",
+    steps: [
+      "<strong>Rich (30+ sales, 90+ days): AutoTheta</strong> – tests multiple strategies, picks best per product",
+      "<strong>Medium (10–30 sales): AutoETS</strong> – fast, automatic seasonality detection",
+      "<strong>Sparse (<10 sales): SeasonalNaive</strong> – honest baseline, never overfits, wide confidence band",
+      "Auto‑detects seasonality (7, 30, or 365 days) using fast numpy correlation (not slow statsmodels)",
+      "Trend adjustment for growing/declining products (uses last 30 days of data)",
+      "Forecasts for next 30, 60 and 90 days with upper/lower confidence bands (80%, 95%)",
+      "<strong>Returns daily forecast arrays (90 days of daily values)</strong> – not just totals",
+      "Low‑confidence forecasts flagged in final report with visible warning",
+      "Batch processing for 1000+ products (4-5x faster)"
+    ],
+    output: "Rice: 28 units (30d, high confidence) + daily array · Lentils: 2 units (Naive, low confidence, flagged)",
+    outputColor: C.purple,
+    table: [
+      { level: "Rich (30+ sales, 90+ days)", method: "AutoTheta", detail: "Best forecast quality, tests multiple strategies" },
+      { level: "Medium (10–30 sales)", method: "AutoETS", detail: "Reliable, automatic seasonality" },
+      { level: "Sparse (<10 sales)", method: "SeasonalNaive", detail: "Wide confidence band, visible warning" }
+    ],
+    note: "Sparse products get a clear warning: 'Not enough data, this forecast may be inaccurate.' Daily arrays enable day‑by‑day inventory simulation."
+  },
+  {
+    num: "04", name: "Segments – Product Classification", color: C.amber,
+    tools: ["scikit‑learn AgglomerativeClustering", "RobustScaler"],
+    input: "KPI table (relative values for cross‑shop comparability)",
+    steps: [
+      "If <15 products → rule‑based segmentation (Star: margin>15% & liquidity>50, Seasonal: best_season known, Deadweight: margin<5% or idle>90d, Risky: volatility>100, else Reliable)",
+      "Otherwise: groups products into natural clusters based on KPI similarity using AgglomerativeClustering (linkage=ward, n_clusters=5)",
+      "No forced bucket count – if a product doesn't fit, it becomes 'Outlier'",
+      "Outlier detection: 1.8 standard deviations from centroid – never forced into wrong group",
+      "<strong>Validates Star products (margin > 15% AND liquidity > 40) – otherwise demoted to Reliable</strong>",
+      "Each label includes a confidence score (0–100) based on distance to centroid and cluster size",
+      "Fewer than 15 products → rule‑based segmentation used, products listed individually with KPIs"
+    ],
+    output: "Star: Rice · Reliable: Oil, Sugar · Seasonal: Tea · Deadweight: Salt · Risky: Pasta · Outlier: Lentils",
+    outputColor: C.amber,
+    segments: [
+      { name: "Star", desc: "High profit, fast sales – always keep stocked", action: "Keep fully stocked", color: C.green },
+      { name: "Reliable", desc: "Steady margin, consistent demand – core of the business", action: "Maintain current stock", color: C.accent },
+      { name: "Seasonal", desc: "Strong seasonal pattern – stock before peak", action: "Stock before peak period", color: C.purple },
+      { name: "Deadweight", desc: "Low margin, slow sales – reduce or eliminate", action: "Run clearance sale", color: C.red },
+      { name: "Risky", desc: "High price volatility, unpredictable demand", action: "Reduce order quantity", color: C.amber },
+      { name: "Outlier", desc: "Doesn't fit any group – manual review recommended", action: "Review manually", color: "#6B6860" }
+    ]
+  },
+  {
+    num: "05", name: "Basket – Product Combinations", color: C.accent,
+    tools: ["mlxtend FP‑Growth"],
+    input: "Transactions (items per basket, using transaction_type='sale')",
+    steps: [
+      "Mines frequent itemsets using FP‑Growth (efficient, no candidate generation)",
+      "Dynamic minimum support: 15% for small shops (<100 transactions), 10% for medium, 5% for large",
+      "<strong>Critical pairs: bought together in >70% of shared transactions (config.CRITICAL_PAIR_CONFIDENCE=0.70)</strong>",
+      "Critical pairs become <strong>hard constraints</strong> in Stage 7 (always stock together)",
+      "Rules pre‑mined and saved as basket_rules.pkl per shop – loaded at startup",
+      "Fewer than 50 transactions → stage uses simple pair counting, not skipped"
+    ],
+    output: "Rice + Oil: 78% confidence (critical pair) · Pasta + Oil: 83% (critical pair)",
+    outputColor: C.accent,
+    note: "Critical pairs are enforced by the optimizer. If you stock rice, you MUST stock oil."
+  },
+  {
+    num: "06", name: "Risk Scoring + ROI Analysis", color: C.red,
+    tools: ["LightGBM", "rule‑based explanation templates", "numpy"],
+    input: "KPIs + segments + basket + forecasts",
+    steps: [
+      "<strong>Hybrid scoring: rule‑based (always) + LightGBM (optional)</strong>",
+      "Rule‑based always calculated: base 50 + margin*0.5 + liquidity*0.3 − volatility*0.2 − idle_days*0.05 + conversion*0.2 (clipped 0-100)",
+      "LightGBM trained once offline (optional) – loaded at startup, never trains at runtime",
+      "Model confidence weighting: 30-70% model trust, never more than 70% (depends on data volume and history length)",
+      "Features are relative KPIs (product vs shop average) – works across different shop types",
+      "Risk score 0–100 per product with plain‑English explanation referencing exact numbers",
+      "<strong>Compares shop annual ROI vs bank deposit (23%) vs gold return (35%)</strong>",
+      "Identifies which specific products drag down overall ROI",
+      "Vectorized scoring: 10-50x faster than loops"
+    ],
+    output: "Rice: 82/100 (low risk) · Pasta: 41 (volatile, low margin) · Shop ROI: 31.4% (beats bank, below gold)",
+    outputColor: C.red,
+    note: "Risk score is transparent and explainable. Falls back to rule‑based only if ML model unavailable."
+  },
+  {
+    num: "07", name: "Optimizer – Smart Shopping List", color: C.green,
+    tools: ["Google OR‑Tools (SCIP solver)"],
+    input: "Risk scores + segments + basket critical pairs + customer priorities + budget + <strong>current inventory + daily forecasts</strong>",
+    steps: [
+      "Integer programming – all quantities are whole numbers, never fractions",
+      "<strong>Three goal modes: Maximize Profit / Cover More Customers / Reduce Risk</strong>",
+      "Hard constraints: budget, critical pairs (stock together), Deadweight products → quantity zero",
+      "Star products → demand-based minimum (30 days coverage), Reliable → 15 days, Seasonal → 20 days",
+      "Champion products get priority boost",
+      "<strong>Respects current inventory – simulates day‑by‑day using daily forecast arrays</strong>",
+      "Only recommends what you actually need (if you have 50 units, forecast says 30, recommends 0)",
+      "If infeasible, constraints relaxed one by one: first basket pairs, then minimums, relaxation explained in plain language",
+      "Completes in under 2 seconds"
+    ],
+    output: "Rice×18 + Oil×10 + Sugar×14 + Tea×4 + Pasta×3 · Total 2,464,000 · Salt: 0 (Deadweight)",
+    outputColor: C.green,
+    modes: [
+      { name: "Maximize Profit", desc: "Prioritises high‑margin, high‑demand products" },
+      { name: "Cover More Customers", desc: "Prioritises breadth and basket coverage" },
+      { name: "Reduce Risk", desc: "Prioritises Reliable and low‑volatility products" }
+    ],
+    note: "Inventory state saved to inventory_state.json after each run. Never recommends negative stock."
+  },
+  {
+    num: "08", name: "Customers – RFM Segmentation", color: C.purple,
+    tools: ["scikit‑learn MiniBatchKMeans", "RobustScaler"],
+    input: "Transaction rows (customer, date, spend), using transaction_type='sale' only",
+    steps: [
+      "RFM analysis: Recency (days since last purchase), Frequency (distinct invoices), Monetary (sum of line_total)",
+      "RobustScaler before clustering – one large customer does not distort the rest",
+      "<strong>Multiple fallbacks: MiniBatchKMeans → AgglomerativeClustering → manual percentiles</strong>",
+      "Segments: Champions (best recency/frequency/monetary) · Loyal · At‑Risk · Lost",
+      "Champion products (top 5 products bought by Champions) receive boosted priority in Stage 7",
+      "Fewer than 3 customers → still analyses single customer, only skips if no customer ID"
+    ],
+    output: "Champions: 4 · Loyal: 9 · At‑Risk: 12 · Lost: 9",
+    outputColor: C.purple,
+    note: "12 at‑risk customers identified – they used to buy but stopped. Action: send targeted offer."
+  },
+  {
+    num: "09", name: "Priority – Top 3 Actions", color: C.amber,
+    tools: ["rule‑based decision engine"],
+    input: "All previous stage outputs + health score",
+    steps: [
+      "Synthesises all analysis into 3 concrete actions the owner should take right now",
+      "Uses revenue change over last 30 days, deadstock (idle>45d), running out, high risk (score>70), basket rules",
+      "Each action states: what to do, which products, expected benefit, confidence",
+      "Examples: 'Liquidate Salt and Lentils – frees 1.2M and improves ROI by 5%'",
+      "No jargon. One sentence per action. Sorted by impact."
+    ],
+    output: "1️⃣ Liquidate Salt and Lentils (deadweight, ROI drag) · 2️⃣ Increase Rice order by 15% (Star product, running low) · 3️⃣ Send offer to 12 At‑Risk customers",
+    outputColor: C.amber,
+    note: "The top 3 actions are the very first thing the shop owner sees. No digging required."
+  }
+];
+
+const outputItems = [
+  "Data quality score (0–100) + exact rows to fix",
+  "Full KPI table for every product (profit, turnover, volatility, hope rate)",
+  "90‑day daily forecast arrays per product (list of 90 numbers) with confidence bands",
+  "Product segment map (Star, Reliable, Seasonal, Deadweight, Risky, Outlier) with confidence scores",
+  "Basket critical pairs – which products must be stocked together (≥70% confidence)",
+  "Risk score (0–100) per product + plain English explanation (e.g., 'Margin 12% below shop average')",
+  "Shop ROI vs bank deposit (23%) vs gold (35%) comparison",
+  "Customer segments: Champions, Loyal, At‑Risk, Lost + recommended actions",
+  "Integer shopping list for any budget (whole quantities, no fractions)",
+  "Products to avoid / liquidate – with evidence and expected benefit",
+  "Seasonal calendar for the next 12 months (based on best_season from Stage 2)",
+  "Shop health score (0–100) based on data quality, ROI, segment mix, freshness",
+  "List of all skipped stages with plain‑language reason",
+  "Top 3 actions the owner should take right now (Stage 9)",
+  "Inventory state file (inventory_state.json) – current stock per product",
+  "transaction_type column (sale / purchase / return_sale / return_purchase ) for perfect inventory tracking"
+];
+
+// Removed gradioTabs – owner UI is now HTML dashboard
+
+const fileTree = `saleyar/
+│
+├── .env                        # API_KEY only – never commit
+├── config.py                   # all thresholds + bank/gold rates
+├── run.py                      # one command to launch anything
+├── test_all.py                 # test everything
+│
+├── pipeline/
+│   ├── column_map.py           # Holoo column name mappings
+│   ├── stage1_cleaner.py
+│   ├── stage2_metrics.py
+│   ├── stage3_forecast.py
+│   ├── stage4_segments.py
+│   ├── stage5_basket.py
+│   ├── stage6_risk.py
+│   ├── stage7_optimizer.py
+│   ├── stage8_customers.py
+│   ├── stage9_priority.py
+│   └── runner.py               # runs stages 1→9, manages MD5 cache, inventory_state.json
+│
+├── models/
+│   ├── train.py                # run once before deployment (creates lgbm_risk.pkl)
+│   ├── loader.py               # loads models at startup, holds in memory
+│   ├── lgbm_risk.pkl           # shared risk model (one for all shops)
+│   └── shops/
+│       ├── {shop_id1}/
+│       │   ├── basket_rules.pkl
+│       │   ├── segment_cache.pkl
+│       │   ├── forecast_cache.pkl
+│       │   ├── inventory_state.json   # current stock per product
+│       │   └── metadata.json   # stores MD5 hash of last uploaded file
+│       └── {shop_id2}/ ...
+│
+├── output/
+│   ├── reporter.py             # assembles final report + LLM‑friendly summary
+│   └── templates/              # Persian & English explanation templates
+│
+├── api/
+│   └── main.py                 # FastAPI – all endpoints, API key auth, includes /llm/ask
+│
+├── llm/
+│   └── agent.py                # LLM integration: micro‑summary (talk mode) vs full summary (bullet points), tab guide, greeting detection, markdown support
+│
+├── ui/
+│   ├── site.html               # HTML owner dashboard (replaces Gradio owner)
+│   ├── developer.py            # detailed Gradio with raw data, extra tabs
+│   └── terminal.py             # CLI mode          
+│
+├── saved_reports/{shop_id}/    # report_latest.json + summary.json + dated backups
+├── data/                       # sample generators`;
+
+const stackLibs = [
+  { lib: "pandas", via: "conda", use: "Data processing" },
+  { lib: "numpy", via: "conda", use: "Math operations" },
+  { lib: "scikit-learn", via: "conda", use: "Segments, anomaly detection, customer clustering" },
+  { lib: "lightgbm", via: "conda", use: "Shared risk model (trained once)" },
+  { lib: "openpyxl", via: "conda", use: "Excel file reading" },
+  { lib: "plotly", via: "conda", use: "All interactive charts" },
+  { lib: "pytest", via: "conda", use: "Test suite" },
+  { lib: "statsforecast", via: "pip", use: "AutoTheta, AutoETS, SeasonalNaive" },
+  { lib: "mlxtend", via: "pip", use: "FP‑Growth basket analysis" },
+  { lib: "ortools", via: "pip", use: "Integer optimisation (SCIP solver)" },
+  { lib: "fastapi", via: "pip", use: "REST API" },
+  { lib: "uvicorn", via: "pip", use: "ASGI server" },
+  { lib: "gradio", via: "pip", use: "Developer UI only (owner is HTML)" },
+  { lib: "jdatetime", via: "pip", use: "Jalali ↔ Gregorian conversion" },
+  { lib: "rapidfuzz", via: "pip", use: "Fuzzy column name matching" },
+  { lib: "python-dotenv", via: "pip", use: ".env file loading" },
+  { lib: "marked.js", via: "CDN", use: "Markdown rendering in HTML dashboard" }
+];
+
+const configCode = `
+# config.py — every tunable value lives here. Nothing is hardcoded anywhere else.
+
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# ── API Security ──────────────────────────────────────────────
+API_KEY = os.getenv("API_KEY", "kamal")
+
+# ── Financial benchmarks — update periodically ───────────────
+BANK_DEPOSIT_RATE_ANNUAL = 23.0     # percent — update from CBI
+GOLD_ANNUAL_RETURN       = 35.0     # percent
+
+# ── Industry benchmarks — Iranian retail sector averages ──────
+RETAIL_AVG_MARGIN        = 18.0     # percent
+RETAIL_AVG_TURNOVER      = 8.0      # times per year
+
+# ── Pipeline thresholds ───────────────────────────────────────
+MIN_SALES_RICH           = 30       # minimum sales for AutoTheta
+MIN_SALES_MEDIUM         = 10       # minimum sales for AutoETS
+MIN_BASKET_ROWS          = 50       # minimum transactions for basket analysis
+MIN_PRODUCTS             = 15       # minimum products for segmentation
+MIN_CUSTOMERS            = 3        # minimum for customer segmentation
+FORECAST_HORIZON         = 90       # days ahead to forecast
+
+# ── Stage 3: Forecast Configuration ───────────────────────────
+MIN_DAYS_FOR_FORECAST    = 7        # minimum days history for any forecast
+SEASON_LENGTH            = None     # None=auto-detect, or 7/30/365
+FORECAST_BATCH_SIZE      = 50       # products per batch (memory vs speed)
+ENABLE_TREND_ADJUSTMENT  = True     # adjust forecast for trending products
+MIN_TREND_THRESHOLD      = 0.05     # 5% trend needed to adjust
+TREND_WEIGHT             = 0.5      # how much trend affects forecast (0-1)
+
+# ── Stage 5: Basket Analysis Configuration ────────────────────
+CRITICAL_PAIR_CONFIDENCE = 0.70     # 70% confidence for critical pairs
+
+def get_min_support(n_transactions: int) -> float:
+    if n_transactions < 100:   return 0.15
+    elif n_transactions < 500: return 0.10
+    else:                      return 0.05
+
+# ── Stage 1: Cleaner Configuration ────────────────────────────
+ALLOW_RETURNS            = True
+ALLOW_DAMAGED            = True
+ALLOW_PROMOTIONS         = True
+MAX_REASONABLE_LOSS      = 50
+MIN_REASONABLE_QTY       = -100
+MAX_REASONABLE_QTY       = 500
+
+# ── Stage 4: Segments ─────────────────────────────────────────
+STAR_MARGIN_MIN          = 15
+STAR_LIQUIDITY_MIN       = 40
+OUTLIER_THRESHOLD        = 1.8
+
+# ── Stage 7: Optimizer ────────────────────────────────────────
+STAR_COVERAGE_DAYS       = 30
+RELIABLE_COVERAGE_DAYS   = 15
+SEASONAL_COVERAGE_DAYS   = 20
+MAX_UNITS_PER_PRODUCT    = 500
+MIN_SHELF_QUANTITY       = 2
+MIN_PRODUCTS_IN_ORDER    = 10
+
+# ── Model paths ───────────────────────────────────────────────
+LGBM_MODEL_PATH          = "models/lgbm_risk.pkl"
+SHOPS_DIR                = "models/shops"
+
+# ── Server ────────────────────────────────────────────────────
+DEFAULT_LANGUAGE         = "en"
+MAX_FILE_SIZE_MB         = 50
+MAX_CONCURRENT_JOBS      = 2
+REPORT_RETENTION_DAYS    = 90
+
+# ── Optional LLM integration ──────────────────────────────────
+LLM_ENABLED             = os.getenv("LLM_ENABLED", "yes").lower() in ("1", "true", "yes")
+LLM_ENDPOINT_URL        = os.getenv("LLM_ENDPOINT_URL", "")  # e.g. "http://localhost:1234/v1/chat/completions"
+LLM_MODEL_NAME          = os.getenv("LLM_MODEL_NAME", "")
+LLM_TIMEOUT_SECONDS     = int(os.getenv("LLM_TIMEOUT_SECONDS", "15"))`;
+
+// ========== RENDER ==========
+
+function tag(text, color, bg) {
+  return `<span class="tag" style="color:${color};background:${bg}">${text}</span>`;
+}
+
+const stagesContainer = document.getElementById("stages-container");
+pipeline.forEach((s, i) => {
+  const toolTags = s.tools.map(t => `<span class="tag" style="color:${s.color};background:${s.color}18;font-size:11px;font-weight:600">${t}</span>`).join(" ");
+  let extraHtml = "";
+  if (s.metrics) {
+    extraHtml += `<div style="margin-bottom:14px">
+      <div class="stage-section-label">Metrics Calculated</div>
+      <div class="metrics-grid">${s.metrics.map(m => `<span class="metric-chip">${m}</span>`).join("")}</div>
+    </div>`;
+  }
+  if (s.table) {
+    extraHtml += `<div style="margin-bottom:14px">
+      <div class="stage-section-label">Method Selection</div>
+      <div class="inner-table-wrap">
+        <table><thead><tr><th>Data Level</th><th>Method</th><th>Detail</th></tr></thead>
+        <tbody>${s.table.map(r => `<tr><td style="font-weight:600">${r.level}</td><td>${tag(r.method, s.color, s.color + "18")}</td><td style="color:var(--muted)">${r.detail}</td>`).join("")}</tbody>
+      </table>
+      </div>
+    </div>`;
+  }
+  if (s.segments) {
+    extraHtml += `<div style="margin-bottom:14px">
+      <div class="stage-section-label">Segments</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${s.segments.map(seg => `<div style="padding:10px 12px;background:var(--surface-alt);border-radius:6px"><div style="font-weight:700;font-size:13px;color:${seg.color};margin-bottom:3px">${seg.name}</div><div style="font-size:12px;color:var(--muted)">${seg.desc}</div></div>`).join("")}
+      </div>
+    </div>`;
+  }
+  if (s.modes) {
+    extraHtml += `<div style="margin-bottom:14px">
+      <div class="stage-section-label">Goal Modes</div>
+      <div class="modes-grid">${s.modes.map(m => `<div class="mode-card"><div class="mode-name" style="color:${s.color}">${m.name}</div><div class="mode-desc">${m.desc}</div></div>`).join("")}</div>
+    </div>`;
+  }
+  stagesContainer.innerHTML += `
+    <div class="card" style="margin-bottom:10px">
+      <div class="stage-header" onclick="toggleStage(${i})">
+        <div class="stage-left">
+          <div class="stage-num" style="color:${s.color}">${s.num}</div>
+          <div>
+            <div class="stage-name">${s.name}</div>
+            <div class="stage-tools">${toolTags}</div>
+          </div>
+        </div>
+        <div class="stage-badges">
+          <span class="parallel-badge">SEQUENTIAL</span>
+          <span class="chevron" id="chevron-${i}">▼</span>
+        </div>
+      </div>
+      <div class="stage-body" id="body-${i}">
+        <div style="margin-bottom:14px"><div class="stage-section-label">Input</div><div class="input-box">${s.input}</div></div>
+        <div style="margin-bottom:14px"><div class="stage-section-label">Steps</div><ul class="steps-list">${s.steps.map(step => `<li><span class="step-dot" style="background:${s.color}"></span><span>${step}</span></li>`).join("")}</ul></div>
+        ${extraHtml}
+        <div class="output-box" style="background:${s.outputColor}0D;border:1px solid ${s.outputColor}35"><div style="font-size:10px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;color:${s.outputColor};margin-bottom:6px">Output</div><div>${s.output}</div></div>
+        ${s.note ? `<div class="note-box" style="margin-top:10px"><strong>Note:</strong> ${s.note}</div>` : ""}
+      </div>
+    </div>`;
+});
+
+const outputContainer = document.getElementById("output-items");
+outputItems.forEach(item => { outputContainer.innerHTML += `<div class="output-item"><span class="output-check">✓</span><span>${item}</span></div>`; });
+
+document.getElementById("file-tree").textContent = fileTree;
+
+const stackBody = document.getElementById("stack-table");
+stackLibs.forEach(r => {
+  const viaColor = r.via === "conda" ? C.green : C.purple;
+  const viaBg = r.via === "conda" ? C.greenBg : C.purpleBg;
+  stackBody.innerHTML += `<tr><td><code>${r.lib}</code></td><td>${tag(r.via, viaColor, viaBg)}</td><td style="color:var(--muted)">${r.use}</td>`;;
+});
+
+document.getElementById("config-code").textContent = configCode;
+
+function toggleStage(i) {
+  const body = document.getElementById(`body-${i}`);
+  const chevron = document.getElementById(`chevron-${i}`);
+  const isOpen = body.classList.contains("open");
+  body.classList.toggle("open", !isOpen);
+  chevron.classList.toggle("open", !isOpen);
+}
+
+// Navigation
+document.querySelectorAll(".nav-item").forEach(item => {
+  item.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    item.classList.add("active");
+    document.getElementById(item.dataset.section).classList.add("active");
+  });
+});
+</script>
+</body>
+</html>

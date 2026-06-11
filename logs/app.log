@@ -1,0 +1,1542 @@
+2026-05-28 05:07:45,188 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 05:07:45,188 INFO api.main Server started — all models loaded
+2026-05-28 05:07:52,443 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 05:07:52,443 INFO api.main Job 64b9ac72-a5d0-4dd1-bf2c-1021dcae6e33 started | shop=default | file=sample_en.csv
+2026-05-28 05:07:52,510 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:07:58,034 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (60034 rows > 20000)
+2026-05-28 05:07:58,071 WARNING pipeline.stage1_cleaner Filtered 108 rows with invalid product names
+2026-05-28 05:07:58,077 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=59922 | warnings=10044 | errors=5
+2026-05-28 05:07:58,088 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:07:58,698 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 05:07:58,700 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 05:07:58,892 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 05:08:04,420 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 05:08:04,422 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 05:08:04,439 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Outlier': 3, 'Seasonal': 3, 'Risky': 1}
+2026-05-28 05:08:04,473 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 05:08:04,473 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 05:08:04,483 INFO pipeline.stage5_basket Found 14747 unique sales transactions
+2026-05-28 05:08:05,187 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 05:08:05,220 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 05:08:05,223 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 05:08:05,224 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 05:08:05,229 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 05:08:08,308 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.9%
+2026-05-28 05:08:08,310 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 05:08:10,180 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 05:08:10,181 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 05:08:10,215 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 05:08:10,338 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 05:08:10,375 INFO pipeline.runner Pipeline complete | shop=default | 17.93s
+2026-05-28 05:08:10,375 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 05:10:34,827 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 05:10:34,827 INFO api.main Server started — all models loaded
+2026-05-28 05:10:44,117 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 05:10:44,117 INFO api.main Job 30489817-5cdf-4aa4-b39d-1abb68893f52 started | shop=default | file=sample_en.csv
+2026-05-28 05:10:44,198 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:10:49,926 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (60034 rows > 20000)
+2026-05-28 05:10:49,969 WARNING pipeline.stage1_cleaner Filtered 108 rows with invalid product names
+2026-05-28 05:10:49,974 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=59922 | warnings=10044 | errors=5
+2026-05-28 05:10:49,983 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:10:50,631 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 05:10:50,632 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 05:10:50,843 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 05:10:56,414 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 05:10:56,421 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 05:10:56,434 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Outlier': 3, 'Seasonal': 3, 'Risky': 1}
+2026-05-28 05:10:56,446 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 05:10:56,447 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 05:10:56,456 INFO pipeline.stage5_basket Found 14747 unique sales transactions
+2026-05-28 05:10:57,129 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 05:10:57,164 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 05:10:57,164 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 05:10:57,164 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 05:10:57,174 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 05:11:00,256 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.9%
+2026-05-28 05:11:00,256 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 05:11:02,113 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 05:11:02,113 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 05:11:02,148 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 05:11:02,253 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 05:11:02,290 INFO pipeline.runner Pipeline complete | shop=default | 18.17s
+2026-05-28 05:11:02,291 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 05:15:52,848 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 05:15:52,848 INFO api.main Server started — all models loaded
+2026-05-28 05:16:00,762 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 05:16:00,762 INFO api.main Job 3538ab5a-6a53-413e-9139-f68a3768642f started | shop=default | file=sample_en.csv
+2026-05-28 05:16:00,848 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:16:06,685 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (60034 rows > 20000)
+2026-05-28 05:16:06,719 WARNING pipeline.stage1_cleaner Filtered 108 rows with invalid product names
+2026-05-28 05:16:06,726 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=59922 | warnings=10044 | errors=5
+2026-05-28 05:16:06,735 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:16:07,393 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 05:16:07,395 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 05:16:07,603 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 05:16:13,131 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 05:16:13,133 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 05:16:13,149 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Outlier': 3, 'Seasonal': 3, 'Risky': 1}
+2026-05-28 05:16:13,160 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 05:16:13,160 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 05:16:13,170 INFO pipeline.stage5_basket Found 14747 unique sales transactions
+2026-05-28 05:16:13,938 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 05:16:13,971 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 05:16:13,974 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 05:16:13,974 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 05:16:13,980 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 05:16:17,091 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.9%
+2026-05-28 05:16:17,092 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 05:16:19,330 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 05:16:19,330 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 05:16:19,371 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 05:16:19,497 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 05:16:19,536 INFO pipeline.runner Pipeline complete | shop=default | 18.77s
+2026-05-28 05:16:19,536 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 05:23:28,976 INFO api.main Job 47621a05-31f2-472b-a862-e2d140210ab5 started | shop=default | file=real_merged.csv
+2026-05-28 05:23:28,976 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 05:23:28,985 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:23:29,403 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 05:23:29,406 INFO models.loader Cleared all models for shop 'default'
+2026-05-28 05:23:29,406 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:23:32,964 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 05:23:32,966 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 05:23:33,975 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 05:24:02,653 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 05:24:02,654 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 05:24:02,927 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 05:24:03,039 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 05:24:03,039 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 05:24:03,040 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 05:24:03,070 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 05:24:03,071 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 05:24:03,071 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 05:24:03,142 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 05:24:03,143 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 05:24:03,272 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 05:24:03,273 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 05:24:03,273 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 05:24:03,969 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 05:24:04,144 INFO pipeline.runner Pipeline complete | shop=default | 35.17s
+2026-05-28 05:24:04,147 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 05:26:01,182 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 05:26:01,183 INFO api.main Server started — all models loaded
+2026-05-28 05:26:19,874 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 05:26:19,874 INFO api.main Job a93ad9e8-1482-462f-bd7b-f276638d20f0 started | shop=default | file=sample_en.csv
+2026-05-28 05:26:19,946 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:26:25,609 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (60034 rows > 20000)
+2026-05-28 05:26:25,645 WARNING pipeline.stage1_cleaner Filtered 108 rows with invalid product names
+2026-05-28 05:26:25,651 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=59922 | warnings=10044 | errors=5
+2026-05-28 05:26:25,662 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:26:26,302 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 05:26:26,304 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 05:26:26,531 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 05:26:32,120 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 05:26:32,125 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 05:26:32,146 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Outlier': 3, 'Seasonal': 3, 'Risky': 1}
+2026-05-28 05:26:32,158 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 05:26:32,158 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 05:26:32,172 INFO pipeline.stage5_basket Found 14747 unique sales transactions
+2026-05-28 05:26:32,973 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 05:26:33,008 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 05:26:33,011 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 05:26:33,012 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 05:26:33,021 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 05:26:36,141 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.9%
+2026-05-28 05:26:36,142 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 05:26:38,270 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 05:26:38,270 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 05:26:38,309 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 05:26:38,427 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 05:26:38,466 INFO pipeline.runner Pipeline complete | shop=default | 18.59s
+2026-05-28 05:26:38,466 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 05:31:45,161 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 05:31:45,162 INFO api.main Server started — all models loaded
+2026-05-28 05:31:53,388 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 05:31:53,388 INFO api.main Job 17839a3c-4ee8-46ed-a407-310f334ff6df started | shop=default | file=sample_en.csv
+2026-05-28 05:31:53,462 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:31:59,314 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (60034 rows > 20000)
+2026-05-28 05:31:59,350 WARNING pipeline.stage1_cleaner Filtered 108 rows with invalid product names
+2026-05-28 05:31:59,356 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=59922 | warnings=10044 | errors=5
+2026-05-28 05:31:59,363 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:31:59,976 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 05:31:59,979 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 05:32:00,163 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 05:32:05,636 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 05:32:05,639 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 05:32:05,656 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Outlier': 3, 'Seasonal': 3, 'Risky': 1}
+2026-05-28 05:32:05,666 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 05:32:05,668 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 05:32:05,677 INFO pipeline.stage5_basket Found 14747 unique sales transactions
+2026-05-28 05:32:06,348 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 05:32:06,379 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 05:32:06,382 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 05:32:06,385 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 05:32:06,390 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 05:32:09,391 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.9%
+2026-05-28 05:32:09,392 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 05:32:11,250 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 05:32:11,250 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 05:32:11,288 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 05:32:11,388 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 05:32:11,425 INFO pipeline.runner Pipeline complete | shop=default | 18.04s
+2026-05-28 05:32:11,426 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 05:41:46,937 INFO api.main Job fab864dc-43e3-4f1f-ae09-05021299db69 started | shop=default | file=real_merged.csv
+2026-05-28 05:41:46,937 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 05:41:46,947 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:41:47,347 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 05:41:47,903 INFO models.loader Cleared all models for shop 'default'
+2026-05-28 05:41:47,903 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:41:51,538 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 05:41:51,539 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 05:41:52,586 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 05:42:20,786 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 05:42:20,787 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 05:42:21,076 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 05:42:21,177 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 05:42:21,177 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 05:42:21,178 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 05:42:21,201 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 05:42:21,201 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 05:42:21,202 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 05:42:21,269 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 05:42:21,270 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 05:42:21,368 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 05:42:21,368 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 05:42:21,369 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 05:42:22,055 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 05:42:22,224 INFO pipeline.runner Pipeline complete | shop=default | 35.28s
+2026-05-28 05:42:22,226 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 05:47:05,636 INFO api.main Job 6931c0f9-7a22-428b-988b-6be9e20ebeaa started | shop=default | file=sample_en.csv
+2026-05-28 05:47:05,636 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 05:47:05,714 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:47:11,627 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (60034 rows > 20000)
+2026-05-28 05:47:11,666 WARNING pipeline.stage1_cleaner Filtered 108 rows with invalid product names
+2026-05-28 05:47:11,672 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=59922 | warnings=10044 | errors=5
+2026-05-28 05:47:11,683 INFO models.loader Cleared all models for shop 'default'
+2026-05-28 05:47:11,684 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:47:12,260 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 05:47:12,263 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 05:47:12,434 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 05:48:40,924 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 05:48:40,925 INFO api.main Server started — all models loaded
+2026-05-28 05:48:48,614 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 05:48:48,614 INFO api.main Job c67f1963-eb2c-4192-8218-858335368a35 started | shop=default | file=sample_en.csv
+2026-05-28 05:48:48,744 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 05:49:00,349 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (117554 rows > 20000)
+2026-05-28 05:49:00,426 WARNING pipeline.stage1_cleaner Filtered 228 rows with invalid product names
+2026-05-28 05:49:00,440 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=117322 | warnings=19207 | errors=5
+2026-05-28 05:49:00,455 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 05:49:01,566 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 05:49:01,570 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 05:49:01,790 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 05:49:07,579 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 05:49:07,584 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 05:49:07,603 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-28 05:49:07,613 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 05:49:07,613 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 05:49:07,634 INFO pipeline.stage5_basket Found 29515 unique sales transactions
+2026-05-28 05:49:08,913 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 05:49:08,943 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 05:49:08,947 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 05:49:08,949 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 05:49:08,954 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 05:49:12,043 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.7%
+2026-05-28 05:49:12,043 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 05:49:15,610 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 05:49:15,613 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 05:49:15,646 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 05:49:15,825 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 05:49:15,883 INFO pipeline.runner Pipeline complete | shop=default | 27.27s
+2026-05-28 05:49:15,885 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 14:33:13,329 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 14:33:13,346 INFO api.main Server started — all models loaded
+2026-05-28 14:33:20,397 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 14:33:20,397 INFO api.main Job 5481e0fe-48a3-4f77-b0c7-002bb81dcb28 started | shop=default | file=sample_en.csv
+2026-05-28 14:33:20,580 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 14:33:36,784 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 14:33:36,885 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 14:33:36,905 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 14:33:36,921 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 14:33:38,518 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 14:33:38,525 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 14:33:38,762 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 14:33:46,232 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 14:33:46,238 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 14:33:46,252 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 14:33:46,266 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 14:33:46,266 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 14:33:46,290 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 14:33:48,398 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 14:33:48,434 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 14:33:48,434 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 14:33:48,442 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 14:33:48,446 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 14:33:51,413 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 14:33:51,413 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 14:33:57,067 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 14:33:57,067 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 14:33:57,101 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 14:33:57,517 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 14:33:57,610 INFO pipeline.runner Pipeline complete | shop=default | 37.21s
+2026-05-28 14:33:57,610 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 14:47:31,445 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 14:47:31,445 INFO api.main Server started — all models loaded
+2026-05-28 14:47:38,223 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 14:47:38,223 INFO api.main Job e023a2e5-46d1-44bd-976a-fbe85ab6f121 started | shop=default | file=sample_en.csv
+2026-05-28 14:47:38,422 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 14:47:55,095 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 14:47:55,190 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 14:47:55,214 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 14:47:55,230 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 14:47:56,779 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 14:47:56,785 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 14:47:56,987 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 14:48:04,453 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 14:48:04,471 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 14:48:04,487 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 14:48:04,490 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 14:48:04,490 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 14:48:04,523 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 14:48:06,507 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 14:48:06,523 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 14:48:06,545 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 14:48:06,561 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 14:48:06,564 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 14:48:06,568 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 14:48:09,617 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 14:48:09,622 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 14:48:15,235 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 14:48:15,235 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 14:48:15,276 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 14:48:15,656 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 14:48:15,747 INFO pipeline.runner Pipeline complete | shop=default | 37.52s
+2026-05-28 14:48:15,748 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 14:51:10,736 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 14:51:10,736 INFO api.main Server started — all models loaded
+2026-05-28 14:51:20,745 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 14:51:20,745 INFO api.main Job bdfcc7b9-6a17-4cd9-a22d-670f5a9981e1 started | shop=default | file=sample_en.csv
+2026-05-28 14:51:20,963 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 14:51:36,977 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 14:51:37,081 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 14:51:37,099 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 14:51:37,122 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 14:51:38,629 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 14:51:38,629 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 14:51:38,848 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 14:51:46,258 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 14:51:46,275 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 14:51:46,288 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 14:51:46,302 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 14:51:46,302 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 14:51:46,330 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 14:51:48,217 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 14:51:48,217 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 14:51:48,264 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 14:51:48,264 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 14:51:48,273 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 14:51:48,278 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 14:51:51,283 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 14:51:51,283 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 14:51:56,763 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 14:51:56,763 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 14:51:56,803 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 14:51:57,179 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 14:51:57,270 INFO pipeline.runner Pipeline complete | shop=default | 36.52s
+2026-05-28 14:51:57,270 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 14:52:23,132 INFO api.main Job 5665848e-3450-467d-bdf2-03aa2e5eb5bc started | shop=default | file=sample_en.csv
+2026-05-28 14:52:23,133 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 14:52:23,339 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 14:52:39,747 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 14:52:39,850 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 14:52:39,873 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 14:52:39,886 INFO models.loader Cleared all models for shop 'default'
+2026-05-28 14:52:39,898 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 14:52:41,455 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 14:52:41,455 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 14:52:41,718 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 14:52:49,248 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 14:52:49,254 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 14:52:49,269 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 14:52:49,281 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 14:52:49,281 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 14:52:49,319 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 14:52:51,466 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 14:52:51,468 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 14:52:51,500 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 14:52:51,505 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 14:52:51,509 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 14:52:51,518 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 14:52:51,519 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 14:53:04,634 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 14:53:04,635 INFO api.main Server started — all models loaded
+2026-05-28 14:53:13,675 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 14:53:13,675 INFO api.main Job 3ff981b6-7ac8-42c4-b1ad-62cf4e42a763 started | shop=default | file=sample_en.csv
+2026-05-28 14:53:13,882 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 14:53:30,291 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 14:53:30,384 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 14:53:30,401 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 14:53:30,433 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 14:53:32,023 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 14:53:32,033 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 14:53:32,257 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 14:53:40,023 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 14:53:40,029 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 14:53:40,044 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 14:53:40,052 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 14:53:40,052 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 14:53:40,083 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 14:53:42,121 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 14:53:42,123 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 14:53:42,159 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 14:53:42,159 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 14:53:42,167 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 14:53:42,172 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 14:53:45,056 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 14:53:45,056 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 14:53:50,785 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 14:53:50,802 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 14:53:50,818 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 14:53:51,199 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 14:53:51,305 INFO pipeline.runner Pipeline complete | shop=default | 37.63s
+2026-05-28 14:53:51,305 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 14:56:11,293 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 14:56:11,293 INFO api.main Server started — all models loaded
+2026-05-28 14:56:24,721 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 14:56:24,721 INFO api.main Job 34816771-adc1-4380-8f6c-04a0e23fef73 started | shop=default | file=sample_en.csv
+2026-05-28 14:56:24,921 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 14:56:41,453 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 14:56:41,560 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 14:56:41,579 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 14:56:41,600 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 14:56:43,143 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 14:56:43,150 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 14:56:43,383 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 14:56:50,869 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 14:56:50,887 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 14:56:50,902 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 14:56:50,902 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 14:56:50,902 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 14:56:50,933 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 14:56:52,974 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 14:56:52,980 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 14:56:53,012 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 14:56:53,017 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 14:56:53,020 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 14:56:53,027 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 14:56:55,999 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 14:56:55,999 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 14:57:01,749 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 14:57:01,749 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 14:57:01,767 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 14:57:02,140 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 14:57:02,240 INFO pipeline.runner Pipeline complete | shop=default | 37.52s
+2026-05-28 14:57:02,240 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 15:01:52,210 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 15:01:52,210 INFO api.main Server started — all models loaded
+2026-05-28 15:01:59,215 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 15:01:59,215 INFO api.main Job 587848d8-4126-42bf-9f4c-6826f4e48610 started | shop=default | file=sample_en.csv
+2026-05-28 15:01:59,395 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 15:02:15,901 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 15:02:15,999 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 15:02:16,020 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 15:02:16,044 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 15:02:17,557 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 15:02:17,573 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 15:02:17,796 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 15:02:25,395 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 15:02:25,395 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 15:02:25,421 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 15:02:25,424 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 15:02:25,424 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 15:02:25,456 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 15:02:27,489 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 15:02:27,489 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 15:02:27,516 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 15:02:27,516 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 15:02:27,532 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 15:02:27,536 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 15:02:30,637 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 15:02:30,637 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 15:02:36,359 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 15:02:36,361 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 15:02:36,386 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 15:02:36,781 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 15:02:36,873 INFO pipeline.runner Pipeline complete | shop=default | 37.66s
+2026-05-28 15:02:36,873 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 15:11:38,623 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 15:11:38,623 INFO api.main Server started — all models loaded
+2026-05-28 15:11:49,732 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 15:11:49,732 INFO api.main Job f8ddabe8-8577-4824-9ae2-5796bbb682e2 started | shop=default | file=sample_en.csv
+2026-05-28 15:11:49,944 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 15:12:06,383 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 15:12:06,487 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 15:12:06,504 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 15:12:06,519 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 15:12:08,107 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 15:12:08,115 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 15:12:08,331 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 15:12:15,883 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 15:12:15,903 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 15:12:15,920 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 15:12:15,933 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 15:12:15,933 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 15:12:15,957 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 15:12:17,958 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 15:12:17,958 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 15:12:18,000 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 15:12:18,000 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 15:12:18,013 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 15:12:18,017 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 15:12:21,069 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 15:12:21,071 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 15:12:26,587 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 15:12:26,587 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 15:12:26,635 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 15:12:27,058 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 15:12:27,151 INFO pipeline.runner Pipeline complete | shop=default | 37.42s
+2026-05-28 15:12:27,151 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 15:13:24,027 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 15:13:24,027 INFO api.main Server started — all models loaded
+2026-05-28 15:13:34,919 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 15:13:34,919 INFO api.main Job 807165e9-7d32-4202-b4a4-dec74839d6ac started | shop=default | file=sample_en.csv
+2026-05-28 15:13:35,132 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 15:13:51,043 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 15:13:51,138 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 15:13:51,153 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 15:13:51,188 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 15:13:52,776 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 15:13:52,783 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 15:13:52,997 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 15:14:00,408 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 15:14:00,408 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 15:14:00,431 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 15:14:00,441 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 15:14:00,441 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 15:14:00,472 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 15:14:02,401 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 15:14:02,403 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 15:14:02,436 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 15:14:02,441 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 15:14:02,444 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 15:14:02,449 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 15:14:05,274 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 15:14:05,274 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 15:14:10,950 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 15:14:10,950 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 15:14:10,984 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 15:14:11,338 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 15:14:11,439 INFO pipeline.runner Pipeline complete | shop=default | 36.52s
+2026-05-28 15:14:11,439 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 16:07:38,353 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 16:07:38,353 INFO api.main Server started — all models loaded
+2026-05-28 16:08:41,504 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 16:08:41,505 INFO api.main Server started — all models loaded
+2026-05-28 16:08:50,152 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 16:08:50,152 INFO api.main Job 274ff93c-0810-406b-b85d-81cedbf3477f started | shop=default | file=sample_en.csv
+2026-05-28 16:08:50,365 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 16:09:07,291 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 16:09:07,388 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 16:09:07,406 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 16:09:07,430 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 16:09:09,007 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 16:09:09,014 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 16:09:09,236 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 16:09:16,871 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 16:09:16,878 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 16:09:16,895 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 16:09:16,905 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 16:09:16,905 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 16:09:16,935 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 16:09:18,972 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 16:09:18,974 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 16:09:19,007 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 16:09:19,013 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 16:09:19,015 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 16:09:19,021 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 16:09:22,086 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 16:09:22,087 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 16:09:27,916 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 16:09:27,917 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 16:09:27,951 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 16:09:28,334 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 16:09:28,427 INFO pipeline.runner Pipeline complete | shop=default | 38.28s
+2026-05-28 16:09:28,427 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 16:14:48,056 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 16:14:48,056 INFO api.main Server started — all models loaded
+2026-05-28 16:14:55,001 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 16:14:55,001 INFO api.main Job 9deba8c3-eb33-44f7-9dd5-64c6908aebe2 started | shop=default | file=real_merged.csv
+2026-05-28 16:14:55,013 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 16:14:55,491 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 16:14:55,491 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 16:14:59,382 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 16:14:59,383 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 16:15:00,452 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 16:15:26,577 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 16:15:26,578 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 16:15:26,823 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 16:15:26,909 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 16:15:26,910 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 16:15:26,911 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 16:15:26,925 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 16:15:26,930 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 16:15:26,931 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 16:15:26,931 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 16:15:26,936 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 16:15:29,985 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 16:15:29,986 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 16:15:30,080 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 16:15:30,080 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 16:15:30,081 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 16:15:30,623 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 16:15:30,791 INFO pipeline.runner Pipeline complete | shop=default | 35.79s
+2026-05-28 16:15:30,793 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 16:42:31,680 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 16:42:31,680 INFO api.main Server started — all models loaded
+2026-05-28 16:42:40,074 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-28 16:42:40,074 INFO api.main Job 2b3718ab-466d-407d-8fa4-cc8dfa16c331 started | shop=default | file=sample_en.csv
+2026-05-28 16:42:40,281 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 16:42:57,990 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (197339 rows > 20000)
+2026-05-28 16:42:58,103 WARNING pipeline.stage1_cleaner Filtered 407 rows with invalid product names
+2026-05-28 16:42:58,126 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=196930 | warnings=32157 | errors=3
+2026-05-28 16:42:58,148 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 16:42:59,965 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-28 16:42:59,973 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-28 16:43:00,250 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-28 16:43:07,911 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-28 16:43:07,911 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 16:43:07,932 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 38, 'Seasonal': 3, 'Outlier': 3, 'Risky': 1}
+2026-05-28 16:43:07,950 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 16:43:07,954 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 16:43:07,980 INFO pipeline.stage5_basket Found 49193 unique sales transactions
+2026-05-28 16:43:10,106 INFO pipeline.stage5_basket Built 41891 baskets with >=2 items
+2026-05-28 16:43:10,106 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-28 16:43:10,138 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-28 16:43:10,148 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 16:43:10,151 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-28 16:43:10,155 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 16:43:13,261 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.6%
+2026-05-28 16:43:13,262 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 16:43:19,207 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-28 16:43:19,207 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 16:43:19,241 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 16:43:19,628 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-28 16:43:19,725 INFO pipeline.runner Pipeline complete | shop=default | 39.65s
+2026-05-28 16:43:19,726 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 16:53:18,046 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 16:53:18,046 INFO api.main Server started — all models loaded
+2026-05-28 16:53:24,982 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 16:53:24,982 INFO api.main Job a747b1bb-5f8f-42ad-8d67-7243f2081401 started | shop=default | file=real_merged.csv
+2026-05-28 16:53:25,001 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 16:53:25,429 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 16:53:25,429 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 16:53:29,268 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 16:53:29,270 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 16:53:30,419 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 16:53:56,638 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 16:53:56,640 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 16:53:56,885 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 16:53:56,971 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 16:53:56,971 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 16:53:56,972 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 16:53:56,987 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 16:53:56,991 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 16:53:56,992 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 16:53:56,992 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 16:53:56,997 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 16:54:00,132 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 16:54:00,133 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 16:54:00,227 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 16:54:00,228 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 16:54:00,228 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 16:54:00,803 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 16:54:00,944 INFO pipeline.runner Pipeline complete | shop=default | 35.96s
+2026-05-28 16:54:00,946 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 16:54:09,030 WARNING llm.agent LLM integration failed: '>' not supported between instances of 'NoneType' and 'int'
+2026-05-28 16:57:21,769 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 16:57:21,769 INFO api.main Server started — all models loaded
+2026-05-28 16:57:31,587 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 16:57:31,587 INFO api.main Job 1d9db8bb-bd27-4233-9225-c274d50f78fb started | shop=default | file=real_merged.csv
+2026-05-28 16:57:31,599 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 16:57:32,122 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 16:57:32,124 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 16:57:36,179 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 16:57:36,180 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 16:57:37,309 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 16:58:03,868 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 16:58:03,870 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 16:58:04,118 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 16:58:04,216 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 16:58:04,216 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 16:58:04,217 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 16:58:04,238 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 16:58:04,243 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 16:58:04,244 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 16:58:04,244 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 16:58:04,249 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 16:58:07,266 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 16:58:07,267 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 16:58:07,365 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 16:58:07,366 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 16:58:07,366 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 16:58:07,906 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 16:58:08,042 INFO pipeline.runner Pipeline complete | shop=default | 36.45s
+2026-05-28 16:58:08,044 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 17:06:08,296 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 17:06:08,297 INFO api.main Server started — all models loaded
+2026-05-28 17:06:16,851 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 17:06:16,852 INFO api.main Job 35be4f6b-a378-4f99-9ab4-118ae9181d70 started | shop=default | file=real_merged.csv
+2026-05-28 17:06:16,866 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 17:06:17,354 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 17:06:17,356 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 17:06:21,129 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 17:06:21,130 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 17:06:22,178 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 17:06:48,165 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 17:06:48,167 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 17:06:48,413 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 17:06:48,500 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 17:06:48,500 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 17:06:48,501 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 17:06:48,514 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 17:06:48,519 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 17:06:48,520 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 17:06:48,521 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 17:06:48,528 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 17:06:51,571 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 17:06:51,572 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 17:06:51,663 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 17:06:51,664 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 17:06:51,664 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 17:06:52,193 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 17:06:52,325 INFO pipeline.runner Pipeline complete | shop=default | 35.47s
+2026-05-28 17:06:52,327 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 17:15:56,225 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 17:15:56,225 INFO api.main Server started — all models loaded
+2026-05-28 17:16:10,221 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 17:16:10,221 INFO api.main Job e7376d89-702e-4ce0-8359-a650523e1b27 started | shop=default | file=real_merged.csv
+2026-05-28 17:16:10,231 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 17:16:10,710 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 17:16:10,711 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 17:16:14,771 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 17:16:14,772 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 17:16:15,934 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 17:16:43,811 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 17:16:43,813 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 17:16:44,085 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 17:16:44,199 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 17:16:44,200 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 17:16:44,201 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 17:16:44,218 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 17:16:44,221 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 17:16:44,222 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 17:16:44,222 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 17:16:44,230 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 17:16:47,431 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 17:16:47,432 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 17:16:47,559 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 17:16:47,560 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 17:16:47,561 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 17:16:48,264 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 17:16:48,419 INFO pipeline.runner Pipeline complete | shop=default | 38.2s
+2026-05-28 17:16:48,421 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 17:22:03,757 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 17:22:03,757 INFO api.main Server started — all models loaded
+2026-05-28 17:22:10,873 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 17:22:10,873 INFO api.main Job d599bd8c-2374-4088-8a19-4f04726ea732 started | shop=default | file=real_merged.csv
+2026-05-28 17:22:10,888 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 17:22:11,395 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 17:22:11,398 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 17:22:15,431 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 17:22:15,432 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 17:22:16,556 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 17:22:42,666 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 17:22:42,668 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 17:22:42,991 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 17:22:43,095 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 17:22:43,096 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 17:22:43,097 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 17:22:43,112 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 17:22:43,117 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 17:22:43,118 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 17:22:43,118 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 17:22:43,126 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 17:22:46,165 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 17:22:46,166 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 17:22:46,269 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 17:22:46,270 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 17:22:46,270 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 17:22:46,939 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 17:22:47,134 INFO pipeline.runner Pipeline complete | shop=default | 36.26s
+2026-05-28 17:22:47,136 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 17:30:25,477 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 17:30:25,478 INFO api.main Server started — all models loaded
+2026-05-28 17:30:33,519 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 17:30:33,519 INFO api.main Job 462deb6e-6f1d-4ac8-9f50-8d38e1e78502 started | shop=default | file=real_merged.csv
+2026-05-28 17:30:33,532 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 17:30:34,073 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 17:30:34,075 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 17:30:38,053 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 17:30:38,054 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 17:30:39,226 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 17:31:07,365 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 17:31:07,367 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 17:31:07,656 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 17:31:07,766 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 17:31:07,766 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 17:31:07,768 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 17:31:07,784 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 17:31:07,790 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 17:31:07,791 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 17:31:07,791 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 17:31:07,798 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 17:31:10,905 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 17:31:10,905 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 17:31:11,004 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 17:31:11,005 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 17:31:11,006 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 17:31:11,553 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 17:31:11,693 INFO pipeline.runner Pipeline complete | shop=default | 38.17s
+2026-05-28 17:31:11,695 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 17:39:46,644 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 17:39:46,645 INFO api.main Server started — all models loaded
+2026-05-28 17:39:54,082 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 17:39:54,082 INFO api.main Job 87a68dbb-287d-4ab4-a967-f941b7cb7ce9 started | shop=default | file=real_merged.csv
+2026-05-28 17:39:54,095 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 17:39:54,591 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 17:39:54,592 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 17:39:58,470 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 17:39:58,471 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 17:39:59,624 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 17:40:25,897 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 17:40:25,899 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 17:40:26,141 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 17:40:26,227 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 17:40:26,227 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 17:40:26,228 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 17:40:26,243 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 17:40:26,247 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 17:40:26,248 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 17:40:26,249 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 17:40:26,255 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 17:40:29,368 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 17:40:29,368 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 17:40:29,476 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 17:40:29,477 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 17:40:29,477 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 17:40:30,029 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 17:40:30,168 INFO pipeline.runner Pipeline complete | shop=default | 36.08s
+2026-05-28 17:40:30,170 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 17:45:25,273 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 17:45:25,273 INFO api.main Server started — all models loaded
+2026-05-28 17:45:37,684 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 17:45:37,684 INFO api.main Job af437430-0db6-4892-a226-81d07fd46558 started | shop=default | file=real_merged.csv
+2026-05-28 17:45:37,699 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 17:45:38,250 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 17:45:38,251 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 17:45:42,237 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 17:45:42,238 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 17:45:43,300 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 17:46:10,014 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 17:46:10,016 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 17:46:10,297 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 17:46:10,408 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 17:46:10,408 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 17:46:10,409 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 17:46:10,427 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 17:46:10,431 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 17:46:10,432 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 17:46:10,432 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 17:46:10,438 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 17:46:13,470 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 17:46:13,471 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 17:46:13,564 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 17:46:13,565 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 17:46:13,565 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 17:46:14,100 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 17:46:14,238 INFO pipeline.runner Pipeline complete | shop=default | 36.55s
+2026-05-28 17:46:14,240 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 17:56:54,483 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 17:56:54,483 INFO api.main Server started — all models loaded
+2026-05-28 17:57:01,098 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 17:57:01,098 INFO api.main Job f944b4e7-be0e-4b9a-8c6a-d1ba4a9cf33d started | shop=default | file=real_merged.csv
+2026-05-28 17:57:01,120 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 17:57:01,531 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 17:57:01,532 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 17:57:05,480 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 17:57:05,481 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 17:57:06,541 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 17:57:32,819 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 17:57:32,820 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 17:57:33,077 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 17:57:33,165 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 17:57:33,166 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 17:57:33,167 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 17:57:33,179 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 17:57:33,183 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 17:57:33,184 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 17:57:33,185 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 17:57:33,190 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 17:57:36,324 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 17:57:36,324 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 17:57:36,414 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 17:57:36,429 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 17:57:36,429 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 17:57:36,964 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 17:57:37,102 INFO pipeline.runner Pipeline complete | shop=default | 36.0s
+2026-05-28 17:57:37,105 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 18:08:16,973 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 18:08:16,973 INFO api.main Server started — all models loaded
+2026-05-28 18:08:36,632 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 18:08:36,632 INFO api.main Job 1e5f85bb-7f92-490e-8f13-f857c864d536 started | shop=default | file=real_merged.csv
+2026-05-28 18:08:36,645 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 18:08:37,106 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 18:08:37,107 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 18:08:40,962 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 18:08:40,963 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 18:08:42,089 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 18:09:09,311 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 18:09:09,313 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 18:09:09,604 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 18:09:09,702 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 18:09:09,703 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 18:09:09,704 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 18:09:09,722 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 18:09:09,726 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 18:09:09,727 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 18:09:09,727 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 18:09:09,733 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 18:09:12,760 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 18:09:12,760 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 18:09:12,854 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 18:09:12,854 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 18:09:12,854 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 18:09:13,451 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 18:09:13,606 INFO pipeline.runner Pipeline complete | shop=default | 36.97s
+2026-05-28 18:09:13,608 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-28 19:07:01,857 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 19:07:01,857 INFO api.main Server started — all models loaded
+2026-05-28 19:07:27,503 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-28 19:07:27,503 INFO api.main Server started — all models loaded
+2026-05-28 19:07:33,711 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-28 19:07:33,711 INFO api.main Job d80087f3-6155-49b0-ad2e-7d8e2c1e8722 started | shop=default | file=real_merged.csv
+2026-05-28 19:07:33,767 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-28 19:07:34,298 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-28 19:07:34,301 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-28 19:07:37,738 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-28 19:07:37,740 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-28 19:07:39,576 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-28 19:08:07,378 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-28 19:08:07,379 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-28 19:08:07,825 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-28 19:08:07,919 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-28 19:08:07,919 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-28 19:08:07,921 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-28 19:08:07,935 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-28 19:08:07,939 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-28 19:08:07,940 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-28 19:08:07,941 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-28 19:08:07,947 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-28 19:08:11,783 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-28 19:08:11,784 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-28 19:08:11,886 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-28 19:08:11,887 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-28 19:08:11,887 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-28 19:08:12,429 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-28 19:08:12,668 INFO pipeline.runner Pipeline complete | shop=default | 38.96s
+2026-05-28 19:08:12,670 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-29 16:09:56,378 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-29 16:09:56,389 INFO api.main Server started — all models loaded
+2026-05-29 16:10:43,618 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-29 16:10:43,619 INFO api.main Server started — all models loaded
+2026-05-29 16:11:51,121 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-29 16:11:51,121 INFO api.main Server started — all models loaded
+2026-05-29 16:11:57,296 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-29 16:11:57,296 INFO api.main Job 6a25319c-3539-42d8-9b1c-dedbbe80c670 started | shop=default | file=sample_en.csv
+2026-05-29 16:11:57,388 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-29 16:12:04,334 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-29 16:12:04,405 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-29 16:12:04,425 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-29 16:12:04,444 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-29 16:12:05,265 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-29 16:12:05,268 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-29 16:12:06,124 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-29 16:12:11,846 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-29 16:12:11,848 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-29 16:12:12,035 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-29 16:12:12,057 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-29 16:12:12,057 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-29 16:12:12,069 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-29 16:12:12,877 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-29 16:12:12,879 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-29 16:12:12,927 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-29 16:12:12,929 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-29 16:12:12,931 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-29 16:12:12,937 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-29 16:12:16,621 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-29 16:12:16,621 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-29 16:12:19,089 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-29 16:12:19,090 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-29 16:12:19,550 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-29 16:12:19,868 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-29 16:12:20,069 INFO pipeline.runner Pipeline complete | shop=default | 22.77s
+2026-05-29 16:12:20,070 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-29 23:15:58,096 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-29 23:15:58,122 INFO api.main Server started — all models loaded
+2026-05-29 23:16:18,298 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-29 23:16:18,298 INFO api.main Server started — all models loaded
+2026-05-29 23:16:30,401 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-29 23:16:30,401 INFO api.main Job e1fa6f49-92e0-4ff4-ab31-57c6c85571bd started | shop=default | file=real_merged.csv
+2026-05-29 23:16:30,481 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-29 23:16:31,034 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-29 23:16:31,034 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-29 23:16:34,767 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-29 23:16:34,767 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-29 23:16:36,642 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-29 23:17:03,938 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-29 23:17:03,938 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-29 23:17:04,340 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-29 23:17:04,426 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-29 23:17:04,426 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-29 23:17:04,427 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-29 23:17:04,442 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-29 23:17:04,446 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-29 23:17:04,447 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-29 23:17:04,447 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-29 23:17:04,452 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-29 23:17:08,292 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-29 23:17:08,292 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-29 23:17:08,384 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-29 23:17:08,384 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-29 23:17:08,384 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-29 23:17:08,914 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-29 23:17:09,114 INFO pipeline.runner Pipeline complete | shop=default | 38.71s
+2026-05-29 23:17:09,116 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-29 23:17:14,769 INFO api.main Job ce01e05c-95c7-4886-8c36-8f31ce1b2abb started | shop=default | file=sample_en.csv
+2026-05-29 23:17:14,769 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-29 23:17:14,856 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-29 23:17:22,223 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-29 23:17:22,253 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-29 23:17:22,276 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-29 23:17:22,287 INFO models.loader Cleared all models for shop 'default'
+2026-05-29 23:17:22,287 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-29 23:17:22,986 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-29 23:17:22,986 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-29 23:17:23,165 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-29 23:17:29,139 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-29 23:17:29,151 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-29 23:17:29,162 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-29 23:17:29,173 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-29 23:17:29,173 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-29 23:17:29,189 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-29 23:17:30,078 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-29 23:17:30,078 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-29 23:17:30,119 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-29 23:17:30,122 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-29 23:17:30,124 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-29 23:17:30,130 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-29 23:17:30,130 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-29 23:17:32,686 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-29 23:17:32,686 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-29 23:17:33,201 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-29 23:17:33,492 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-29 23:17:33,547 INFO pipeline.runner Pipeline complete | shop=default | 18.78s
+2026-05-29 23:17:33,547 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-29 23:18:15,553 INFO api.main Job a86a42ba-f9c4-4afc-a759-a69b79b18078 started | shop=default | file=sample_en.csv
+2026-05-29 23:18:15,553 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=101,000,000
+2026-05-29 23:18:15,672 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-29 23:18:22,820 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-29 23:18:22,871 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-29 23:18:22,874 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-29 23:18:22,889 INFO models.loader Cleared all models for shop 'default'
+2026-05-29 23:18:22,889 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-29 23:18:23,604 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-29 23:18:23,612 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-29 23:18:23,774 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-29 23:18:29,475 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-29 23:18:29,479 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-29 23:18:29,488 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-29 23:18:29,498 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-29 23:18:29,498 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-29 23:18:29,514 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-29 23:18:30,434 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-29 23:18:30,438 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-29 23:18:30,474 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-29 23:18:30,477 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-29 23:18:30,479 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-29 23:18:30,486 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-29 23:18:30,488 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-29 23:18:33,207 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-29 23:18:33,207 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=101,000,000 | goal=maximize_profit
+2026-05-29 23:18:33,240 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-29 23:18:33,394 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-29 23:18:33,445 INFO pipeline.runner Pipeline complete | shop=default | 17.89s
+2026-05-29 23:18:33,445 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 16:12:24,286 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 16:12:24,304 INFO api.main Server started — all models loaded
+2026-05-30 16:13:06,335 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 16:13:06,336 INFO api.main Server started — all models loaded
+2026-05-30 16:13:50,093 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 16:13:50,093 INFO api.main Job 59da9bc6-8cfe-49b3-9c6f-a5df98024c29 started | shop=default | file=sample_en.csv
+2026-05-30 16:13:50,254 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 16:13:57,942 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 16:13:57,993 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 16:13:58,001 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 16:13:58,010 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 16:13:58,877 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 16:13:58,881 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 16:13:59,767 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 16:14:05,928 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 16:14:05,931 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 16:14:06,129 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 16:14:06,139 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 16:14:06,139 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 16:14:06,155 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 16:14:07,010 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 16:14:07,013 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 16:14:07,053 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 16:14:07,055 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 16:14:07,057 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 16:14:07,061 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 16:14:10,812 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 16:14:10,813 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 16:14:13,270 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 16:14:13,270 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 16:14:13,707 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 16:14:13,963 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 16:14:14,161 INFO pipeline.runner Pipeline complete | shop=default | 24.07s
+2026-05-30 16:14:14,162 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 16:34:58,903 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 16:34:58,904 INFO api.main Server started — all models loaded
+2026-05-30 16:35:54,350 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-30 16:35:54,350 INFO api.main Job dd069127-16cf-442c-ae82-ba0975545542 started | shop=default | file=real_merged.csv
+2026-05-30 16:35:54,363 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 16:35:54,816 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-30 16:35:54,818 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 16:35:58,546 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-30 16:35:58,547 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-30 16:35:59,670 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-30 16:36:27,584 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-30 16:36:27,585 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 16:36:27,844 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-30 16:36:27,959 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 16:36:27,959 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 16:36:27,961 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-30 16:36:27,975 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-30 16:36:27,980 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-30 16:36:27,981 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 16:36:27,981 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-30 16:36:27,988 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 16:36:31,095 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-30 16:36:31,096 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 16:36:31,189 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-30 16:36:31,190 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 16:36:31,190 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-30 16:36:31,765 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 16:36:31,920 INFO pipeline.runner Pipeline complete | shop=default | 37.57s
+2026-05-30 16:36:31,922 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 16:38:39,944 INFO api.main Job af42e18f-0933-4ea3-a05e-f5b03ed0b019 started | shop=default | file=sample_en.csv
+2026-05-30 16:38:39,944 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 16:38:40,031 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 16:38:47,026 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 16:38:47,072 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 16:38:47,080 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 16:38:47,090 INFO models.loader Cleared all models for shop 'default'
+2026-05-30 16:38:47,092 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 16:38:47,845 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 16:38:47,847 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 16:38:48,043 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 16:38:53,841 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 16:38:53,845 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 16:38:53,856 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 16:38:53,865 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 16:38:53,866 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 16:38:53,881 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 16:38:54,711 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 16:38:54,713 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 16:38:54,747 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 16:38:54,749 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 16:38:54,752 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 16:38:54,758 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 16:38:54,758 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 16:38:57,206 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 16:38:57,207 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 16:38:57,242 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 16:38:57,395 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 16:38:57,440 INFO pipeline.runner Pipeline complete | shop=default | 17.5s
+2026-05-30 16:38:57,441 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 16:44:51,188 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 16:44:51,189 INFO api.main Server started — all models loaded
+2026-05-30 16:45:07,281 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-30 16:45:07,281 INFO api.main Job e5161b15-d4bd-4056-ab47-03fe40994488 started | shop=default | file=real_merged.csv
+2026-05-30 16:45:07,296 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 16:45:07,769 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-30 16:45:07,771 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 16:45:11,683 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-30 16:45:11,685 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-30 16:45:12,797 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-30 16:45:41,685 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-30 16:45:41,687 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 16:45:41,967 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-30 16:45:42,068 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 16:45:42,068 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 16:45:42,071 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-30 16:45:42,089 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-30 16:45:42,095 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-30 16:45:42,096 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 16:45:42,096 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-30 16:45:42,104 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 16:45:45,270 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-30 16:45:45,270 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 16:45:45,371 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-30 16:45:45,372 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 16:45:45,373 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-30 16:45:46,042 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 16:45:46,207 INFO pipeline.runner Pipeline complete | shop=default | 38.92s
+2026-05-30 16:45:46,211 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 16:47:43,380 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 16:47:43,380 INFO api.main Server started — all models loaded
+2026-05-30 16:47:49,880 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 16:47:49,880 INFO api.main Job 11e6c415-998e-4491-8546-e71b98000ff1 started | shop=default | file=sample_en.csv
+2026-05-30 16:47:49,967 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 16:47:57,021 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 16:47:57,064 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 16:47:57,072 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 16:47:57,082 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 16:47:57,806 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 16:47:57,809 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 16:47:58,001 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 16:48:03,654 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 16:48:03,657 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 16:48:03,672 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 16:48:03,681 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 16:48:03,681 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 16:48:03,694 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 16:48:04,530 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 16:48:04,531 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 16:48:04,566 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 16:48:04,569 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 16:48:04,570 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 16:48:04,575 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 16:48:07,702 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 16:48:07,703 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 16:48:10,277 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 16:48:10,277 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 16:48:10,312 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 16:48:10,473 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 16:48:10,521 INFO pipeline.runner Pipeline complete | shop=default | 20.64s
+2026-05-30 16:48:10,522 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 16:54:58,634 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 16:54:58,634 INFO api.main Server started — all models loaded
+2026-05-30 16:55:19,339 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 16:55:19,339 INFO api.main Job fe4746d5-afb5-4a54-9b84-a2347e38ca8f started | shop=default | file=sample_en.csv
+2026-05-30 16:55:19,431 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 16:55:27,136 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 16:55:27,185 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 16:55:27,193 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 16:55:27,202 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 16:55:28,007 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 16:55:28,010 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 16:55:28,211 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 16:55:34,041 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 16:55:34,046 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 16:55:34,061 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 16:55:34,072 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 16:55:34,072 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 16:55:34,085 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 16:55:34,975 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 16:55:34,977 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 16:55:35,017 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 16:55:35,020 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 16:55:35,021 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 16:55:35,026 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 16:55:38,171 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 16:55:38,172 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 16:55:40,773 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 16:55:40,773 ERROR api.main Pipeline error for job fe4746d5-afb5-4a54-9b84-a2347e38ca8f: name 'df_clean' is not defined
+Traceback (most recent call last):
+  File "G:\DataAnalyst\saved\vscode\SaleYar\api\main.py", line 138, in _run
+    result = runner.run_pipeline(
+  File "G:\DataAnalyst\saved\vscode\SaleYar\pipeline\runner.py", line 348, in run_pipeline
+    original_products = df_clean["product"].tolist()
+NameError: name 'df_clean' is not defined
+2026-05-30 16:56:59,914 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 16:56:59,914 INFO api.main Server started — all models loaded
+2026-05-30 16:57:06,929 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 16:57:06,929 INFO api.main Job 05fedac4-764c-4609-866b-bf79beb8df33 started | shop=default | file=sample_en.csv
+2026-05-30 16:57:07,032 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 16:57:14,299 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 16:57:14,351 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 16:57:14,358 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 16:57:14,368 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 16:57:15,166 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 16:57:15,168 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 16:57:15,383 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 16:57:21,213 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 16:57:21,216 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 16:57:21,234 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 16:57:21,245 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 16:57:21,246 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 16:57:21,262 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 16:57:22,185 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 16:57:22,187 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 16:57:22,226 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 16:57:22,229 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 16:57:22,231 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 16:57:22,238 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 16:57:25,272 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 16:57:25,273 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 16:57:28,022 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 16:57:28,023 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 16:57:44,894 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 16:57:45,056 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 16:57:45,108 INFO pipeline.runner Pipeline complete | shop=default | 38.18s
+2026-05-30 16:57:45,119 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 16:59:20,939 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 16:59:20,940 INFO api.main Server started — all models loaded
+2026-05-30 16:59:28,354 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 16:59:28,354 INFO api.main Job 00e6a68f-d25a-4a02-b5a9-c10eb64dd7e5 started | shop=default | file=sample_en.csv
+2026-05-30 16:59:28,437 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 16:59:35,972 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 16:59:36,022 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 16:59:36,030 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 16:59:36,041 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 16:59:36,853 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 16:59:36,856 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 16:59:37,085 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 16:59:43,049 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 16:59:43,053 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 16:59:43,074 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 16:59:43,088 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 16:59:43,088 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 16:59:43,104 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 16:59:44,072 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 16:59:44,074 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 16:59:44,112 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 16:59:44,116 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 16:59:44,118 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 16:59:44,123 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 16:59:47,158 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 16:59:47,159 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 16:59:49,894 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 16:59:49,898 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 16:59:49,943 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 16:59:50,136 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 16:59:50,189 INFO pipeline.runner Pipeline complete | shop=default | 21.83s
+2026-05-30 16:59:50,190 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 17:08:05,275 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 17:08:05,276 INFO api.main Server started — all models loaded
+2026-05-30 17:08:14,696 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 17:08:14,697 INFO api.main Job 9af7beb0-85c9-41d9-88d8-e8e474c49a57 started | shop=default | file=sample_en.csv
+2026-05-30 17:08:14,790 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 17:08:21,951 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 17:08:22,002 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 17:08:22,009 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 17:08:22,019 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 17:08:22,801 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 17:08:22,804 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 17:08:23,008 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 17:08:28,846 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 17:08:28,849 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 17:08:28,866 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 17:08:28,890 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 17:08:28,891 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 17:08:28,905 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 17:08:29,873 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 17:08:29,875 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 17:08:29,911 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 17:08:29,914 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 17:08:29,915 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 17:08:29,919 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 17:08:33,004 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 17:08:33,004 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 17:08:35,595 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 17:08:35,598 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 17:08:35,638 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 17:08:35,819 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 17:08:35,868 INFO pipeline.runner Pipeline complete | shop=default | 21.17s
+2026-05-30 17:08:35,868 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 17:12:35,286 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 17:12:35,286 INFO api.main Server started — all models loaded
+2026-05-30 17:12:49,770 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-30 17:12:49,771 INFO api.main Job 341fd703-fb90-4b34-8b39-c3fe36ce5ab5 started | shop=default | file=real_merged.csv
+2026-05-30 17:12:49,782 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 17:12:50,248 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-30 17:12:50,249 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 17:12:53,917 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-30 17:12:53,919 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-30 17:12:54,929 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-30 17:13:20,308 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-30 17:13:20,309 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 17:13:20,550 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-30 17:13:20,635 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 17:13:20,635 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 17:13:20,636 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-30 17:13:20,652 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-30 17:13:20,656 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-30 17:13:20,657 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 17:13:20,657 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-30 17:13:20,663 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 17:13:23,687 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-30 17:13:23,687 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 17:13:23,774 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-30 17:13:23,775 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 17:13:23,775 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-30 17:13:24,299 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 17:13:24,440 INFO pipeline.runner Pipeline complete | shop=default | 34.67s
+2026-05-30 17:13:24,443 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 17:16:51,601 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 17:16:51,601 INFO api.main Server started — all models loaded
+2026-05-30 17:16:58,412 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 17:16:58,412 INFO api.main Job 79fe6518-2206-4bf1-8969-f106f67bbf9d started | shop=default | file=sample_en.csv
+2026-05-30 17:16:58,493 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 17:17:05,473 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 17:17:05,523 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 17:17:05,534 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 17:17:05,548 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 17:17:06,463 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 17:17:06,467 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 17:17:06,687 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 17:17:12,653 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 17:17:12,657 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 17:17:12,677 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 17:17:12,688 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 17:17:12,688 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 17:17:12,701 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 17:17:13,686 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 17:17:13,688 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 17:17:13,728 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 17:17:13,731 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 17:17:13,732 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 17:17:13,738 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 17:17:16,708 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 17:17:16,709 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 17:17:19,308 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 17:17:19,312 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 17:17:19,352 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 17:17:19,539 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 17:17:19,588 INFO pipeline.runner Pipeline complete | shop=default | 21.17s
+2026-05-30 17:17:19,588 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 17:26:56,729 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 17:26:56,729 INFO api.main Server started — all models loaded
+2026-05-30 17:27:04,652 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-05-30 17:27:04,652 INFO api.main Job 152a796f-c196-41c7-bcd9-d9fd01e5bab8 started | shop=default | file=sample_en.csv
+2026-05-30 17:27:04,734 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 17:27:12,135 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 17:27:12,180 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 17:27:12,189 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 17:27:12,199 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 17:27:12,988 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 17:27:12,990 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 17:27:13,196 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 17:27:18,859 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 17:27:18,862 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 17:27:18,884 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 17:27:18,896 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 17:27:18,896 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 17:27:18,910 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 17:27:19,880 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 17:27:19,882 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 17:27:19,921 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 17:27:19,924 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 17:27:19,925 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 17:27:19,931 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 17:27:22,939 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 17:27:22,939 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 17:27:25,711 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 17:27:25,714 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 17:27:25,749 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 17:27:25,931 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 17:27:25,978 INFO pipeline.runner Pipeline complete | shop=default | 21.33s
+2026-05-30 17:27:25,979 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 17:42:50,817 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 17:42:50,818 INFO api.main Server started — all models loaded
+2026-05-30 17:43:05,825 INFO pipeline.runner Pipeline start | shop=default | file=real_merged.csv | budget=100,000,000
+2026-05-30 17:43:05,825 INFO api.main Job 47e26f63-eef2-44f8-888f-0b40f42e48e8 started | shop=default | file=real_merged.csv
+2026-05-30 17:43:05,838 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 17:43:06,281 INFO pipeline.stage1_cleaner Stage 1 complete | quality=99 | clean_rows=2863 | warnings=1599 | errors=53
+2026-05-30 17:43:06,282 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 17:43:09,970 INFO pipeline.stage2_metrics Stage 2 complete | 1530 products
+2026-05-30 17:43:09,972 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 1530 products
+2026-05-30 17:43:11,104 INFO pipeline.stage3_forecast Building forecasts for 123 products (0 skipped)
+2026-05-30 17:43:38,453 INFO pipeline.stage3_forecast Stage 3 complete | 123 forecasted | 1407 skipped
+2026-05-30 17:43:38,455 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 17:43:38,694 INFO pipeline.stage4_segments Stage 4 complete | {'Deadweight': 950, 'Seasonal': 557, 'Outlier': 20, 'Reliable': 2, 'Risky': 1}
+2026-05-30 17:43:38,784 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 17:43:38,785 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 17:43:38,786 INFO pipeline.stage5_basket Found 289 unique sales transactions
+2026-05-30 17:43:38,802 INFO pipeline.stage5_basket Built 190 baskets with >=2 items
+2026-05-30 17:43:38,806 INFO pipeline.stage5_basket Stage 5 complete | 0 rules | 0 critical pairs
+2026-05-30 17:43:38,807 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 17:43:38,807 INFO pipeline.stage6_risk Stage 6: risk scoring | products=1530
+2026-05-30 17:43:38,812 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 17:43:41,905 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=6199765.0%
+2026-05-30 17:43:41,906 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 17:43:42,005 INFO pipeline.runner Inventory calculated using transaction_type: 1530 products
+2026-05-30 17:43:42,005 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-05-30 17:43:42,006 INFO pipeline.stage7_optimizer Too many products (1530), using greedy fallback for speed.
+2026-05-30 17:43:42,065 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 17:43:42,203 INFO pipeline.runner Pipeline complete | shop=default | 36.38s
+2026-05-30 17:43:42,205 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-05-30 17:49:02,954 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-05-30 17:49:02,955 INFO api.main Server started — all models loaded
+2026-05-30 17:49:15,609 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000,000,000,000,620,008,645,040,778,319,495,168
+2026-05-30 17:49:15,609 INFO api.main Job cea93dc7-19b2-412d-b6ba-27dcb724724d started | shop=default | file=sample_en.csv
+2026-05-30 17:49:15,697 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-05-30 17:49:22,716 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-05-30 17:49:22,761 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-05-30 17:49:22,768 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-05-30 17:49:22,779 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-05-30 17:49:23,577 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-05-30 17:49:23,579 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-05-30 17:49:23,775 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-05-30 17:49:29,291 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-05-30 17:49:29,291 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-05-30 17:49:29,313 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-05-30 17:49:29,328 INFO pipeline.runner Saved shop cache for 'default'
+2026-05-30 17:49:29,328 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-05-30 17:49:29,339 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-05-30 17:49:30,158 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-05-30 17:49:30,161 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-05-30 17:49:30,194 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-05-30 17:49:30,194 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-05-30 17:49:30,194 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-05-30 17:49:30,203 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-05-30 17:49:33,184 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-05-30 17:49:33,186 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-05-30 17:49:35,509 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-05-30 17:49:35,512 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000,000,000,000,620,008,645,040,778,319,495,168 | goal=maximize_profit
+2026-05-30 17:49:35,522 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-05-30 17:49:35,677 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-05-30 17:49:35,724 INFO pipeline.runner Pipeline complete | shop=default | 20.11s
+2026-05-30 17:49:35,724 INFO output.reporter Report generated for shop 'default' (not saved)
+2026-06-01 12:21:50,419 INFO models.loader Loaded shared LightGBM model from models/lgbm_risk.pkl
+2026-06-01 12:21:50,433 INFO api.main Server started — all models loaded
+2026-06-01 12:21:54,443 INFO pipeline.runner Pipeline start | shop=default | file=sample_en.csv | budget=100,000,000
+2026-06-01 12:21:54,443 INFO api.main Job 53db82e2-6967-4237-9eec-6c479f0ddcb4 started | shop=default | file=sample_en.csv
+2026-06-01 12:21:54,716 INFO pipeline.stage1_cleaner Keeping 10 columns: ['invoice_id', 'date', 'product', 'qty', 'buy_price', 'sell_price', 'customer_id', 'customer_segment', 'product_category', 'transaction_type']
+2026-06-01 12:22:02,534 INFO pipeline.stage1_cleaner Skipping anomaly detection for large file (80382 rows > 20000)
+2026-06-01 12:22:02,591 WARNING pipeline.stage1_cleaner Filtered 158 rows with invalid product names
+2026-06-01 12:22:02,600 INFO pipeline.stage1_cleaner Stage 1 complete | quality=100 | clean_rows=80222 | warnings=13184 | errors=3
+2026-06-01 12:22:02,617 INFO pipeline.stage2_metrics Stage 2: calculating KPIs
+2026-06-01 12:22:03,530 INFO pipeline.stage2_metrics Stage 2 complete | 45 products
+2026-06-01 12:22:03,530 INFO pipeline.stage3_forecast Stage 3: demand forecasting | 45 products
+2026-06-01 12:22:04,629 INFO pipeline.stage3_forecast Building forecasts for 45 products (0 skipped)
+2026-06-01 12:22:11,313 INFO pipeline.stage3_forecast Stage 3 complete | 45 forecasted | 0 skipped
+2026-06-01 12:22:11,330 INFO pipeline.stage4_segments Stage 4: product segmentation
+2026-06-01 12:22:11,556 INFO pipeline.stage4_segments Stage 4 complete | {'Reliable': 39, 'Seasonal': 3, 'Outlier': 2, 'Risky': 1}
+2026-06-01 12:22:11,588 INFO pipeline.runner Saved shop cache for 'default'
+2026-06-01 12:22:11,590 INFO pipeline.stage5_basket Stage 5: basket analysis
+2026-06-01 12:22:11,604 INFO pipeline.stage5_basket Found 19689 unique sales transactions
+2026-06-01 12:22:12,446 INFO pipeline.stage5_basket Built 17043 baskets with >=2 items
+2026-06-01 12:22:12,446 INFO pipeline.stage5_basket Sampled down to 2000 baskets (seed=42)
+2026-06-01 12:22:12,488 INFO pipeline.stage5_basket Stage 5 complete | 1 rules | 0 critical pairs
+2026-06-01 12:22:12,489 INFO pipeline.stage5_basket Saved basket cache for 'default'
+2026-06-01 12:22:12,492 INFO pipeline.stage6_risk Stage 6: risk scoring | products=45
+2026-06-01 12:22:12,497 INFO pipeline.stage6_risk LightGBM model loaded from models/lgbm_risk.pkl
+2026-06-01 12:22:16,649 INFO pipeline.stage6_risk Stage 6 complete | shop_roi=19.0%
+2026-06-01 12:22:16,649 INFO pipeline.runner Inventory calculated from scratch for shop 'default'
+2026-06-01 12:22:19,073 INFO pipeline.runner Inventory calculated using transaction_type: 45 products
+2026-06-01 12:22:19,077 INFO pipeline.stage7_optimizer Stage 7: optimisation | budget=100,000,000 | goal=maximize_profit
+2026-06-01 12:22:19,625 INFO pipeline.stage8_customers Stage 8: customer segmentation
+2026-06-01 12:22:20,084 INFO pipeline.stage8_customers Clustering: MiniBatchKMeans
+2026-06-01 12:22:20,252 INFO pipeline.runner Pipeline complete | shop=default | 25.81s
+2026-06-01 12:22:20,252 INFO output.reporter Report generated for shop 'default' (not saved)
