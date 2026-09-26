@@ -1,0 +1,242 @@
+# SaleYar — Complete Documentation
+
+**Offline business intelligence for Iranian shop owners.**
+
+Give it a Holoo CSV export. Get back a plain Persian or English report telling you exactly what to buy, what not to buy, and why. No cloud. No monthly fees. Your data stays on your computer.
+
+---
+
+## The Big Idea
+
+Most BI tools are built for experts. SaleYar is built for a shop owner who needs to know: *“Should I order more rice or more oil? Is my profit good enough? Which products are killing me?”*
+
+Every number has a confidence score. If data is thin, it tells you. If a stage is skipped (not enough transactions, too few products), it explains why in plain language. It never crashes.
+
+---
+
+## What You Get After Uploading a File
+
+- **Data quality score** — 0–100. Below 40? Pipeline stops and tells you exactly which rows to fix.
+- **Health & Quality tab** — dataset overview, column statistics, quality report, sales trend chart, top products chart, cleaned data preview, per‑product quantity summary (shows raw inventory including negatives for debugging).
+- **Product Rankings tab** — unified score (combines profit, sales velocity, liquidity, risk, and demand), rank number (1,2,3…), revenue (M), profit (M), margin %, risk score (🟢🟡🔴), current stock (non‑negative), segment, last sale days, plain English risk explanation. Search box with Apply Filter button.
+- **Forecast tab** — 30/60/90 day forecasts with daily breakdowns, confidence levels (High/Medium/Low), segment badges, actionable recommendations (ORDER MORE, Maintain stock, Reduce order, Check manually). Products with very little data use category average fallback.
+- **Product segments** — Star, Reliable, Seasonal, Deadweight, Risky, Outlier. Lists and segment‑specific actions. Seasonal products are never marked as Deadweight. For small shops (<15 products) segmentation is rule‑based and deterministic.
+- **Basket rules** — products bought together, with confidence and lift. Critical pairs (≥70% confidence and lift ≥2) become hard constraints in the optimizer. For very small datasets (<50 transactions) a simple pair‑counting method is used instead of FP‑Growth.
+- **Purchase Order tab** — ALL products appear. Each product shows: current stock (non‑negative), recommended quantity to buy (max 500 units per product, never more than 60 days of demand), final stock, unit cost, total cost, and a plain language “why”. Products with zero recommendation still appear with an explanation. If SCIP solver is unavailable, a greedy algorithm provides a fallback order.
+- **ROI & Customers tab** — shop ROI vs bank deposit (23%) and gold (35%); customer segments (Champions, Loyal, At‑Risk, Lost) with details; champion products list. Handles single‑customer shops gracefully.
+- **Inventory tab** — current stock (non‑negative), days of coverage, stock status (OUT/LOW/OK/OVERSTOCK), and clear actions (ORDER NOW, ORDER THIS WEEK, RUN SALE).
+- **Risk score** — 0–100 per product, plain English explanation. Hybrid scoring (rule‑based + LightGBM) with confidence weighting. For small shops (<20 products) the model weight is reduced. Never trusts the model more than 70%.
+- **Shopping list** — exact whole quantities for any budget (maximise profit, cover customers, reduce risk). Respects current inventory – day‑by‑day stock simulation. Never recommends more than 500 units of any product.
+- **Top 3 actions** — the most important thing. After all analysis, SaleYar gives you three concrete things to do right now, with expected benefit and confidence.
+- **LLM Advisor** — ask natural language questions about your shop. Gets a compact summary (~600‑800 tokens) of all stages. The advisor can be toggled between two modes:
+  - **Keyword mode** (fast, offline) – rule‑based, uses local data.
+  - **Real LLM mode** – connects to a local LLM (LM Studio or Ollama) for natural, conversational answers.  
+  - **Talk Mode** – enables ultra‑short, friendly answers (1‑2 sentences). When off, the LLM gives 4 bullet points (like Gradio).  
+  - The LLM knows the dashboard tabs and can guide you: *“Check the Products tab for top sellers.”*
+- **Plus** — JSON full report, shop health score (0–100), and a list of every skipped stage with a plain language reason.
+
+---
+
+## How It Works Under the Hood
+
+**MD5 cache per shop** — every uploaded file is hashed. Same file twice? Results in <1 second. New file? All saved models for that shop are deleted and rebuilt fresh.
+
+**Smart cleaning** — Handles returns (negative quantities), damaged goods (zero sell price), and promotions (loss‑making sales) as warnings, not errors. Auto‑detects Persian/English column names and converts Jalali dates to Gregorian. For very large files (>50 000 rows), fuzzy matching and anomaly detection are skipped for speed. Quality threshold is lower (30) for shops with fewer than 100 rows.
+
+**Unified scoring** — Every product gets a unified score combining profit margin (25%), sales velocity (25%), liquidity rate (20%), inverse risk (15%), and customer demand (15%). This single score drives both ranking and purchase recommendations, ensuring consistency.
+
+**Vectorized scoring** — Risk scores use numpy vectorisation (10‑50x faster than loops).
+
+**Auto‑detect seasonality** — Tests 7, 30, and 365 day patterns using fast numpy correlation. Uses the best fit.
+
+**Trend adjustment** — Detects growing or shrinking products and adjusts forecasts using the last 30 days.
+
+**Hybrid risk scoring** — Rule‑based (transparent, always works) + LightGBM model (captures complex patterns). Weighted by confidence (30‑70% model trust, lower for small shops). Falls back to rule‑based only if the model is unavailable.
+
+**Daily forecast arrays** — Returns 90 days of daily values, not just totals. Enables precise inventory simulation. Products with less than 7 days of history use category average; products with 7‑29 days use a simple moving average of the last 7 days. All forecasts include a confidence level (High/Medium/Low).
+
+**Day‑by‑day inventory simulation** — “You have 50 units. Day 1 demand = 5, Day 2 = 8 …” When stock hits zero, it calculates exactly how many more units you need.
+
+**Current inventory tracking** — Inventory is calculated fresh from transaction data. Negative stock (caused by missing purchase records) is automatically set to zero for display and optimizer calculations.
+
+**Transaction type support** — The `transaction_type` column tells the pipeline exactly what each row is: `sale`, `purchase`, `return_sale`, `return_purchase`. No guessing.
+
+**Integer optimisation** — Google OR‑Tools with SCIP solver (primary). If SCIP is missing or the number of products exceeds 500, a greedy algorithm provides a fallback. All quantities are whole numbers. Maximum 500 units per product. Minimum 2 units for shelf presence. If infeasible, it relaxes constraints one by one and tells you what changed. Returns in under 2 seconds.
+
+**One file per stage** — `pipeline/stage1_cleaner.py` through `stage9_priority.py`. Break one stage, nothing else breaks.
+
+**Graceful failure** — Less than 50 transactions? Use simple pair counting instead of skipping. Less than 15 products? Skip segmentation and list products individually. Less than 3 customers? Still analyse a single customer; only skip if truly insufficient. Missing a library? Log a warning, skip that stage, return everything else. Never crashes.
+
+**LLM‑friendly summary** — Reporter generates a compact summary (~600‑800 tokens): shop health, top/bottom products, stock status, forecast needs, segments, customer insights, actions, alerts, skipped stages. Perfect for LLM without overload.
+
+---
+
+## The 9 Stages at a Glance
+
+| Stage | What it does |
+|-------|---------------|
+| **1 – Cleaner** | Auto‑detects language, maps columns (Persian/English), converts Jalali dates (fallback to today). Removes zero‑quantity rows. Handles returns, damaged goods, promotions as warnings. Anomaly detection (IsolationForest) only for files ≤50 000 rows. Quality score: if <100 rows, pass threshold is 30, else 40. |
+| **2 – KPIs** | Profit margin, liquidity rate, price volatility, price change count, hope rate, portfolio weight, days since last sale, best selling season, conversion rate, annual ROI, daily sales. Outlier clipping (1st‑99th percentile). Category fallback for missing values. Calculates unified score and assigns rank (1,2,3…). |
+| **3 – Forecast** | AutoTheta (rich), AutoETS (medium), or simple average of last 7 days (sparse). Category average fallback for products with <7 days of history. Auto‑detects seasonality (7/30/365). Trend adjustment. Confidence level (High/Medium/Low) based on MAPE. Batch processing. |
+| **4 – Segments** | For ≥15 products: AgglomerativeClustering with RobustScaler. For <15 products: rule‑based (Star, Reliable, Seasonal, Deadweight, Risky, Outlier). Outlier threshold adapts (2.5 for <30 products, else 1.8). Seasonal products never become Deadweight. Star validation (margin ≥15%, liquidity ≥40%). |
+| **5 – Basket** | For <50 transactions: simple pair counting. For ≥50: FP‑Growth with dynamic min_support (higher for small shops). Critical pairs require confidence ≥70% and lift ≥2. Memory‑safe product limit (200). Cached per shop. |
+| **6 – Risk** | Hybrid: rule‑based (vectorised) + LightGBM model (optional). Rule weights from config. For small shops (<20 products), model trust reduced. Scores 0–100, plain English explanation. Compares shop ROI to bank (23%) and gold (35%). |
+| **7 – Optimizer** | Primary: OR‑Tools SCIP. Fallback: greedy algorithm if SCIP missing or >500 products. Max 500 units per product, min 2 units for shelf presence. Uses unified_score as objective. All products appear in output (qty 0 with reason). Relaxes constraints if infeasible. |
+| **8 – Customers** | RFM analysis. For 1 customer: detailed analysis. For 3‑20 customers: manual percentile‑based segmentation. For >20 customers: MiniBatchKMeans (fallbacks: AgglomerativeClustering → percentiles). Champion products derived from best customers. |
+| **9 – Priority** | Synthesises all stages into 3 concrete actions. Priority: revenue drop (>10%), deadstock (>45 days idle), reorder (forecast > stock), basket pairing, high‑risk (score ≥70). Pads to 3 actions with general tips. Handles zero‑sales and perfect‑health edge cases. |
+
+---
+
+## Four Ways to Run It
+
+### 1. Owner Dashboard – HTML (recommended for shop owners)
+`python run.py` → choose option 1
+
+This is a pure HTML/CSS/JS dashboard that runs entirely in the browser. It connects to the FastAPI backend for analysis and LLM. Features:
+- 9 tabs: Overview, Purchase Orders, Forecast, Products, Segments, Basket, Inventory, Customers & ROI, Settings.
+- Real‑time polling of async jobs.
+- Budget, goal, language, shop ID controls.
+- Global search across products.
+- LLM Advisor with two modes: **Keyword** (fast, offline) or **Real LLM** (connects to LM Studio/Ollama).
+- **Talk Mode** toggle – when ON, the AI gives ultra‑short, conversational answers (max 10 words); when OFF, it returns 4 bullet points (same as Gradio).
+- The AI knows the dashboard tabs and can guide you: *“Check the Products tab for top sellers.”*
+- Answers support markdown (bold, bullet points) and the send button disables while waiting for response.
+
+Launch it by selecting option 1 in the menu, or `python run.py --mode owner` (now defaults to HTML).
+
+### 2. Developer UI – Gradio (for debugging and advanced users)
+`python run.py` → choose option 2
+
+Full data visibility with 11 tabs: Health & Quality (with charts), Product Rankings (with search box and rank column), Forecast, Segments, Basket Rules, Purchase Order, ROI & Customers, Inventory, Priority Actions, LLM Advisor, JSON Report.  
+The LLM in Gradio always returns **4 bullet points** (no Talk Mode). This is intentional – developers want structured answers, not conversational chat.
+
+### 3. Terminal Mode
+`python run.py` → choose option 3
+
+Command line. Press Enter for defaults, type 0 to go back. Rich formatting, tables, colours. No browser needed.
+
+### 4. FastAPI Server
+`uvicorn api.main:app --reload --port 8000`
+
+All endpoints require `X-API-Key` header. Invalid key → HTTP 403.  
+Endpoints:
+- `POST /analyze` – starts full pipeline, returns `job_id`.
+- `GET /result/{job_id}` – poll for completion.
+- `POST /optimize` – budget optimizer only (under 2 seconds).
+- `POST /basket` – basket analysis only.
+- `POST /risk` – risk scoring only.
+- `GET /report/{shop_id}` – latest saved report.
+- `GET /health/{shop_id}` – health score only.
+- `GET /healthcheck` – server status, loaded models, uptime.
+- `POST /llm/ask` – LLM advisor endpoint. Accepts `question`, `report_summary` (full report), `inventory`, `forecasts`, `language`, `talk` (bool). Default `talk=True` for HTML dashboard.
+
+Every endpoint has `try/except`. Never crashes – always returns a proper JSON error.
+
+---
+
+## Project Structure
+
+```
+├── .env                        # API_KEY only – never commit
+├── config.py                   # all thresholds + bank/gold rates
+├── run.py                      # one command to launch anything
+├── test_all.py                 # 16+ tests
+│
+├── pipeline/
+│   ├── column_map.py           # Holoo column mappings (Persian/English)
+│   ├── stage1_cleaner.py
+│   ├── stage2_metrics.py
+│   ├── stage3_forecast.py
+│   ├── stage4_segments.py
+│   ├── stage5_basket.py
+│   ├── stage6_risk.py
+│   ├── stage7_optimizer.py
+│   ├── stage8_customers.py
+│   ├── stage9_priority.py
+│   └── runner.py               # orchestrates all 9 stages, MD5 cache, inventory
+│
+├── models/
+│   ├── train.py                # run once before deployment
+│   ├── loader.py               # loads models at startup
+│   ├── lgbm_risk.pkl           # shared risk model (optional)
+│   └── shops/{shop_id}/        # basket_rules.pkl, metadata.json, etc.
+│
+├── output/
+│   ├── reporter.py             # assembles final report + LLM summary
+│   └── templates/              # Persian & English explanation templates
+│
+├── api/
+│   └── main.py                 # FastAPI – all endpoints, API key auth, CORS
+│
+├── llm/
+│   └── agent.py                # LLM integration: micro‑summary (talk mode) vs full summary (bullet points), tab guide, greeting detection, markdown support
+│
+├── ui/
+│   ├── site.html               # HTML owner dashboard (replaces Gradio owner)
+│   ├── developer.py            # detailed Gradio (full data, for developers)
+│   └── terminal.py             # CLI mode with rich formatting
+│
+├── saved_reports/{shop_id}/    # report_latest.json + summary.json + dated backups
+├── data/                       # sample generators + test data
+├── logs/                       # application logs
+└── requirements.txt            # full dependencies
+```
+
+---
+
+## Configuration
+
+All tunable values live in `config.py`.  
+**Benchmarks:** Bank deposit 23%, gold annual return 35%.  
+**Thresholds:** Rich history 30 sales, medium 10 sales, min basket rows 50, min products for segmentation 15, min customers 3, forecast horizon 90 days, max file size 50MB, default language `"en"` (or `"fa"`).  
+**Inventory settings:** `STAR_COVERAGE_DAYS = 30`, `RELIABLE_COVERAGE_DAYS = 15`, `SEASONAL_COVERAGE_DAYS = 20`, `SAFETY_STOCK_DAYS = 7`.  
+**Order limits:** `MAX_UNITS_PER_PRODUCT = 500`, `MIN_SHELF_QUANTITY = 2`, `MIN_PRODUCTS_IN_ORDER = 10`.  
+**Also configurable:** `ALLOW_RETURNS`, `ALLOW_DAMAGED`, `ALLOW_PROMOTIONS`, `MAX_REASONABLE_QTY`, `MIN_DAYS_FOR_FORECAST`, `FORECAST_BATCH_SIZE`, `ENABLE_TREND_ADJUSTMENT`, `LOW_CONFIDENCE_MULTIPLIER = 0.3`, `SEASONAL_MIN_STOCK_DAYS = 14`.  
+
+The `.env` file holds only the API key. Never commit it. **Change the API key before exposing the API.**
+
+---
+
+## LLM Advisor – How It Works
+
+The LLM advisor is **optional**. When enabled, it sends a compact summary of the report to a local LLM (LM Studio or Ollama) and returns a natural language answer.
+
+- **Micro‑summary** (for Talk Mode) – only health %, revenue/profit (in millions), out‑of‑stock count, top seller. This keeps answers short and focused.
+- **Full summary** (for bullet‑point mode) – includes health, data quality, top 5 products, bottom 5, segments, inventory status, forecast needs, basket rules, customer segments, priority actions, alerts, high‑risk products.
+- **Tab guide** – The LLM is told about all dashboard tabs (Overview, Purchase Orders, Forecast, Products, Segments, Basket, Inventory, Customers & ROI, Settings) so it can direct users: *“Check the Products tab for top sellers.”*
+- **Talk mode** – Forces the LLM to answer in 1‑2 very short sentences (max 10 words), omit numbers on greetings, and only include data when asked.
+- **Greeting/thanks detection** – The LLM is instructed to reply without numbers to “hi”, “hello”, “thanks”, “thank you”, “bye”.
+- **Markdown support** – The HTML dashboard renders bot messages with `innerHTML`, so the LLM can use **bold**, *italic*, or `- bullet points` in its answers.
+- **Fallback** – If the LLM endpoint is unavailable, the dashboard falls back to a keyword‑based `smartAnswer` function that answers from local data without an LLM.
+
+The LLM endpoint URL and model name are set in `config.py`. Example for LM Studio: `LLM_ENDPOINT_URL = "http://localhost:1234/v1/chat/completions"`.  
+For Ollama: `LLM_ENDPOINT_URL = "http://localhost:11434/api/generate"`.
+
+---
+
+## Performance
+
+- **Small shop (50 products), fresh analysis** – 3–5 seconds, ~200MB RAM.
+- **Large shop (500 products), fresh** – 8–12 seconds, ~350MB RAM.
+- **Identical file with cache hit** – <1 second, ~50MB RAM.
+- **Optimizer only** – <2 seconds.
+- **Health score only from cache** – 0.5 seconds.
+
+Batch processing makes large shops 4‑5× faster. Vectorised scoring gives 10‑50× speedup. Daily forecast arrays enable accurate inventory simulation.
+
+---
+
+## Tech Stack
+
+**Conda installs:** `pandas`, `numpy`, `scikit‑learn`, `lightgbm`, `openpyxl`, `plotly`, `pytest`  
+**Pip installs:** `statsforecast` (AutoTheta, AutoETS, SeasonalNaive), `mlxtend` (FP‑Growth), `ortools` (SCIP solver), `fastapi`, `uvicorn`, `gradio`, `jdatetime`, `rapidfuzz`, `python‑dotenv`
+
+---
+
+## The Bottom Line
+
+SaleYar is a 9‑stage pipeline with MD5 cache, unified scoring, hybrid risk scoring (rule‑based + LightGBM), daily forecast arrays, day‑by‑day inventory simulation, integer optimisation, four interfaces, full inventory tracking with `transaction_type` support, LLM‑friendly summary, and graceful failure handling.  
+
+The shop owner gets a pure **HTML dashboard** with an intelligent LLM assistant that can answer questions in ultra‑short conversational mode or bullet‑point mode, understands the dashboard tabs, respects greetings, and supports Persian/English.  
+
+**Works offline. No cloud. No recurring fees. Never crashes.**

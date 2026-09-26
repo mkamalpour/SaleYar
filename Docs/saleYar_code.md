@@ -1,0 +1,773 @@
+# SALEYAR – COMPLETE FROZEN MEMORY (Production‑Ready)
+
+## Project Identity
+
+**Name:** SaleYar  
+**Purpose:** Offline business intelligence for Iranian shop owners  
+**Input:** Holoo CSV/Excel export (any column order, Persian/English mixed, Jalali dates)  
+**Output:** Plain Persian/English report + interactive HTML dashboard with purchase recommendations, risk scores, forecasts, top 3 actions, and an intelligent LLM assistant  
+**Status:** Production ready  
+**Key characteristics:** No cloud, no fees, works offline, never crashes
+
+---
+
+## Configuration (`config.py` – Full)
+
+```python
+API_KEY = "kamal"
+BANK_DEPOSIT_RATE_ANNUAL = 23.0
+GOLD_ANNUAL_RETURN = 35.0
+RETAIL_AVG_MARGIN = 18.0
+RETAIL_AVG_TURNOVER = 8.0
+
+# ============================================================================
+# PIPELINE THRESHOLDS (Works for ANY shop size)
+# ============================================================================
+MIN_SALES_RICH = 30           # days and sales for AutoTheta
+MIN_SALES_MEDIUM = 10         # days and sales for AutoETS
+MIN_BASKET_ROWS = 50          # minimum transactions for basket FP‑Growth
+MIN_PRODUCTS = 15             # minimum products for clustering segmentation
+MIN_CUSTOMERS = 3             # minimum customers for clustering segmentation
+FORECAST_HORIZON = 90         # days ahead to forecast
+
+# ============================================================================
+# STAGE 3: FORECAST (Honest but not cruel)
+# ============================================================================
+MIN_DAYS_FOR_FORECAST = 7
+SEASON_LENGTH = None          # None = auto‑detect (7/30/365)
+FORECAST_BATCH_SIZE = 50      # products per batch (memory vs speed)
+ENABLE_TREND_ADJUSTMENT = True
+MIN_TREND_THRESHOLD = 0.05    # 5% trend needed to adjust
+TREND_WEIGHT = 0.5            # how much trend affects forecast (0-1)
+FORECAST_CONFIDENCE_MAPE_HIGH = 40
+FORECAST_CONFIDENCE_MAPE_LOW = 70
+FORECAST_SPARSE_USE_CATEGORY = True
+
+# ============================================================================
+# STAGE 5: BASKET
+# ============================================================================
+CRITICAL_PAIR_CONFIDENCE = 0.70   # 70% confidence for critical pairs
+BASKET_TINY_FALLBACK = True
+BASKET_MAX_PRODUCTS = 200
+BASKET_SAMPLE_SIZE = 2000
+
+# ============================================================================
+# STAGE 1: CLEANER
+# ============================================================================
+ALLOW_RETURNS = True
+ALLOW_DAMAGED = True
+ALLOW_PROMOTIONS = True
+MAX_REASONABLE_LOSS = 50
+MIN_REASONABLE_QTY = -100
+MAX_REASONABLE_QTY = 500
+
+SMALL_SHOP_ROWS = 50
+QUALITY_PASS_SMALL = 30
+QUALITY_PASS_NORMAL = 40
+LARGE_FILE_CLEANER = 20000
+
+# ============================================================================
+# STAGE 4: SEGMENTS
+# ============================================================================
+MIN_PRODUCTS_CLUSTER = 15
+OUTLIER_THRESHOLD = 1.8
+OUTLIER_THRESHOLD_SMALL = 2.5
+RISKY_VOLATILITY_THRESHOLD = 100
+STAR_MARGIN_MIN = 15
+STAR_LIQUIDITY_MIN = 40
+SEASONAL_CORRELATION_THRESHOLD = 0.2
+
+# ============================================================================
+# STAGE 7: OPTIMIZER (Safe for ALL shops)
+# ============================================================================
+STAR_COVERAGE_DAYS = 30
+RELIABLE_COVERAGE_DAYS = 15
+SEASONAL_COVERAGE_DAYS = 20
+SAFETY_STOCK_DAYS = 7
+
+MAX_ORDER_UNITS_PER_PRODUCT = 500
+MAX_UNITS_PER_PRODUCT = 500
+MIN_SHELF_QUANTITY = 2
+MIN_PRODUCTS_IN_ORDER = 10
+MAX_COVERAGE_DAYS = 60
+MIN_UNIT_COST_FOR_LARGE_ORDER = 1000
+MAX_SINGLE_PRODUCT_SHARE = 0.35
+
+OPTIMIZER_GREEDY_FALLBACK = True
+OPTIMIZER_MAX_PRODUCTS_FOR_SCIP = 500
+
+LOW_CONFIDENCE_MULTIPLIER = 0.3
+SEASONAL_MIN_STOCK_DAYS = 14
+
+# ============================================================================
+# STAGE 6: RISK
+# ============================================================================
+RISK_BASE = 50.0
+RISK_MARGIN_WEIGHT = 0.5
+RISK_LIQUIDITY_WEIGHT = 0.3
+RISK_VOLATILITY_WEIGHT = -0.2
+RISK_IDLE_WEIGHT = -0.05
+RISK_CONVERSION_WEIGHT = 0.2
+RISK_MARGIN_MAX = 25.0
+RISK_LIQUIDITY_MAX = 15.0
+RISK_VOLATILITY_MIN = -15.0
+RISK_IDLE_MIN = -20.0
+RISK_CONVERSION_MAX = 10.0
+HYBRID_MIN_CONFIDENCE = 0.3
+HYBRID_MAX_CONFIDENCE = 0.7
+RISK_SMALL_SHOP_MAX_PRODUCTS = 20
+RISK_SMALL_SHOP_MODEL_WEIGHT = 0.2
+
+# ============================================================================
+# STAGE 8: CUSTOMERS
+# ============================================================================
+CUSTOMER_SINGLE_HANDLING = True
+RFM_LOG_TRANSFORM = True
+CUSTOMER_CLUSTER_FALLBACK = "percentile"
+
+# ============================================================================
+# STAGE 9: PRIORITY ACTIONS
+# ============================================================================
+PRIORITY_REVENUE_DROP_THRESHOLD = 20
+PRIORITY_DEADSTOCK_DAYS = 60
+PRIORITY_HIGH_RISK_THRESHOLD = 70
+
+# ============================================================================
+# MODELS & PATHS
+# ============================================================================
+LGBM_MODEL_PATH = "models/lgbm_risk.pkl"
+SHOPS_DIR = "models/shops"
+SAVE_REPORTS_TO_DISK = False
+
+# ============================================================================
+# SERVER
+# ============================================================================
+DEFAULT_LANGUAGE = "en"
+MAX_FILE_SIZE_MB = 50
+MAX_CONCURRENT_JOBS = 2
+REPORT_RETENTION_DAYS = 90
+
+# ============================================================================
+# LLM (OPTIONAL)
+# ============================================================================
+LLM_ENABLED = True
+LLM_ENDPOINT_URL = ""      # e.g. "http://localhost:1234/v1/chat/completions"
+LLM_MODEL_NAME = ""        # e.g. "local-model"
+LLM_TIMEOUT_SECONDS = 15
+```
+
+---
+
+## Unified Score Weights
+
+```python
+UNIFIED_SCORE_WEIGHTS = {
+    "profit_margin": 0.25,
+    "sales_velocity": 0.25,
+    "liquidity_rate": 0.20,
+    "inverse_risk": 0.15,
+    "customer_demand": 0.15
+}
+```
+
+---
+
+## The 9 Stages – Full Detail
+
+### Stage 1: Cleaner (`stage1_cleaner.py`)
+
+**Purpose:** Load, validate, and clean raw CSV.  
+
+**Input:** `file_bytes`, `filename`, `language`  
+**Output:** `df`, `quality` (0‑100), `flagged`, `warnings`, `passed`, `message`
+
+**Process:**
+1. Read CSV/Excel with encoding detection (`utf-8`, `windows-1256`, `utf-8-sig`, `latin-1`).
+2. Map Persian/English column names to internal names using `COLUMN_MAP` + fuzzy matching (threshold 70).
+3. Convert Jalali dates to Gregorian (fallback to today if parsing fails).
+4. Normalise `transaction_type` to `sale`, `return_sale`, `purchase`, `return_purchase`.
+5. Clean data with business rules:
+   - `qty == 0` → remove row (warning).
+   - `qty < 0` → treat as return (warning, keep).
+   - `sell_price == 0` → damaged goods (warning, keep).
+   - `sell_price < buy_price` → promotion (warning, keep).
+   - Loss > 50% → warning.
+6. Anomaly detection with `IsolationForest` (contamination 0.005, sampling if >10 000 rows). Skipped entirely if file has >50 000 rows.
+7. Remove rows with real errors.
+8. Quality score = 100 – (error_rows / total_rows × 100).  
+   Pass threshold: 30 if final row count <100, else 40.
+9. If quality below threshold, `passed = False` and pipeline stops.
+
+**Graceful failure:** Returns `passed=False` with a clear message describing which rows to fix.
+
+### Stage 2: KPIs (`stage2_metrics.py`)
+
+**Purpose:** Compute product KPIs, unified score, and rank.  
+
+**Input:** Cleaned DataFrame  
+**Output:** DataFrame with one row per product + KPI columns
+
+**KPIs calculated:**
+- `total_sold`, `total_revenue`, `total_cost`, `total_profit`
+- `profit_margin` = (avg_sell – avg_buy) / avg_buy × 100
+- `liquidity_rate` = min(100, monthly_turnover × 10)
+- `daily_sales` = total_sold / date_range_days
+- `price_volatility` = standard deviation of sell prices
+- `days_since_last_sale` = (max_date – last_sale).days
+- `best_season` = quarter with most sales (Q1‑Q4)
+- `conversion_rate` = product_invoices / total_invoices × 100
+- `annual_roi` = (total_profit/total_cost) × (365/date_range_days) × 100
+- `sufficiency` = `"rich"` (≥30 sales & ≥90 days), `"medium"` (≥10 sales), else `"sparse"`
+
+**Outlier clipping:** Clip each KPI at 1st and 99th percentile.  
+**Missing values:** Filled with category median, then 0.
+
+**Unified score (0‑100):**
+- Normalise `profit_margin`, `daily_sales`, `liquidity_rate` to 0‑100 (min‑max after clipping).
+- `inverse_risk_norm` = 100 – risk_score (risk not yet available, default 50).
+- `unified_score` = 0.25×margin_norm + 0.25×velocity_norm + 0.20×liquidity_norm + 0.15×inverse_risk_norm + 0.15×velocity_norm.
+- `rank` = unified_score.rank(ascending=False, method="min").astype(int).
+
+### Stage 3: Forecast (`stage3_forecast.py`)
+
+**Purpose:** Generate 90‑day demand forecasts.  
+
+**Input:** Cleaned DataFrame, KPIs DataFrame  
+**Output:** `{product_name: forecast_dict}`
+
+**Forecast_dict contains:**
+- `method`: `"AutoTheta"`, `"AutoETS"`, `"Category Average"`, `"Simple Average"`, or `"Skipped"`
+- `daily_forecast`: list of 90 values
+- `h30`, `h60`, `h90`: totals
+- `confidence`: `"High"`, `"Medium"`, or `"Low"`
+- `low_confidence`: boolean
+- `skipped`: boolean + `skip_reason`
+
+**Logic by data availability:**
+- **<7 days history** → use category average (fallback). Confidence `Low`.
+- **7–29 days** → use simple average of last 7 days. Confidence `Medium`.
+- **30–179 days** → AutoETS. Confidence based on MAPE.
+- **≥180 days** → AutoTheta with auto‑detected seasonality (7/30/365). Confidence based on MAPE.
+- **No category average** → forecast zero (conservative).
+
+**Process:**
+- Filter to sales only (`transaction_type == 'sale'`).
+- Build daily time series (fill missing days with 0).
+- Auto‑detect seasonality with numpy autocorrelation.
+- Batch processing: 50 products for <500, 100 for 500‑1000, 200 for >1000.
+- Apply trend adjustment (configurable).
+
+**Graceful failure:** Every product receives a forecast (even if just a fallback). Never skips without a reason.
+
+### Stage 4: Segments (`stage4_segments.py`)
+
+**Purpose:** Group products into business segments.  
+
+**Input:** KPIs DataFrame  
+**Output:** DataFrame with added `segment`, `segment_confidence`
+
+**Rule‑based (used when <15 products):**
+- `Star`: profit_margin >15% and liquidity >50
+- `Seasonal`: has `best_season` and (margin >5% or liquidity >30)
+- `Deadweight`: margin <5% or idle >90 days or liquidity <10 (but never seasonal)
+- `Risky`: price_volatility >100
+- `Outlier`: margin <‑5% or (idle >180 and liquidity <5)
+- `Reliable`: everything else
+
+**Clustering (used when ≥15 products):**
+1. Scale features with `RobustScaler`.
+2. `AgglomerativeClustering` (n_clusters=5).
+3. Label clusters semantically (Star, Reliable, Deadweight, Risky, Seasonal).
+4. Outlier detection: products with distance > adaptive threshold (2.5 if <30 products, else 1.8) become `"Outlier"`.
+5. Validate Star products: demote to Reliable if margin <15% or liquidity <40.
+6. Seasonal products are **never** marked as Deadweight.
+
+**Graceful failure:** Falls back to rule‑based if clustering fails.
+
+### Stage 5: Basket (`stage5_basket.py`)
+
+**Purpose:** Find products often bought together.  
+
+**Input:** Cleaned DataFrame, `shop_id`  
+**Output:** `rules`, `critical_pairs`, `skipped`, `skip_reason`
+
+**Adaptive method:**
+- **<50 transactions** → simple pair counting (no FP‑Growth).
+- **50–1000 transactions** → FP‑Growth with `min_support` = 15/n_transactions.
+- **>1000 transactions** → sample down to 2000 baskets, `min_support` = 0.05.
+
+**Process:**
+- Keep only invoices with ≥2 items.
+- Limit to top 200 most frequent products (memory safe).
+- Use `TransactionEncoder` + `fpgrowth` from `mlxtend`.
+- Generate rules with `min_confidence` = 0.4.
+- **Critical pairs:** confidence ≥70% **and** lift ≥2.0 (both conditions).
+- Cache rules per shop in `models/shops/{shop_id}/basket_rules.pkl`.
+
+**Graceful failure:** Returns empty rules with explanation if insufficient data or memory error.
+
+### Stage 6: Risk (`stage6_risk.py`)
+
+**Purpose:** Calculate risk score (0‑100) and plain English explanation.  
+
+**Input:** KPIs DataFrame, `language`, `shop_id`  
+**Output:** DataFrame with `risk_score`, `risk_explanation`, `shop_roi`, `vs_bank`, `vs_gold`
+
+**Rule‑based score (vectorised):**
+```
+score = 50
+     + margin × 0.5      (max +25)
+     + liquidity × 0.3   (max +15)
+     - volatility × 0.2  (max -15)
+     - idle_days × 0.05  (max -20)
+     + conversion × 0.2  (max +10)
+clip(score, 0, 100)
+```
+
+**LightGBM model (optional):**
+- Loaded from `config.LGBM_MODEL_PATH` (trained on synthetic data aligned with rule‑based formula).
+- Model confidence = 30‑70% based on data size and history length.
+- For shops with <20 products, model weight is reduced to 20%.
+
+**Hybrid combination:**
+```
+final = rule × (1 – confidence) + model × confidence
+```
+
+**Explanation (English/Persian):**
+- Compares margin to shop average.
+- Mentions days since last sale, price volatility, segment.
+- If model score differs by >15, shows warning.
+
+**Shop ROI:**
+- Revenue‑weighted average of product annual ROIs.
+- Compared to bank deposit (23%) and gold (35%).
+
+### Stage 7: Optimizer (`stage7_optimizer.py`)
+
+**Purpose:** Recommend purchase quantities within budget.  
+
+**Input:** KPIs DataFrame, budget, goal, critical_pairs, current_inventory, forecasts, language  
+**Output:** `order` list, `total_cost`, `feasible`, `relaxations`, `summary`
+
+**Primary solver:** OR‑Tools SCIP (integer programming).  
+**Fallback (if SCIP missing or >500 products):** greedy algorithm (sorted by unified_score, never fails).
+
+**Constraints:**
+- Total cost ≤ budget.
+- Each product: `0 ≤ buy_qty ≤ min(500, budget_max, demand_max)`.
+- Deadweight → `buy_qty = 0`.
+- Critical pairs → if one product not in stock, must buy at least 1 of the other.
+- Minimum number of products in order: 10.
+- Star/Reliable/Seasonal receive minimum quantities based on forecast (capped at demand).
+
+**Quantity calculation (`_calculate_needed_quantity`):**
+- Low confidence → multiply by 0.3.
+- Negative current stock → treat as 0.
+- No forecast → use `daily_sales` from KPIs.
+- Never exceed 500 units.
+- Minimum shelf presence = 2 units for products with stock <7 days (except Deadweight).
+
+**Objective:** maximise `∑ unified_score[i] × buy_vars[i]`.
+
+**Three attempts (relaxing constraints):**
+1. Strict (all constraints).
+2. Remove critical pair constraints.
+3. Remove minimum quantity constraints.
+
+**Output:** **All products appear** in the order list.  
+- Products with `qty > 0` have a recommendation reason.  
+- Products with `qty = 0` have an exclusion reason (e.g., “No sales in 90+ days”, “Sufficient stock”, “Not prioritised within budget”).
+
+**Graceful failure:** Returns `feasible=False` with a summary explaining why (or uses greedy fallback, which is always feasible).
+
+### Stage 8: Customers (`stage8_customers.py`)
+
+**Purpose:** Segment customers using RFM analysis.  
+
+**Input:** Cleaned DataFrame, `language`  
+**Output:** `segments`, `summary`, `champion_products`, `skipped`, `skip_reason`
+
+**RFM calculation:**
+- `recency` = days since last purchase.
+- `frequency` = number of unique invoices.
+- `monetary` = sum of net revenue (sales – returns) per customer.
+
+**Adaptive method:**
+- **1 customer** → detailed analysis (segment “Solo”, champion products = top 5 purchases).
+- **3–20 customers** → manual percentile‑based segmentation (no clustering).
+- **>20 customers** → clustering with fallbacks.
+
+**Clustering (thread‑safe, multiple fallbacks):**
+1. Log‑transform monetary to reduce skew.
+2. Scale with `RobustScaler`.
+3. Try `MiniBatchKMeans`.
+4. If fails, try `AgglomerativeClustering`.
+5. If fails, use manual percentiles.
+
+**Segment labels:** `"Champions"`, `"Loyal"`, `"At‑Risk"`, `"Lost"`.
+
+**Champion products:** Top 5 products by quantity purchased by Champion customers.
+
+**Graceful failure:** Skips only if truly insufficient data (e.g., no customer ID column). Never crashes.
+
+### Stage 9: Priority (`stage9_priority.py`)
+
+**Purpose:** Generate exactly three actionable recommendations.  
+
+**Input:** Cleaned DataFrame, products list, forecasts, basket_rules, customers, optimizer, language  
+**Output:** List of 3 actions, each with `urgency`, `title`, `description`, `product`
+
+**Priority order (first applicable):**
+1. **Revenue drop >10%** (🔴) – “Revenue is falling”
+2. **Deadstock** (idle >45 days, 🔴) – “Liquidate dead stock”
+3. **Reorder** (forecast > stock, 🟡) – “Reorder soon”
+4. **Basket pairing** (from rules, 🟢) – “Use basket pairing”
+5. **High risk** (score ≥70, 🟡) – “Watch high‑risk product”
+
+**Edge cases:**
+- No sales at all → special action “No sales data found”.
+- Shop health >90 → general maintenance tip.
+- Always pad to 3 actions with generic tip (e.g., “Review your best products”).
+
+**Graceful failure:** Always returns exactly 3 actions (never empty).
+
+---
+
+## Runner (`runner.py`)
+
+**Purpose:** Orchestrate all 9 stages, handle MD5 cache, inventory.  
+
+**Process:**
+1. Run Stage 1. If `passed=False`, stop and return error.
+2. Compute MD5 hash of the uploaded file.
+3. Check cache in `models/shops/{shop_id}/metadata.json`.
+   - If hash matches → load `df_kpis` and `forecasts` from disk, skip Stages 2‑4.
+   - Else → run Stages 2‑4, save to disk.
+4. Run Stages 5, 6, 7, 8, 9 sequentially.
+5. Calculate inventory:
+   ```
+   stock = purchases + return_sales - sales - return_purchases
+   stock = max(0, stock)   # never negative
+   ```
+6. Return final result.
+
+**Cache invalidation:** When a new file is uploaded, `loader.clear_shop_models(shop_id)` is called, deleting the entire shop cache.
+
+**Graceful failure:** Any stage that fails returns a “skipped” status; pipeline continues.
+
+---
+
+## Reporter (`reporter.py`)
+
+**Purpose:** Assemble final report, enrich with computed fields, save to disk.  
+
+**Input:** `pipeline_result`, `shop_id`, `save_to_disk`  
+**Output:** Enriched report dict + compact summary
+
+**Enrichment (`_enrich`):**
+- `segment_breakdown`, `to_liquidate` (Deadweight idle >60 days), `to_watch` (Risky/Outlier).
+- `skipped_stages` list.
+- `health_score` (0‑100).
+- `alerts` (low data quality, low health, optimizer infeasible, skipped stages).
+
+**Health score formula:**
+- 25% data quality
+- 25% vs bank bonus (20+ →25, 10+ →20, 0+ →12, -10+ →5)
+- 25% (Star + Reliable) / total × 100
+- 25% products sold in last 30 days / total × 100
+
+**Summary (`_build_summary`):** ~600‑800 tokens, containing:
+- Shop health, revenue, profit, ROI.
+- Urgent: out‑of‑stock, low‑stock, order‑now lists.
+- Top/bottom 5 products, high risk, forecast needs.
+- Star & deadweight products, segment counts.
+- Champion products, customer segments.
+- Top 3 actions, alerts, missing stages.
+
+**Saving:** If `save_to_disk=True`, writes `report_latest.json`, `report_YYYY‑MM‑DD.json`, and `summary.json` to `saved_reports/{shop_id}/`.
+
+---
+
+## Model Loader (`loader.py`)
+
+**Purpose:** Load models once at server startup.  
+
+**Loaded models:**
+- Shared: `lgbm_risk.pkl` (LightGBM risk model).
+- Per‑shop: `basket_rules.pkl`, `metadata.json`.
+
+**Functions:**
+- `get_shared(name)`, `get_shop_model(shop_id, name)`, `get_shop_basket_rules(shop_id)`
+- `clear_shop_models(shop_id)`
+- `is_ready()` → `True` if LightGBM model loaded
+
+**Graceful failure:** Missing model → logged warning; stage that needs it will skip gracefully.
+
+---
+
+## Model Training (`train.py`)
+
+**Purpose:** Train the shared LightGBM risk model on synthetic data.  
+
+**Command:** `python models/train.py --shop_id dummy` (run once before deployment)
+
+**Process:**
+- Generate 10 000 synthetic products with realistic KPI distributions (beta, exponential, Poisson).
+- Compute target label using the **same rule‑based formula** as Stage 6 (weights, clipping).
+- Train `LGBMRegressor` (n_estimators=200, learning_rate=0.05, subsample=0.8, colsample_bytree=0.8).
+- Save model + feature columns to `config.LGBM_MODEL_PATH`.
+
+**Note:** Does not train clustering – Stage 4 performs live clustering.
+
+---
+
+## Owner Interface – HTML Dashboard (`ui/site.html`)
+
+**Purpose:** Pure HTML/CSS/JS dashboard for shop owners. Replaces the Gradio owner UI.  
+
+**Launch:** `python run.py` (option 1) or `python run.py --mode owner`.
+
+**Features:**
+- **9 tabs:** Overview, Purchase Orders, Forecast, Products, Segments, Basket, Inventory, Customers & ROI, Settings.
+- **Real‑time polling** of async jobs (every 3 seconds) with loading overlay.
+- **Controls in top bar:** Shop ID, Budget (Toman), Goal (max profit / cover customers / reduce risk), Language (en/fa), Upload button, status indicator.
+- **Global search** – filters products, inventory, orders, forecast.
+- **Purchase Orders tab:** All products appear. Each shows current stock (non‑negative), recommended quantity (max 500 units, never more than 60 days demand), final stock, unit cost, total cost, and plain language “why”. Copy list / export CSV buttons.
+- **Products tab:** Ranked list (1,2,3…) with unified score, segment, revenue (M), profit (M), margin %, risk score (🟢🟡🔴), current stock, last sale days, risk explanation. Searchable.
+- **Inventory tab:** Current stock, days of coverage, status (OUT/LOW/OK/OVERSTOCK), actions (ORDER NOW, ORDER THIS WEEK, RUN SALE).
+- **LLM Advisor panel** (floating robot):
+  - **Keyword mode** – fast, offline, rule‑based (`smartAnswer` function).
+  - **Real LLM mode** – connects to `/llm/ask` endpoint.
+  - **Talk Mode toggle** (in Settings):
+    - **ON** → sends `talk: true` → AI gives ultra‑short conversational answers (max 10 words). Uses **micro‑summary** (health %, revenue/profit in millions, out‑of‑stock count, top seller). Greetings/thanks get no numbers. “How to find X” → tells exact tab name.
+    - **OFF** → sends `talk: false` → AI gives 4 bullet points (like Gradio). Uses **full summary**.
+  - **Markdown support** – bot messages rendered with `innerHTML`.
+  - **Send button disabled** during request, re‑enabled after response.
+  - **Fallback** – if Real LLM fails, falls back to keyword advisor.
+- **Settings tab:** API Base URL, API Key, AI Advisor Mode (Keyword / Real), Talk Mode checkbox. Saved in `localStorage`.
+- **Responsive sidebar** – collapses on mobile.
+
+---
+
+## Developer UI – Gradio (`ui/developer.py`)
+
+**Purpose:** Full data visibility for debugging and advanced users.  
+
+**Launch:** `python run.py` (option 2) or `python run.py --mode developer`.
+
+**Tabs:**
+1. Health & Quality – quality report, column stats, charts, data preview.
+2. Product Rankings – search box + Apply Filter button, rank column, coloured segment badges.
+3. Forecast – table of forecasts with confidence levels.
+4. Segments – segment counts and product lists.
+5. Basket Rules – product combinations with confidence and lift.
+6. Purchase Order – recommended purchases with reasons.
+7. ROI & Customers – ROI comparison, customer segments.
+8. Inventory – stock levels with status (ORDER NOW, LOW, OK, OVERSTOCK).
+9. Priority Actions – top 3 actions.
+10. LLM Advisor – natural language Q&A using LLM (optional). **Always returns 4 bullet points** (no Talk Mode).
+11. JSON Report – full raw JSON.
+
+**Inventory display:** Uses clean inventory (non‑negative). Health & Quality tab shows raw inventory (including negatives for debugging).
+
+**Graceful failure:** Returns error message if pipeline fails.
+
+---
+
+## Terminal UI (`ui/terminal.py`)
+
+**Purpose:** Command‑line interface with rich formatting.  
+
+**Launch:** `python run.py` (option 3) or `python run.py --mode terminal`.
+
+**Process:**
+- Interactive prompts for file path, budget, goal, language.
+- Runs pipeline, displays results as formatted tables (using `rich` library).
+- Shows health score, order recommendations, top actions.
+
+**Graceful failure:** Prints error and exits gracefully.
+
+---
+
+## API (`api/main.py`)
+
+**Purpose:** FastAPI server with API key authentication.  
+
+**Launch:** `uvicorn api.main:app --reload --port 8000`
+
+**Endpoints:**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/analyze` | POST | Full pipeline (async, returns `job_id`) |
+| `/result/{job_id}` | GET | Poll for job completion |
+| `/optimize` | POST | Lightweight optimizer only (under 2 seconds) |
+| `/basket` | POST | Basket analysis only |
+| `/risk` | POST | Risk scoring only |
+| `/report/{shop_id}` | GET | Latest saved report |
+| `/health/{shop_id}` | GET | Health score only |
+| `/healthcheck` | GET | Server status, model load status |
+| `/llm/ask` | POST | LLM advisor. Accepts `question`, `report_summary` (full report), `inventory`, `forecasts`, `language`, `talk` (bool). Default `talk=True` for HTML dashboard. |
+
+**Authentication:** All endpoints require `X-API-Key` header matching `config.API_KEY` (else HTTP 403).
+
+**Job management:** `ThreadPoolExecutor` with `max_workers = config.MAX_CONCURRENT_JOBS`.
+
+**Graceful failure:** Every endpoint wrapped in `try/except`; returns JSON with `"error"` key.
+
+---
+
+## LLM Advisor (`llm/agent.py`)
+
+**Purpose:** Optional natural language answers using a configured LLM endpoint (LM Studio or Ollama).  
+
+**Configuration:** Uses `config.LLM_ENABLED`, `LLM_ENDPOINT_URL`, `LLM_MODEL_NAME`, `LLM_TIMEOUT_SECONDS`.
+
+**Two summary modes:**
+- **Micro‑summary** (used when `talk=True`): only health %, revenue/profit in millions, out‑of‑stock count, top seller. Forces ultra‑short answers (max 10 words), omits numbers on greetings, and includes a **tab guide** (list of all dashboard tabs and their contents).
+- **Full summary** (used when `talk=False`): includes health, data quality, top 5 products, bottom 5, segments, inventory status, forecast needs, basket rules, customer segments, priority actions, alerts, high‑risk products. Gives 4 bullet points.
+
+**Process:**
+- Builds prompt with role instruction, summary, user question, and answer instruction.
+- Sends POST request to `LLM_ENDPOINT_URL` (supports LM Studio `/api/v1/chat` format and Ollama `/api/generate`).
+- Parses response and returns answer.
+
+**Graceful failure:** Returns `None` if LLM not configured or request fails – UI falls back to keyword advisor.
+
+---
+
+## Data Generator (`data/generate_data.py`)
+
+**Purpose:** Generate realistic synthetic data for testing.  
+
+**Output:** `sample_en.csv`, `sample_fa.csv`
+
+**Data characteristics:**
+- 4 transaction types (`sale`, `return_sale`, `purchase`, `return_purchase`).
+- 45+ products with varied margins, seasonality, trends.
+- Customer segments with different spending patterns.
+- Hand‑coded basket rules (realistic pairs).
+- Monthly promotions.
+- 2+ years of data.
+- Perfect stock tracking (verification file included).
+
+**Usage:** `python data/generate_data.py --invoices 15000 --customers 300 --seed 42`
+
+---
+
+## Running Commands
+
+| Action | Command |
+|--------|---------|
+| HTML Owner Dashboard | `python run.py` → option 1 (or `python run.py --mode owner`) |
+| Gradio Developer UI | `python run.py` → option 2 (or `python run.py --mode developer`) |
+| Terminal mode | `python run.py` → option 3 (or `python run.py --mode terminal`) |
+| FastAPI server | `uvicorn api.main:app --reload --port 8000` |
+| Train LightGBM | `python models/train.py --shop_id dummy` |
+| Generate sample data | `python data/generate_data.py` |
+| Run tests | `pytest test_all.py` |
+
+---
+
+## Dependencies
+
+**Conda installs:** `pandas`, `numpy`, `scikit-learn`, `lightgbm`, `openpyxl`, `plotly`, `pytest`
+
+**Pip installs:** `statsforecast`, `mlxtend`, `ortools`, `fastapi`, `uvicorn`, `gradio`, `jdatetime`, `rapidfuzz`, `python-dotenv`
+
+---
+
+## Core Formulas
+
+**Unified score (0‑100):**
+```
+score = (margin×0.25) + (velocity×0.25) + (liquidity×0.20) + ((100‑risk)×0.15) + (velocity×0.15)
+```
+(velocity = daily_sales normalised)
+
+**Inventory:**
+```
+stock = purchases + return_sales − sales − return_purchases
+stock = max(0, stock)
+```
+
+**Health score (0‑100):**
+```
+health = (data_quality × 0.25) + vs_bank_bonus + ((Star+Reliable)/total × 100 × 0.25) + (products_sold_in_last_30_days / total × 100 × 0.25)
+```
+vs_bank_bonus: 20+ →25, 10+ →20, 0+ →12, -10+ →5, else 0.
+
+**Risk score (rule‑based):**
+```
+risk = 50 + margin×0.5 + liquidity×0.3 − volatility×0.2 − idle_days×0.05 + conversion×0.2
+risk = clip(risk, 0, 100)
+```
+
+---
+
+## Known Limitations & Their Handling
+
+| Limitation | Behaviour |
+|------------|-----------|
+| Inventory persistence | Starts fresh each run (no saved state). |
+| Negative stock | Set to 0 (assumes missing purchase records) – user warned via alerts. |
+| Forecast needs ≥7 days | Otherwise category average (Low confidence). |
+| Small data | Basket (<50 transactions) → simple pairs; Segmentation (<15 products) → rule‑based; Customers (<3) → single‑customer handling. |
+| SCIP not installed | Greedy fallback (always works). |
+| LLM endpoint unreachable | Falls back to keyword advisor. |
+
+---
+
+## Project Structure (Complete)
+
+```
+saleyar/
+├── .env                        # API_KEY only – never commit
+├── config.py                   # all thresholds + bank/gold rates
+├── run.py                      # one command to launch anything
+├── test_all.py                 # 16+ tests
+│
+├── pipeline/
+│   ├── column_map.py           # Holoo column mappings (Persian/English)
+│   ├── stage1_cleaner.py
+│   ├── stage2_metrics.py
+│   ├── stage3_forecast.py
+│   ├── stage4_segments.py
+│   ├── stage5_basket.py
+│   ├── stage6_risk.py
+│   ├── stage7_optimizer.py
+│   ├── stage8_customers.py
+│   ├── stage9_priority.py
+│   └── runner.py               # orchestrates all 9 stages, MD5 cache, inventory
+│
+├── models/
+│   ├── train.py                # run once before deployment
+│   ├── loader.py               # loads models at startup
+│   ├── lgbm_risk.pkl           # shared risk model (optional)
+│   └── shops/{shop_id}/        # basket_rules.pkl, metadata.json, etc.
+│
+├── output/
+│   ├── reporter.py             # assembles final report + LLM summary
+│   └── templates/              # Persian & English explanation templates
+│
+├── api/
+│   └── main.py                 # FastAPI – all endpoints, API key auth, CORS
+│
+├── llm/
+│   └── agent.py                # LLM integration: micro‑summary (talk) vs full summary (bullet points), tab guide, greeting detection, markdown support
+│
+├── ui/
+│   ├── site.html               # HTML owner dashboard (replaces Gradio owner)
+│   ├── developer.py            # detailed Gradio (full data, for developers)
+│   └── terminal.py             # CLI mode with rich formatting
+│
+├── saved_reports/{shop_id}/    # report_latest.json + summary.json + dated backups
+├── data/                       # sample generators + test data
+├── logs/                       # application logs
+└── requirements.txt            # full dependencies
+```
+
+---
+
+**This document is the complete frozen memory of SaleYar. It contains every detail needed to rebuild the project from scratch. No code files are required – this is the sole source of truth.**
