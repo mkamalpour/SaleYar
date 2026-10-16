@@ -22,8 +22,9 @@ import sys
 import joblib
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
-from validation import validate_shop_id
+from saleyar import config
+from saleyar.validation import validate_shop_id
+from models import risk_model
 
 logger = logging.getLogger(__name__)
 
@@ -39,22 +40,12 @@ def load_all():
 
 
 def _load_shared_models():
-    _LOAD_STATUS["shared"] = {}
-    path = config.LGBM_MODEL_PATH
-    if os.path.exists(path):
-        try:
-            _SHARED_MODELS["lgbm_risk"] = joblib.load(path)
-            _LOAD_STATUS["shared"]["lgbm_risk"] = "loaded"
-            logger.info(f"Loaded shared LightGBM model from {path}")
-        except Exception as e:
-            _LOAD_STATUS["shared"]["lgbm_risk"] = f"error: {e}"
-            logger.error(f"Failed to load LightGBM model: {e}")
-    else:
-        _LOAD_STATUS["shared"]["lgbm_risk"] = "not found"
-        logger.warning(
-            f"LightGBM model not found at {path}. "
-            "Run 'python models/train.py --shop_id demo' to train it."
-        )
+    loaded = risk_model.get_model()
+    _SHARED_MODELS.pop("lgbm_risk", None)
+    state = risk_model.status()
+    _LOAD_STATUS["shared"] = {"lgbm_risk": "loaded" if loaded else "rule-based fallback", "risk_model": state}
+    if loaded:
+        _SHARED_MODELS["lgbm_risk"] = loaded
 
 
 def _load_all_shops():
@@ -98,6 +89,8 @@ def _load_shop(shop_id: str):
 
 def get_shared(model_name: str):
     """Retrieve a shared model (e.g., 'lgbm_risk')."""
+    if model_name == "lgbm_risk":
+        _load_shared_models()
     return _SHARED_MODELS.get(model_name)
 
 
@@ -113,6 +106,7 @@ def get_shop_basket_rules(shop_id: str):
 
 def get_status() -> dict:
     """Return load status (used by /healthcheck)."""
+    _load_shared_models()
     return {
         "shared": _LOAD_STATUS.get("shared", {}),
         "shops":  {k: v for k, v in _LOAD_STATUS.items() if k != "shared"},
@@ -147,10 +141,5 @@ def clear_shop_models(shop_id: str) -> None:
 
 
 def is_ready(shop_id: str = None) -> bool:
-    """
-    True if the system is ready to serve requests.
-    Requires at least the shared LightGBM model to be loaded.
-    For basket rules, we don't require them (stage can skip).
-    """
-    lgbm_ok = _LOAD_STATUS.get("shared", {}).get("lgbm_risk") == "loaded"
-    return lgbm_ok
+    """Rule-based analytics remains ready when the optional risk model is absent."""
+    return True

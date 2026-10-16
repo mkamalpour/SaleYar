@@ -29,7 +29,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 logger = logging.getLogger(__name__)
 
-import config
+from saleyar import config
 
 N_SEGMENTS = 4
 

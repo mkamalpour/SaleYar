@@ -10,7 +10,7 @@ Improvements:
 - Caches rules per shop
 """
 
-from validation import shop_serialized
+from saleyar.validation import shop_serialized
 
 import hashlib
 import logging
@@ -24,7 +24,7 @@ from mlxtend.preprocessing import TransactionEncoder
 import random
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
+from saleyar import config
 from models.loader import get_shop_dir
 
 logger = logging.getLogger(__name__)

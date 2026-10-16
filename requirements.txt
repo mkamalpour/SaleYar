@@ -1,47 +1,28 @@
-# ============================================
-# REQUIREMENTS FOR SALEYAR
-# ============================================
-# Install:
-#   pip install -r requirements.txt
-#
-# Version floors (>=) rather than exact pins: the exact set this project is
-# tested against is pinned in requirements-lock.txt. Lower bounds keep a fresh
-# install working across Python versions while still pulling security patches.
-# ============================================
+# Recommended runtime: Python 3.10.19. Compatible versions from the existing environment.
+pandas==2.3.3
+numpy==1.26.4
+scipy==1.15.2
+scikit-learn==1.7.2
+openpyxl==3.1.5
+xlrd==2.0.2
+joblib==1.5.3
+threadpoolctl==3.6.0
+lightgbm==4.6.0
+statsforecast==2.0.3
+mlxtend==0.23.4
+ortools==9.14.6206
+plotly==6.6.0
+seaborn==0.13.2
+fastapi==0.133.1
+python-multipart==0.0.22
+uvicorn==0.41.0
+jdatetime==5.2.0
+persiantools==5.5.0
+rapidfuzz==3.14.3
+gradio==6.14.0
+rich==14.3.3
+python-dotenv==1.2.1
 
-# ---------- CORE DATA STACK ----------
-pandas>=2.1.4
-numpy>=1.26.3
-scipy>=1.12.0
-scikit-learn>=1.4.0
-openpyxl>=3.1.2
-xlrd>=2.0.1
-joblib>=1.3.2
-threadpoolctl>=3.1.0
-
-# ---------- ANALYTICS / MODELLING ----------
-lightgbm>=4.1.0
-statsforecast>=1.7.0
-mlxtend>=0.23.1
-ortools>=9.9.3966
-
-# ---------- VISUALISATION ----------
-plotly>=5.18.0
-seaborn>=0.13.2
-
-# ---------- API SERVER ----------
-fastapi>=0.109.0
-python-multipart>=0.0.18
-uvicorn>=0.27.0
-# NOTE: uvicorn[standard] is intentionally not used — the extra pulls in
-# platform-specific wheels that break the Docker build.
-
-# ---------- PERSIAN TEXT / DATES ----------
-jdatetime>=5.0.0
-persiantools>=3.4.0
-rapidfuzz>=3.6.0
-
-# ---------- UI / CONSOLE / CONFIG ----------
-gradio>=6.14.0
-rich>=13.7.0
-python-dotenv>=1.0.0
+# Existing verification tools
+pytest==9.0.3
+httpx==0.28.1

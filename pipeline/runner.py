@@ -11,7 +11,7 @@ FIXED: Inventory tracking resets each run, matches UI summary calculation.
 FIXED: Damaged goods now correctly reduce inventory.
 """
 
-from validation import shop_serialized
+from saleyar.validation import shop_serialized
 
 import hashlib
 import logging
@@ -207,7 +207,7 @@ def run_pipeline(
     """
     Run all 9 stages and assemble the final report.
     """
-    from validation import validate_shop_id, validate_analysis
+    from saleyar.validation import validate_shop_id, validate_analysis
     validate_shop_id(shop_id)
     validate_analysis(budget, goal, language)
     start_total = time.time()

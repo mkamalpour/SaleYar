@@ -36,7 +36,7 @@ from models import loader
 from output import reporter
 from pipeline import runner
 from ui.utils import health_tag, build_llm_text
-import config
+from saleyar import config
 
 try:
     from llm.agent import ask_llm

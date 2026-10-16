@@ -11,7 +11,7 @@ import logging
 import urllib.error
 import urllib.request
 
-import config
+from saleyar import config
 
 logger = logging.getLogger(__name__)
 

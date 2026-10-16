@@ -14,8 +14,8 @@ import sys
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
-from validation import validate_shop_id
+from saleyar import config
+from saleyar.validation import validate_shop_id
 
 logger = logging.getLogger(__name__)
 

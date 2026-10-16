@@ -20,7 +20,7 @@ from sklearn.preprocessing import RobustScaler
 from scipy.spatial.distance import cdist
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
+from saleyar import config
 
 logger = logging.getLogger(__name__)
 

@@ -24,7 +24,7 @@ import pandas as pd
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import console  # Configure streams safely without replacing/closing wrappers.
+from saleyar import console  # Configure streams safely without replacing/closing wrappers.
 
 def clean_old_files(data_dir="data"):
     if not os.path.exists(data_dir):

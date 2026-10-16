@@ -34,6 +34,7 @@ coverage.xml
 # Runtime models, reports, caches, and logs
 models/shops/
 models/.local_api_key
+models/lgbm_risk.json
 *.pkl
 *.joblib
 models/*.bin
@@ -70,3 +71,6 @@ data/upload*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local invoice documents, kept outside maintained documentation
+data/private/

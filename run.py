@@ -13,7 +13,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-import console  # noqa: F401  — forces UTF-8 stdout before anything prints
+from saleyar import console  # noqa: F401  — forces UTF-8 stdout before anything prints
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -41,7 +41,7 @@ def run_html_dashboard() -> None:
         print(f"ERROR: {html_path} not found.")
         return
 
-    import config
+    from saleyar import config
 
     injected_key = config.API_KEY
     dashboard_url = f"http://localhost:{web_port}/ui/owner.html"
@@ -225,13 +225,11 @@ def generate_sample_data() -> None:
 
 
 def train_demo_models() -> None:
-    if not ensure_sample_data():
-        return
-    print("Training demo models with data/sample_en.csv...")
-    if run_subprocess(["models/train.py", "--shop_id", "demo", "--csv", SAMPLE_CSV]):
-        print("Demo model training failed.")
+    """Prepare the synthetic risk model; invoice generation is not required."""
+    if run_subprocess(["models/train.py"]):
+        print("Model setup failed. To rebuild: python models/train.py --force")
     else:
-        print("Demo models trained and saved in models/.")
+        print("Risk model ready; legacy model files are preserved.")
 
 
 def show_menu() -> None:

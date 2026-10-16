@@ -21,7 +21,16 @@ sent to that endpoint; leave LLM integration disabled for fully local operation.
 
 ## Quick start
 
-Use Python 3.11-3.13 and a virtual environment:
+Use **Python 3.10.19**, matching your existing `saleYar` environment. Activate it first:
+
+```bash
+conda activate saleYar
+python -m pip install -r requirements.txt
+python models/train.py
+python run.py --mode owner
+```
+
+Or create a virtual environment using a Python 3.10 interpreter:
 
 ```powershell
 python -m venv .venv
@@ -48,7 +57,7 @@ nonfinite numbers are flagged instead of being silently invented.
 Budgets must be positive. Shop IDs use 1-64 letters, digits, underscores or
 hyphens and start with a letter or digit. Inferred inventory depends on complete
 transaction history, including opening stock. Forecasts and purchase suggestions
-are estimates, not guarantees. Financial benchmark values in `config.py` are
+are estimates, not guarantees. Financial benchmark values in `saleyar/config.py` are
 illustrative assumptions, not current bank rates or promised gold returns.
 The metric named `profit_margin` is markup relative to purchase cost.
 
@@ -73,17 +82,25 @@ Local interactive API documentation is available at `/docs`.
 ## Development
 
 ```bash
-python -m pip install -r requirements-dev.txt
+python -m pip install -r requirements.txt
 python -m pytest tests -q
-python scripts/check_environment.py
 ```
 
 Tests use synthetic data and isolate shop caches from real models and reports.
-`requirements-lock.txt` records the verified Windows/Python 3.13 environment;
-use `requirements.txt` for installation on other platforms and Python versions.
+`requirements.txt` pins the compatible versions already installed in your Python
+3.10.19 environment, plus `xlrd` for legacy Excel files. Keep this project in its
+own environment; avoid unrestricted upgrades of ML dependencies.
+
+Model setup uses `python models/train.py`. It migrates a readable legacy
+`models/lgbm_risk.pkl` to native LightGBM `models/lgbm_risk.json` without deleting
+the original. Native files include feature order and training versions. If an old
+pickle cannot load, `python models/train.py --force` builds the synthetic model
+while preserving the old file. Changed models reload automatically; `/healthcheck`
+reports model availability and recovery details.
 
 | Directory | Purpose |
 | --- | --- |
+| `saleyar/` | Shared configuration, validation, and console setup |
 | `api/` | FastAPI authentication, uploads, jobs, and results |
 | `pipeline/` | Import, metrics, forecasts, segments, basket, risk, orders, customers |
 | `ui/` | Owner dashboard assets, server, developer and terminal interfaces |
@@ -91,7 +108,3 @@ use `requirements.txt` for installation on other platforms and Python versions.
 | `data/` | Synthetic invoice generator and invoice merger |
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
-| `docs/` | Architecture and changelog |
-
-See [architecture](docs/architecture.md), [changelog](docs/changelog.md), and
-[contributing](CONTRIBUTING.md).

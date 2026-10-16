@@ -3,7 +3,7 @@
 from dotenv import load_dotenv
 import os
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 # ============================================================================
@@ -21,7 +21,7 @@ def _default_api_key() -> str:
     if env_key:
         return env_key
 
-    key_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", ".local_api_key")
+    key_file = os.path.join(PROJECT_ROOT, "models", ".local_api_key")
     try:
         if os.path.exists(key_file):
             with open(key_file, "r", encoding="utf-8") as f:
@@ -200,7 +200,7 @@ PRIORITY_HIGH_RISK_THRESHOLD = 70
 # ============================================================================
 # MODELS & PATHS
 # ============================================================================
-LGBM_MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "lgbm_risk.pkl")
+LGBM_MODEL_PATH = os.path.abspath(os.path.expanduser(os.getenv("SALEYAR_MODEL_PATH", os.path.join(PROJECT_ROOT, "models", "lgbm_risk.pkl"))))
 SHOPS_DIR = os.path.join(PROJECT_ROOT, "models", "shops")
 SAVED_REPORTS_DIR = os.path.join(PROJECT_ROOT, "saved_reports")
 LOGS_DIR = os.path.join(PROJECT_ROOT, "logs")

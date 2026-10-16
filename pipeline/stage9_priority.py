@@ -11,7 +11,7 @@ Improvements:
 
 import pandas as pd
 
-import config
+from saleyar import config
 
 # Configurable thresholds (with defaults)
 REVENUE_DROP_THRESHOLD = getattr(config, 'PRIORITY_REVENUE_DROP_THRESHOLD', 10)

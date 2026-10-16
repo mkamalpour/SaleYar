@@ -20,7 +20,7 @@ import numpy as np
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import console  # noqa: F401  — forces UTF-8 stdout before anything prints
+from saleyar import console  # noqa: F401  — forces UTF-8 stdout before anything prints
 
 
 def timing_decorator(func):
@@ -44,7 +44,7 @@ def timing_decorator(func):
 @timing_decorator
 def test_config():
     """Test configuration loads"""
-    import config
+    from saleyar import config
     assert hasattr(config, 'API_KEY')
     assert hasattr(config, 'MIN_SALES_RICH')
     assert hasattr(config, 'FORECAST_HORIZON')
@@ -54,7 +54,7 @@ def test_config():
 @timing_decorator
 def test_imports():
     """Test all critical imports"""
-    import config
+    from saleyar import config
     from models import loader
     from output import reporter
     from pipeline import stage1_cleaner, stage2_metrics, stage3_forecast

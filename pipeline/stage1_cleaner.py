@@ -38,7 +38,7 @@ ENCODINGS_TO_TRY = ["utf-8", "windows-1256", "utf-8-sig", "latin-1"]
 FUZZY_SCORE_THRESHOLD = 70
 QUALITY_PASS_THRESHOLD = 40          # default, may be lowered for small shops
 
-import config
+from saleyar import config
 
 ALLOW_RETURNS = getattr(config, 'ALLOW_RETURNS', True)
 ALLOW_DAMAGED = getattr(config, 'ALLOW_DAMAGED', True)

@@ -15,32 +15,33 @@ import logging
 import os
 import sys
 
-import joblib
 import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
+from saleyar import config
+from models import risk_model
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def train(shop_id: str, csv_path: str = None, skip_lgbm: bool = False):
-    """Train the shared LightGBM risk model on synthetic data."""
-    os.makedirs(os.path.dirname(config.LGBM_MODEL_PATH), exist_ok=True)
-
+def train(shop_id: str = "shared", csv_path: str = None, skip_lgbm: bool = False, force: bool = False):
+    """Create a native model or migrate a readable legacy model without deleting it."""
     if skip_lgbm:
-        logger.info("Skipping LightGBM training (--skip_lgbm)")
-        return
-
-    if os.path.exists(config.LGBM_MODEL_PATH):
-        logger.info(f"Model already exists at {config.LGBM_MODEL_PATH}. Use --force to retrain.")
-        return
-
-    logger.info("Training LightGBM risk model on synthetic data...")
-    _train_lgbm_synthetic()
-    logger.info(f"✅ Model saved to {config.LGBM_MODEL_PATH}")
+        logger.info("Skipping LightGBM training")
+        return None
+    loaded = risk_model.get_model(force=True)
+    if not force and loaded:
+        if loaded["source"] == "legacy":
+            path = risk_model.migrate_legacy()
+            logger.info("Migrated existing model to %s; original pickle preserved", path)
+            return path
+        logger.info("Compatible native model already exists at %s; use --force to retrain", risk_model.native_path())
+        return risk_model.native_path()
+    if not force and (os.path.exists(config.LGBM_MODEL_PATH) or risk_model.native_path().exists()):
+        raise RuntimeError("Existing model is unreadable. Run python models/train.py --force to create a compatible native model. Legacy files will be preserved.")
+    return _train_lgbm_synthetic()
 
 
 def _train_lgbm_synthetic(n_samples: int = 10_000):
@@ -75,27 +76,6 @@ def _train_lgbm_synthetic(n_samples: int = 10_000):
     # ──────────────────────────────────────────────────────────────────────
     # Calculate rule‑based risk score (same formula as stage6_risk.py)
     # ──────────────────────────────────────────────────────────────────────
-    base = 50.0
-    margin_contrib   = np.clip(profit_margin * 0.5, 0, 25)
-    liquidity_contrib = np.clip(liquidity_rate * 0.3, 0, 15)
-    volatility_contrib = np.clip(price_volatility * -0.2, -15, 0)   # negative penalty
-    idle_contrib       = np.clip(days_since_last * -0.05, -20, 0)
-    conversion_contrib = np.clip(conversion_rate * 0.2, 0, 10)
-
-    raw_score = (
-        base
-        + margin_contrib
-        + liquidity_contrib
-        + volatility_contrib
-        + idle_contrib
-        + conversion_contrib
-    )
-    # Clip to 0‑100 (rule‑based already does this)
-    y = np.clip(raw_score, 0, 100)
-
-    # ──────────────────────────────────────────────────────────────────────
-    # Feature matrix (must match columns used in stage6_risk)
-    # ──────────────────────────────────────────────────────────────────────
     X = pd.DataFrame({
         "profit_margin":        profit_margin,
         "liquidity_rate":       liquidity_rate,
@@ -111,6 +91,9 @@ def _train_lgbm_synthetic(n_samples: int = 10_000):
     # ──────────────────────────────────────────────────────────────────────
     # Train LightGBM
     # ──────────────────────────────────────────────────────────────────────
+    from pipeline.stage6_risk import _score_rule_based_vectorized
+    y = _score_rule_based_vectorized(X)
+
     model = lgb.LGBMRegressor(
         n_estimators=200,
         learning_rate=0.05,
@@ -120,15 +103,13 @@ def _train_lgbm_synthetic(n_samples: int = 10_000):
         colsample_bytree=0.8,
         random_state=42,
         verbose=-1,
+        n_jobs=2,
     )
     model.fit(X, y)
 
-    # Save model and feature list
-    joblib.dump(
-        {"model": model, "feature_cols": list(X.columns)},
-        config.LGBM_MODEL_PATH,
-    )
-    logger.info(f"LightGBM model saved → {config.LGBM_MODEL_PATH}")
+    path = risk_model.save_model(model.booster_, list(X.columns))
+    logger.info("Native LightGBM model saved to %s", path)
+    return path
 
 
 if __name__ == "__main__":
@@ -136,7 +117,7 @@ if __name__ == "__main__":
         description="Train the shared LightGBM risk model for SaleYar."
     )
     parser.add_argument(
-        "--shop_id", required=True,
+        "--shop_id", "--shop-id", default="shared",
         help="Shop identifier (unused, kept for compatibility)."
     )
     parser.add_argument(
@@ -144,7 +125,7 @@ if __name__ == "__main__":
         help="CSV path (unused, kept for compatibility)."
     )
     parser.add_argument(
-        "--skip_lgbm", action="store_true",
+        "--skip_lgbm", "--skip-lgbm", action="store_true",
         help="Skip LightGBM training (if already trained)."
     )
     parser.add_argument(
@@ -153,9 +134,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # Override existence check if --force is used
-    if args.force and os.path.exists(config.LGBM_MODEL_PATH):
-        os.remove(config.LGBM_MODEL_PATH)
-        logger.info("Removed existing model due to --force flag.")
-
-    train(args.shop_id, args.csv, args.skip_lgbm)
+    try:
+        train(args.shop_id, args.csv, args.skip_lgbm, force=args.force)
+    except Exception as exc:
+        logger.error("Model setup failed: %s", exc)
+        raise SystemExit(1) from exc

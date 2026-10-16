@@ -12,27 +12,17 @@ Improvements:
 import logging
 import os
 import sys
-import joblib
 import numpy as np
 import pandas as pd
-from functools import lru_cache
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
+from saleyar import config
+from models import risk_model
 
 logger = logging.getLogger(__name__)
 
-FEATURE_COLS = [
-    "profit_margin",
-    "liquidity_rate",
-    "price_volatility",
-    "hope_rate",
-    "portfolio_weight",
-    "days_since_last_sale",
-    "conversion_rate",
-    "margin_vs_avg",
-    "price_change_count",
-]
+FEATURE_COLS = risk_model.FEATURE_COLS
+
 
 # Rule‑based weights (from config)
 RISK_BASE = getattr(config, 'RISK_BASE', 50.0)
@@ -79,7 +69,7 @@ def run(df_kpis: pd.DataFrame, language: str = "en", shop_id: str = None) -> pd.
         df_out["risk_model_score"] = model_scores
 
     df_out["risk_explanation"] = df_out.apply(
-        lambda row: _explain_enhanced(row, language, rule_scores[row.name] if hasattr(rule_scores, '__getitem__') else None),
+        lambda row: _explain_enhanced(row, language),
         axis=1
     )
 
@@ -115,43 +105,20 @@ def _score_rule_based_vectorized(df: pd.DataFrame) -> np.ndarray:
 
 
 def _get_model_scores(df: pd.DataFrame):
-    """Return model predictions and confidence (if model exists)."""
-    global _MODEL_CACHE, _MODEL_FEATURES_CACHE, _MODEL_AVAILABLE
-    if _MODEL_CACHE is None:
-        _load_model()
-    if not _MODEL_AVAILABLE or _MODEL_CACHE is None:
+    """Use the shared native model cache and preserve calibrated 0-100 scores."""
+    _load_model()
+    scores = risk_model.predict(df)
+    if scores is None:
         return None, 0.0
-
-    try:
-        available = [c for c in _MODEL_FEATURES_CACHE if c in df.columns]
-        if len(available) < 3:
-            return None, 0.0
-        X = df[available].fillna(0)
-        raw = _MODEL_CACHE.predict(X)
-        r_min, r_max = raw.min(), raw.max()
-        scores = (raw - r_min) / (r_max - r_min) * 100 if r_max > r_min else np.full(len(raw), 50.0)
-        confidence = _calculate_model_confidence(df)
-        return scores.round(1).tolist(), confidence
-    except Exception as e:
-        logger.warning(f"Model scoring failed: {e}")
-        return None, 0.0
+    return scores, _calculate_model_confidence(df)
 
 
 def _load_model():
     global _MODEL_CACHE, _MODEL_FEATURES_CACHE, _MODEL_AVAILABLE
-    if os.path.exists(config.LGBM_MODEL_PATH):
-        try:
-            model_data = joblib.load(config.LGBM_MODEL_PATH)
-            _MODEL_CACHE = model_data["model"]
-            _MODEL_FEATURES_CACHE = model_data.get("feature_cols", FEATURE_COLS)
-            _MODEL_AVAILABLE = True
-            logger.info(f"LightGBM model loaded from {config.LGBM_MODEL_PATH}")
-        except Exception as e:
-            logger.warning(f"Could not load LightGBM model: {e}")
-            _MODEL_AVAILABLE = False
-    else:
-        logger.info(f"No model found at {config.LGBM_MODEL_PATH}, using rule‑based only")
-        _MODEL_AVAILABLE = False
+    loaded = risk_model.get_model()
+    _MODEL_CACHE = loaded["model"] if loaded else None
+    _MODEL_FEATURES_CACHE = loaded["feature_cols"] if loaded else None
+    _MODEL_AVAILABLE = loaded is not None
 
 
 def _calculate_model_confidence(df: pd.DataFrame) -> float:
@@ -233,7 +200,7 @@ def _explain_enhanced(row: pd.Series, language: str, rule_score: float = None) -
         elif segment == "Star":
             parts.append("کالای برتر — اولویت در تأمین موجودی")
         reason = " ".join(parts) if parts else "عملکرد خوب در همه معیارها"
-        if model_score and abs(score - model_score) > 15:
+        if model_score is not None and abs(score - model_score) > 15:
             return f"امتیاز {score:.0f}/100. {reason}\n\n⚠️ امتیاز مدل: {model_score:.0f} — این دو امتیاز متفاوت هستند. لطفاً بررسی کنید."
         return f"امتیاز {score:.0f}/100. {reason}"
     else:
@@ -261,7 +228,7 @@ def _explain_enhanced(row: pd.Series, language: str, rule_score: float = None) -
         elif segment == "Risky":
             parts.append("Classified as Risky — monitor closely")
         reason = " ".join(parts) if parts else "Good all‑around performer"
-        if model_score and abs(score - model_score) > 15:
+        if model_score is not None and abs(score - model_score) > 15:
             return f"**Risk Score: {score:.0f}/100** (Model: {model_score:.0f})\n\n⚠️ **Scores disagree significantly** — review this product manually.\n\n{reason}"
         return f"**Risk Score: {score:.0f}/100**\n\n{reason}"
 

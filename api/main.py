@@ -15,13 +15,13 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional, Literal
 from threading import RLock
-from validation import SHOP_ID_PATTERN, validate_shop_id
+from saleyar.validation import SHOP_ID_PATTERN, validate_shop_id
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import console  # noqa: F401  — forces UTF-8 stdout before anything prints
+from saleyar import console  # noqa: F401  — forces UTF-8 stdout before anything prints
 
-import config
+from saleyar import config
 from models import loader
 from output import reporter
 from pipeline import runner, stage7_optimizer, stage5_basket, stage6_risk

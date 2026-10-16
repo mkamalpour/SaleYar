@@ -19,7 +19,7 @@ import pandas as pd
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import config
+from saleyar import config
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ def run(df_kpis: pd.DataFrame, budget: float, goal: str = "maximize_profit",
     """Run optimisation, fallback to greedy if needed."""
     logger.info(f"Stage 7: optimisation | budget={budget:,.0f} | goal={goal}")
 
-    from validation import validate_analysis
+    from saleyar.validation import validate_analysis
     validate_analysis(budget, goal, language)
     if budget <= 0:
         return _skip(_t(language, "Budget must be greater than zero.", "بودجه باید بیشتر از صفر باشد."))
