@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-test_all.py
+smoke_pipeline.py
 
 Comprehensive test suite for SaleYar project.
-Run with: python test_all.py
+Run with: python tests/smoke_pipeline.py
 
 Tests all components FAST. Skips slow parts, uses small data.
 """
@@ -18,7 +18,7 @@ import pandas as pd
 import numpy as np
 
 # Add current directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import console  # noqa: F401  — forces UTF-8 stdout before anything prints
 
@@ -405,7 +405,7 @@ def run_all_tests():
     print("="*60)
     
     if passed == total:
-        print("\n🎉 ALL TESTS PASSED! Project is production ready.\n")
+        print("\n🎉 ALL TESTS PASSED! Synthetic pipeline checks completed.\n")
         return True
     else:
         print(f"\n⚠️  {total - passed} test(s) failed.\n")

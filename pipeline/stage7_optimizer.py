@@ -11,6 +11,7 @@ Improvements:
 - Uses unified_score from Stage 2 as objective
 """
 
+import math
 import logging
 import sys
 import numpy as np
@@ -53,6 +54,8 @@ def run(df_kpis: pd.DataFrame, budget: float, goal: str = "maximize_profit",
     """Run optimisation, fallback to greedy if needed."""
     logger.info(f"Stage 7: optimisation | budget={budget:,.0f} | goal={goal}")
 
+    from validation import validate_analysis
+    validate_analysis(budget, goal, language)
     if budget <= 0:
         return _skip(_t(language, "Budget must be greater than zero.", "بودجه باید بیشتر از صفر باشد."))
     if df_kpis.empty:
@@ -67,6 +70,8 @@ def run(df_kpis: pd.DataFrame, budget: float, goal: str = "maximize_profit",
 
     if use_scip:
         result = _solve_scip(df_kpis, budget, goal, basket_result, current_inventory, forecasts, language)
+        if not result["feasible"] and config.OPTIMIZER_GREEDY_FALLBACK:
+            result = _solve_greedy(df_kpis, budget, goal, current_inventory, forecasts, language)
     else:
         if not HAS_ORTOOLS:
             logger.info("SCIP not available, using greedy fallback.")
@@ -136,7 +141,7 @@ def _solve_integer_program(df_kpis, budget, goal, critical_pairs, current_invent
     n = len(products)
     unit_costs = df_kpis["avg_buy_price"].fillna(0).tolist()
     segments = df_kpis.get("segment", pd.Series([""]*n)).tolist()
-    unified_scores = df_kpis.get("unified_score", pd.Series([50.0]*n)).fillna(50).tolist()
+    unified_scores = _objective_scores(df_kpis, goal).tolist()
     daily_velocity = df_kpis.get("daily_sales", pd.Series([0.0]*n)).fillna(0).tolist()
 
     # current stock (fix negatives)
@@ -151,7 +156,7 @@ def _solve_integer_program(df_kpis, budget, goal, critical_pairs, current_invent
         abs_max = MAX_UNITS_PER_PRODUCT
         # budget limit
         max_spend = budget * MAX_SINGLE_PRODUCT_SHARE
-        budget_max = int(max_spend / max(unit_costs[i], 1)) if unit_costs[i] > 0 else abs_max
+        budget_max = int(max_spend / unit_costs[i]) if unit_costs[i] > 0 else 0
         # demand limit (max coverage days)
         product_name = products[i]
         fc_data = forecasts.get(product_name, {}) if forecasts else {}
@@ -161,7 +166,9 @@ def _solve_integer_program(df_kpis, budget, goal, critical_pairs, current_invent
             demand_max = int(avg_daily * MAX_COVERAGE_DAYS)
         else:
             demand_max = abs_max
-        max_qty.append(max(0, min(abs_max, budget_max, demand_max)))
+        needed = _calculate_needed_quantity(current_stock[i], daily_fc, MAX_COVERAGE_DAYS,
+            daily_velocity[i], fc_data.get("low_confidence", False), segments[i])
+        max_qty.append(max(0, min(abs_max, budget_max, demand_max, needed)))
 
     buy_vars = [solver.IntVar(0, max_qty[i], f"buy_{i}") for i in range(n)]
 
@@ -175,7 +182,8 @@ def _solve_integer_program(df_kpis, budget, goal, critical_pairs, current_invent
         solver.Add(buy_vars[i] >= cv)
         solver.Add(buy_vars[i] <= max_qty[i] * cv)
         product_count_vars.append(cv)
-    solver.Add(solver.Sum(product_count_vars) >= MIN_PRODUCTS_IN_ORDER)
+    if enforce_minimums:
+        solver.Add(solver.Sum(product_count_vars) >= min(MIN_PRODUCTS_IN_ORDER, sum(q > 0 for q in max_qty)))
 
     # Deadweight -> buy zero
     for i, seg in enumerate(segments):
@@ -254,7 +262,9 @@ def _solve_integer_program(df_kpis, budget, goal, critical_pairs, current_invent
 
 def _solve_greedy(df_kpis, budget, goal, current_inventory, forecasts, language):
     """Simple greedy algorithm - shows ALL products, respects budget for purchases."""
-    sorted_df = df_kpis.sort_values("unified_score", ascending=False).copy()
+    sorted_df = df_kpis.copy()
+    sorted_df["_objective"] = _objective_scores(sorted_df, goal) / sorted_df["avg_buy_price"].clip(lower=1)
+    sorted_df = sorted_df.sort_values("_objective", ascending=False)
     remaining_budget = budget
     order = []
 
@@ -281,7 +291,8 @@ def _solve_greedy(df_kpis, budget, goal, current_inventory, forecasts, language)
         
         # Calculate max affordable
         max_by_budget = int(remaining_budget / unit_cost) if unit_cost > 0 else 0
-        qty = min(needed, MAX_UNITS_PER_PRODUCT, max_by_budget)
+        max_by_share = int(budget * MAX_SINGLE_PRODUCT_SHARE / unit_cost) if unit_cost > 0 else 0
+        qty = min(needed, MAX_UNITS_PER_PRODUCT, max_by_budget, max_by_share)
         
         # ALWAYS add to order (qty may be 0)
         if qty >= MIN_SHELF_QUANTITY and unit_cost > 0 and remaining_budget >= qty * unit_cost:
@@ -320,9 +331,22 @@ def _solve_greedy(df_kpis, budget, goal, current_inventory, forecasts, language)
 # HELPERS
 # ============================================================================
 
+def _objective_scores(df, goal):
+    """Per-unit benefit, consistently used by SCIP and the greedy fallback."""
+    if goal == "reduce_risk":
+        return (100 - df.get("risk_score", pd.Series(50, index=df.index)).fillna(50)).clip(lower=0)
+    if goal == "cover_customers":
+        return df.get("conversion_rate", pd.Series(1, index=df.index)).fillna(0).clip(lower=0)
+    selling = df.get("avg_sell_price", pd.Series(0, index=df.index)).fillna(0)
+    buying = df["avg_buy_price"].fillna(0)
+    return (selling - buying).clip(lower=0)
+
+
 def _calculate_needed_quantity(current_stock, daily_forecast, coverage_days,
                                daily_velocity=0.0, low_confidence=False, segment="Individual"):
     """Calculate how many units to buy (capped at MAX_UNITS_PER_PRODUCT)."""
+    if segment == "Deadweight":
+        return 0
     if current_stock < 0:
         current_stock = 0
     mult = LOW_CONFIDENCE_MULTIPLIER if low_confidence else 1.0
@@ -334,7 +358,7 @@ def _calculate_needed_quantity(current_stock, daily_forecast, coverage_days,
     forecast_demand = sum(daily_forecast[:coverage_days])
     if current_stock >= forecast_demand * 1.5:
         return 0
-    needed = int((forecast_demand - current_stock) * mult)
+    needed = math.ceil((forecast_demand - current_stock) * mult)
     needed = max(0, needed)
     if needed > MAX_UNITS_PER_PRODUCT:
         needed = MAX_UNITS_PER_PRODUCT

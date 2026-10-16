@@ -10,6 +10,9 @@ Improvements:
 - Caches rules per shop
 """
 
+from validation import shop_serialized
+
+import hashlib
 import logging
 import os
 import sys
@@ -22,6 +25,7 @@ import random
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import config
+from models.loader import get_shop_dir
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +34,7 @@ BASKET_MAX_PRODUCTS = getattr(config, 'BASKET_MAX_PRODUCTS', 200)
 BASKET_SAMPLE_SIZE = getattr(config, 'BASKET_SAMPLE_SIZE', 2000)
 
 
+@shop_serialized
 def run(df: pd.DataFrame, shop_id: str = "default") -> dict:
     """Run basket analysis with adaptive method based on data size."""
     logger.info("Stage 5: basket analysis")
@@ -51,12 +56,15 @@ def run(df: pd.DataFrame, shop_id: str = "default") -> dict:
         return {"rules": [], "critical_pairs": [], "skipped": True, "skip_reason": reason}
 
     # Load from cache
-    rules_path = os.path.join(config.SHOPS_DIR, shop_id, "basket_rules.pkl")
+    rules_path = os.path.join(get_shop_dir(shop_id), "basket_rules.pkl")
+    fingerprint = hashlib.sha256(pd.util.hash_pandas_object(
+        sales_df[["invoice_id", "product", "qty"]], index=False).values.tobytes() +
+        str((config.MIN_BASKET_ROWS, CRITICAL_PAIR_CONFIDENCE, BASKET_MAX_PRODUCTS, BASKET_SAMPLE_SIZE)).encode()).hexdigest()
     if os.path.exists(rules_path):
         try:
             data = joblib.load(rules_path)
-            logger.info(f"Loaded {len(data.get('rules', []))} cached rules")
-            return data
+            if data.get("fingerprint") == fingerprint and "result" in data:
+                return data["result"]
         except Exception as e:
             logger.warning(f"Cache load failed, re-mining: {e}")
 
@@ -69,7 +77,7 @@ def run(df: pd.DataFrame, shop_id: str = "default") -> dict:
     if result and not result.get("skipped"):
         try:
             os.makedirs(os.path.dirname(rules_path), exist_ok=True)
-            joblib.dump(result, rules_path)
+            joblib.dump({"fingerprint": fingerprint, "result": result}, rules_path)
             logger.info(f"Saved basket cache for '{shop_id}'")
         except Exception as e:
             logger.warning(f"Could not save cache: {e}")

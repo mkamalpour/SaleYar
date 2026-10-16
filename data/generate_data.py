@@ -23,9 +23,8 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 
-if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import console  # Configure streams safely without replacing/closing wrappers.
 
 def clean_old_files(data_dir="data"):
     if not os.path.exists(data_dir):

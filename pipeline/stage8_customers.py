@@ -44,6 +44,13 @@ def run(df: pd.DataFrame, language: str = "en") -> dict:
         logger.info(f"Stage 8 skipped – {reason}")
         return _skip(reason)
 
+    df = df.copy()
+    if "transaction_type" in df.columns:
+        df = df[df["transaction_type"].isin(["sale", "return_sale"])].copy()
+        df["qty"] = df["qty"].abs().where(df["transaction_type"].eq("sale"), -df["qty"].abs())
+    df = df[df["customer_id"].notna() & ~df["customer_id"].astype(str).str.strip().isin(["", "nan", "None"])].copy()
+    if df.empty:
+        return _skip("No customer sales are available for segmentation.")
     n_customers = df["customer_id"].nunique()
     if n_customers == 1:
         return _single_customer_analysis(df, language)
@@ -244,7 +251,7 @@ def _champion_products(df: pd.DataFrame, champion_ids: list) -> list:
     """Top 5 products purchased by Champion customers."""
     if not champion_ids:
         return []
-    champ_df = df[df["customer_id"].isin(champion_ids)]
+    champ_df = df[df["customer_id"].isin(champion_ids)].copy()
     if "qty" not in champ_df.columns or "product" not in champ_df.columns:
         return []
     champ_df["qty"] = pd.to_numeric(champ_df["qty"], errors="coerce").fillna(0)

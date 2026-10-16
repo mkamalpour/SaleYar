@@ -8,7 +8,6 @@ launch the developer UI, launch terminal mode, or get API instructions.
 
 import argparse
 import os
-import shutil
 import subprocess
 import sys
 
@@ -27,30 +26,12 @@ def run_subprocess(command: list[str], cwd: str = PROJECT_ROOT) -> int:
     return result.returncode
 
 
-def clear_shop_models() -> None:
-    """Delete all per-shop model folders so every run starts fresh."""
-    shops_dir = os.path.join(PROJECT_ROOT, "models", "shops")
-    if os.path.exists(shops_dir):
-        for item in os.listdir(shops_dir):
-            path = os.path.join(shops_dir, item)
-            try:
-                if os.path.isdir(path):
-                    shutil.rmtree(path)
-                else:
-                    os.remove(path)
-            except Exception as e:
-                print(f"Warning: could not remove {path}: {e}")
-    else:
-        os.makedirs(shops_dir, exist_ok=True)
-
-
 def run_html_dashboard() -> None:
     """Launch the owner dashboard and the API server."""
     import socketserver
     import threading
     import time
     import webbrowser
-    from http.server import SimpleHTTPRequestHandler
 
     api_port = int(os.environ.get("SALEYAR_API_PORT", "8000"))
     web_port = int(os.environ.get("SALEYAR_WEB_PORT", "3000"))
@@ -65,37 +46,8 @@ def run_html_dashboard() -> None:
     injected_key = config.API_KEY
     dashboard_url = f"http://localhost:{web_port}/ui/owner.html"
 
-    class DashboardHandler(SimpleHTTPRequestHandler):
-        """Serves the project root, injecting the runtime API key into owner.html."""
-
-        def log_message(self, *args):  # silence per-request stderr noise
-            pass
-
-        def _read_with_key(self, path: str) -> bytes:
-            with open(path, "rb") as f:
-                body = f.read()
-            if path.endswith("owner.html"):
-                body = body.replace(
-                    b"__SALEYAR_API_KEY__", injected_key.encode("utf-8")
-                )
-            return body
-
-        def do_GET(self):
-            path = self.translate_path(self.path.split("?", 1)[0])
-            if os.path.isfile(path) and path.endswith("owner.html"):
-                try:
-                    body = self._read_with_key(path)
-                except OSError:
-                    self.send_error(404)
-                    return
-                self.send_response(200)
-                self.send_header("Content-Type", "text/html; charset=utf-8")
-                self.send_header("Content-Length", str(len(body)))
-                self.send_header("Cache-Control", "no-store")
-                self.end_headers()
-                self.wfile.write(body)
-                return
-            super().do_GET()
+    from ui.server import create_dashboard_handler
+    DashboardHandler = create_dashboard_handler(PROJECT_ROOT, injected_key, api_port)
 
     # Start API server in a background thread.
     def start_api():
@@ -104,7 +56,7 @@ def run_html_dashboard() -> None:
 
     def start_web():
         socketserver.TCPServer.allow_reuse_address = True
-        with socketserver.TCPServer(("", web_port), DashboardHandler) as httpd:
+        with socketserver.ThreadingTCPServer(("127.0.0.1", web_port), DashboardHandler) as httpd:
             httpd.serve_forever()
 
     for thread, name in ((start_api, "api"), (start_web, "web")):
@@ -136,7 +88,7 @@ def run_html_dashboard() -> None:
     print("=" * 58)
     print(f"  Dashboard : {dashboard_url}")
     print(f"  API       : http://127.0.0.1:{api_port}")
-    print(f"  API key   : {injected_key}")
+    print("  API key   : configured automatically in the local dashboard")
     print("\n  Press Ctrl+C to stop.")
     print("=" * 58 + "\n")
 
@@ -307,8 +259,6 @@ def main() -> None:
     parser.add_argument("--generate-data", action="store_true", help="Generate sample data.")
     parser.add_argument("--train-demo", action="store_true", help="Train demo models using sample data.")
     args = parser.parse_args()
-
-    clear_shop_models()
 
     if args.generate_data:
         generate_sample_data()

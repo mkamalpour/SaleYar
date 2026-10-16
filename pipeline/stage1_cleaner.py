@@ -107,7 +107,7 @@ def run(file_bytes: bytes, filename: str, language: str = "en") -> dict:
     for issue in all_issues:
         if isinstance(issue, dict):
             issue_text = issue.get("issue", "")
-            if any(x in issue_text.lower() for x in ["return", "damaged", "loss", "promotion", "anomaly", "zero quantity"]):
+            if issue.get("severity") == "warning":
                 warnings.append(issue)
             else:
                 real_errors.append(issue)
@@ -166,7 +166,7 @@ def _clean_with_business_rules(df: pd.DataFrame, language: str):
 
     # Remove exact duplicates (record as info)
     before = len(df)
-    df = df.drop_duplicates().reset_index(drop=True)
+    df = df.drop_duplicates().copy()
     removed = before - len(df)
     if removed:
         issues.append({
@@ -180,13 +180,20 @@ def _clean_with_business_rules(df: pd.DataFrame, language: str):
     # Coerce numeric columns
     for col in ["qty", "buy_price", "sell_price"]:
         if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
+            digits = str.maketrans("\u06f0\u06f1\u06f2\u06f3\u06f4\u06f5\u06f6\u06f7\u06f8\u06f9", "0123456789")
+            raw = df[col].astype(str).str.translate(digits).str.replace(",", "", regex=False).str.replace("\u066c", "", regex=False)
+            df[col] = pd.to_numeric(raw, errors="coerce")
+            invalid = ~np.isfinite(df[col])
+            for idx in df.index[invalid]:
+                issues.append({"row_index": idx, "row_number": idx + 2,
+                               "issue": f"Invalid numeric value in {col}", "severity": "error"})
+            df.loc[invalid, col] = np.nan
 
     # ========== REMOVE ZERO QUANTITY ROWS (they are useless) ==========
     zero_qty_mask = df["qty"] == 0
     if zero_qty_mask.any():
         removed_zero = zero_qty_mask.sum()
-        df = df[~zero_qty_mask].reset_index(drop=True)
+        df = df[~zero_qty_mask].copy()
         issues.append({
             "row_index": -1,
             "row_number": -1,
@@ -448,48 +455,37 @@ def _map_headers(df: pd.DataFrame, n_rows: int = None):
 
 
 def _parse_dates(df: pd.DataFrame, language: str):
-    """Parse dates trying multiple formats; fallback to today instead of NaT."""
+    """Parse Gregorian/Jalali dates and flag invalid values for exclusion."""
     issues = []
-
-    def _try_parse(val):
-        if pd.isna(val):
-            return pd.Timestamp.now()   # fallback to today
-        val = str(val).strip()
-        # Try common Gregorian formats
-        for fmt in ("%Y/%m/%d", "%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"):
-            try:
-                return pd.to_datetime(val, format=fmt)
-            except:
-                continue
-        # Try Jalali
-        if HAS_JDATETIME:
-            for fmt in ("%Y/%m/%d", "%Y-%m-%d", "%Y%m%d", "%d/%m/%Y"):
+    digits = str.maketrans("\u06f0\u06f1\u06f2\u06f3\u06f4\u06f5\u06f6\u06f7\u06f8\u06f9\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669", "01234567890123456789")
+    def parse(value):
+        if pd.isna(value):
+            return pd.NaT
+        value = str(value).strip().translate(digits)
+        year = value[:4]
+        jalali = year.isdigit() and 1200 <= int(year) < 1700
+        if jalali and HAS_JDATETIME:
+            for fmt in ("%Y/%m/%d", "%Y-%m-%d", "%Y%m%d"):
                 try:
-                    jd = jdatetime.datetime.strptime(val, fmt)
-                    return pd.Timestamp(jd.togregorian())
-                except Exception:
-                    continue
-        # Final fallback
-        logger.warning(f"Could not parse date '{val}', using today")
-        return pd.Timestamp.now()
-
+                    return pd.Timestamp(jdatetime.datetime.strptime(value, fmt).togregorian())
+                except ValueError:
+                    pass
+        if not jalali:
+            for fmt in ("%Y/%m/%d", "%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d %H:%M:%S"):
+                try:
+                    return pd.to_datetime(value, format=fmt)
+                except (ValueError, TypeError):
+                    pass
+        return pd.NaT
     df = df.copy()
-    df["date"] = df["date"].apply(_try_parse)
-
-    # Now check for future dates (warnings, not errors)
-    now = pd.Timestamp.now()
-    future_mask = df["date"] > now
-    if future_mask.any():
-        for idx in df[future_mask].index:
-            issues.append({
-                "row_index": idx,
-                "row_number": idx + 2,
-                "issue": _t(language, "Date is in the future (using today)", "تاریخ در آینده است (امروز جایگزین شد)"),
-                "value": str(df.loc[idx, "date"]),
-                "severity": "warning"
-            })
-        df.loc[future_mask, "date"] = now
-
+    original = df["date"].copy()
+    df["date"] = pd.to_datetime(df["date"].map(parse), errors="coerce")
+    for idx in df.index[df["date"].isna()]:
+        issues.append({"row_index": idx, "row_number": idx + 2,
+                       "issue": "Invalid or missing date", "value": str(original.loc[idx]), "severity": "error"})
+    for idx in df.index[df["date"] > pd.Timestamp.now()]:
+        issues.append({"row_index": idx, "row_number": idx + 2,
+                       "issue": "Date is in the future", "value": str(original.loc[idx]), "severity": "warning"})
     return df, issues
 
 

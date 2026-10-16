@@ -13,7 +13,9 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
+from threading import RLock
+from validation import SHOP_ID_PATTERN, validate_shop_id
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -54,18 +56,18 @@ class SafeJSONEncoder(json.JSONEncoder):
 
 def safe_json_serialize(obj):
     """Convert any object to JSON-serializable format."""
-    return json.loads(json.dumps(obj, cls=SafeJSONEncoder))
+    return json.loads(json.dumps(obj, cls=SafeJSONEncoder), parse_constant=lambda value: None)
 
 # ============================================================================
 
-os.makedirs("logs", exist_ok=True)
-os.makedirs("saved_reports", exist_ok=True)
+os.makedirs(config.LOGS_DIR, exist_ok=True)
+os.makedirs(config.SAVED_REPORTS_DIR, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
     handlers=[
-        logging.FileHandler("logs/app.log"),
+        logging.FileHandler(os.path.join(config.LOGS_DIR, "app.log"), encoding="utf-8"),
         logging.StreamHandler(),
     ],
 )
@@ -78,8 +80,8 @@ ALLOWED_ORIGINS = (
     [o.strip() for o in _cors_raw.split(",") if o.strip()]
     if _cors_raw
     else [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        f"http://localhost:{os.getenv('SALEYAR_WEB_PORT', '3000')}",
+        f"http://127.0.0.1:{os.getenv('SALEYAR_WEB_PORT', '3000')}",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ]
@@ -109,6 +111,7 @@ app.add_middleware(
     allow_headers=["Content-Type", "X-API-Key"],
 )
 
+_state_lock = RLock()
 _jobs: dict = {}
 # Latest report per shop, so /report/{shop_id} and /health/{shop_id} work even
 # when SAVE_REPORTS_TO_DISK is off. Bounded by MAX_REPORT_SHOPS.
@@ -121,17 +124,23 @@ MAX_UPLOAD_BYTES = config.MAX_FILE_SIZE_MB * 1024 * 1024
 
 def _store_report(shop_id: str, report: dict) -> None:
     """Cache the newest report for a shop, evicting the oldest shop if full."""
-    if shop_id in _reports:
-        _reports.pop(shop_id)
-    elif len(_reports) >= MAX_REPORT_SHOPS:
-        _reports.pop(next(iter(_reports)))
-    _reports[shop_id] = report
+    with _state_lock:
+        if shop_id in _reports:
+            _reports.pop(shop_id)
+        elif len(_reports) >= MAX_REPORT_SHOPS:
+            _reports.pop(next(iter(_reports)))
+        _reports[shop_id] = report
 
 
 def _load_report(shop_id: str):
     """Read a report from the in-memory cache, falling back to disk."""
-    if shop_id in _reports:
-        return _reports[shop_id]
+    try:
+        validate_shop_id(shop_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    with _state_lock:
+        if shop_id in _reports:
+            return _reports[shop_id]
     return reporter.load_latest(shop_id)
 
 
@@ -173,6 +182,15 @@ async def _read_upload(file: UploadFile) -> bytes:
     return data
 
 
+def _read_upload_sync(file: UploadFile) -> bytes:
+    data = file.file.read(MAX_UPLOAD_BYTES + 1)
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="Uploaded file exceeds the size limit.")
+    if not data:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    return data
+
+
 def _validate_upload(file: UploadFile):
     allowed_extensions = {".csv", ".xlsx", ".xls", ".txt"}
     ext = os.path.splitext(file.filename or "")[-1].lower()
@@ -190,10 +208,10 @@ def _validate_upload(file: UploadFile):
 @app.post("/analyze", summary="Full pipeline — returns job_id immediately")
 async def analyze(
     file:      UploadFile  = File(...),
-    shop_id:   str         = Form("default"),
-    budget:    float       = Form(1_000_000),
-    goal:      str         = Form("maximize_profit"),
-    language:  str         = Form("en"),
+    shop_id:   str         = Form("default", pattern=SHOP_ID_PATTERN, min_length=1, max_length=64),
+    budget:    float       = Form(1_000_000, gt=0, allow_inf_nan=False),
+    goal:      Literal["maximize_profit", "cover_customers", "reduce_risk"] = Form("maximize_profit"),
+    language:  Literal["en", "fa"] = Form("en"),
     x_api_key: Optional[str] = Header(None),
 ):
     _require_key(x_api_key)
@@ -201,30 +219,37 @@ async def analyze(
 
     file_bytes = await _read_upload(file)
     job_id = str(uuid.uuid4())
-    _prune_jobs()
-    _jobs[job_id] = {
-        "status":  "running",
-        "result":  None,
-        "error":   None,
-        "started": time.time(),
-    }
+    with _state_lock:
+        _prune_jobs()
+        active = sum(job["status"] == "running" for job in _jobs.values())
+        if active >= config.MAX_PENDING_JOBS:
+            raise HTTPException(status_code=429, detail="Analysis queue is full. Please try again shortly.")
+        _jobs[job_id] = {"status": "running", "result": None, "error": None, "started": time.time()}
 
     def _run():
         try:
             result = runner.run_pipeline(
                 file_bytes, file.filename, budget, shop_id, goal, language
             )
-            report = reporter.assemble_and_save(result, shop_id, save_to_disk=config.SAVE_REPORTS_TO_DISK)
-            result["report"] = report
-            _store_report(shop_id, report)
-            _jobs[job_id]["result"] = safe_json_serialize(result)
-            _jobs[job_id]["status"] = "done"
+            if result.get("passed") is not False:
+                report = reporter.assemble_and_save(result, shop_id, save_to_disk=config.SAVE_REPORTS_TO_DISK)
+                result["report"] = report
+                _store_report(shop_id, report)
+            payload = safe_json_serialize(result)
+            with _state_lock:
+                _jobs[job_id]["result"] = payload
+                _jobs[job_id]["status"] = "done"
         except Exception as e:
             logger.error(f"Pipeline error for job {job_id}: {e}", exc_info=True)
             _jobs[job_id]["status"] = "error"
             _jobs[job_id]["error"]  = str(e)
 
-    _executor.submit(_run)
+    try:
+        _executor.submit(_run)
+    except RuntimeError as exc:
+        with _state_lock:
+            _jobs.pop(job_id, None)
+        raise HTTPException(status_code=503, detail="Analysis service is unavailable.") from exc
     logger.info(f"Job {job_id} started | shop={shop_id} | file={file.filename}")
 
     return {
@@ -243,7 +268,9 @@ async def analyze(
 def get_result(job_id: str, x_api_key: Optional[str] = Header(None)):
     _require_key(x_api_key)
 
-    job = _jobs.get(job_id)
+    with _state_lock:
+        _prune_jobs()
+        job = dict(_jobs[job_id]) if job_id in _jobs else None
     if not job:
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
 
@@ -265,12 +292,12 @@ def get_result(job_id: str, x_api_key: Optional[str] = Header(None)):
 # ─────────────────────────────────────────────────────────────
 
 @app.post("/optimize", summary="Budget optimizer only — under 2 seconds")
-async def optimize(
+def optimize(
     file:      UploadFile  = File(...),
-    shop_id:   str         = Form("default"),
-    budget:    float       = Form(1_000_000),
-    goal:      str         = Form("maximize_profit"),
-    language:  str         = Form("en"),
+    shop_id:   str         = Form("default", pattern=SHOP_ID_PATTERN, min_length=1, max_length=64),
+    budget:    float       = Form(1_000_000, gt=0, allow_inf_nan=False),
+    goal:      Literal["maximize_profit", "cover_customers", "reduce_risk"] = Form("maximize_profit"),
+    language:  Literal["en", "fa"] = Form("en"),
     x_api_key: Optional[str] = Header(None),
 ):
     _require_key(x_api_key)
@@ -280,7 +307,7 @@ async def optimize(
         from pipeline import stage1_cleaner, stage2_metrics, stage4_segments, stage3_forecast
         from pipeline.runner import calculate_current_inventory
 
-        file_bytes = await _read_upload(file)
+        file_bytes = _read_upload_sync(file)
         s1 = stage1_cleaner.run(file_bytes, file.filename, language)
         if not s1["passed"]:
             return JSONResponse(
@@ -313,6 +340,8 @@ async def optimize(
         )
         return safe_json_serialize(result)
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"/optimize error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -323,9 +352,9 @@ async def optimize(
 # ─────────────────────────────────────────────────────────────
 
 @app.post("/basket", summary="Basket analysis only — under 8 seconds")
-async def basket(
+def basket(
     file:      UploadFile  = File(...),
-    shop_id:   str         = Form("default"),
+    shop_id:   str         = Form("default", pattern=SHOP_ID_PATTERN, min_length=1, max_length=64),
     x_api_key: Optional[str] = Header(None),
 ):
     _require_key(x_api_key)
@@ -334,7 +363,7 @@ async def basket(
     try:
         from pipeline import stage1_cleaner
 
-        file_bytes = await _read_upload(file)
+        file_bytes = _read_upload_sync(file)
         s1 = stage1_cleaner.run(file_bytes, file.filename)
         if not s1["passed"]:
             return JSONResponse(
@@ -344,6 +373,8 @@ async def basket(
         result = stage5_basket.run(s1["df"], shop_id)
         return safe_json_serialize(result)
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"/basket error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -354,10 +385,10 @@ async def basket(
 # ─────────────────────────────────────────────────────────────
 
 @app.post("/risk", summary="Risk scoring only — under 3 seconds")
-async def risk(
+def risk(
     file:      UploadFile  = File(...),
-    shop_id:   str         = Form("default"),
-    language:  str         = Form("en"),
+    shop_id:   str         = Form("default", pattern=SHOP_ID_PATTERN, min_length=1, max_length=64),
+    language:  Literal["en", "fa"] = Form("en"),
     x_api_key: Optional[str] = Header(None),
 ):
     _require_key(x_api_key)
@@ -366,7 +397,7 @@ async def risk(
     try:
         from pipeline import stage1_cleaner, stage2_metrics
 
-        file_bytes = await _read_upload(file)
+        file_bytes = _read_upload_sync(file)
         s1 = stage1_cleaner.run(file_bytes, file.filename, language)
         if not s1["passed"]:
             return JSONResponse(
@@ -378,6 +409,8 @@ async def risk(
         result = df_kpis[["product", "risk_score", "risk_explanation"]].to_dict("records")
         return safe_json_serialize(result)
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"/risk error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -435,7 +468,8 @@ def healthcheck(x_api_key: Optional[str] = Header(None)):
     uptime = round(
         (datetime.now() - datetime.fromisoformat(SERVER_START)).total_seconds()
     )
-    active_jobs = sum(1 for j in _jobs.values() if j["status"] == "running")
+    with _state_lock:
+        active_jobs = sum(1 for j in _jobs.values() if j["status"] == "running")
 
     return {
         "status":         "ok",
@@ -457,7 +491,7 @@ class LLMAskRequest(BaseModel):
 
 
 @app.post("/llm/ask", summary="Ask the shop advisor")
-async def llm_ask(
+def llm_ask(
     data: LLMAskRequest,
     x_api_key: Optional[str] = Header(None),
 ):

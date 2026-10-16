@@ -3,7 +3,8 @@
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 # ============================================================================
 # API & SERVER
@@ -199,8 +200,11 @@ PRIORITY_HIGH_RISK_THRESHOLD = 70
 # ============================================================================
 # MODELS & PATHS
 # ============================================================================
-LGBM_MODEL_PATH = "models/lgbm_risk.pkl"
-SHOPS_DIR = "models/shops"
+LGBM_MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "lgbm_risk.pkl")
+SHOPS_DIR = os.path.join(PROJECT_ROOT, "models", "shops")
+SAVED_REPORTS_DIR = os.path.join(PROJECT_ROOT, "saved_reports")
+LOGS_DIR = os.path.join(PROJECT_ROOT, "logs")
+MAX_PENDING_JOBS = MAX_CONCURRENT_JOBS * 4
 SAVE_REPORTS_TO_DISK = False
 
 # ============================================================================

@@ -15,6 +15,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import config
+from validation import validate_shop_id
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def assemble_and_save(pipeline_result: dict, shop_id: str, save_to_disk: bool = 
     report["summary"] = _build_summary(pipeline_result, report)
 
     if save_to_disk:
-        save_dir = os.path.join("saved_reports", shop_id)
+        save_dir = os.path.join(config.SAVED_REPORTS_DIR, validate_shop_id(shop_id))
         os.makedirs(save_dir, exist_ok=True)
         date_str = datetime.now().strftime("%Y-%m-%d")
         path_latest = os.path.join(save_dir, "report_latest.json")
@@ -208,7 +209,7 @@ def _calculate_health_score(report: dict) -> int:
 
     products = report.get("products", [])
     if products:
-        fresh = sum(1 for p in products if (p.get("days_since_last_sale") or 999) <= 30)
+        fresh = sum(1 for p in products if (p.get("days_since_last_sale") if p.get("days_since_last_sale") is not None else 999) <= 30)
         fresh_pct = fresh / len(products) * 100
         score += fresh_pct * 0.25
 
@@ -254,7 +255,7 @@ def _to_float(value, default=0.0):
 
 
 def load_latest(shop_id: str) -> dict | None:
-    path = os.path.join("saved_reports", shop_id, "report_latest.json")
+    path = os.path.join(config.SAVED_REPORTS_DIR, validate_shop_id(shop_id), "report_latest.json")
     if not os.path.exists(path):
         return None
     with open(path, encoding="utf-8") as f:
@@ -262,7 +263,7 @@ def load_latest(shop_id: str) -> dict | None:
 
 
 def load_latest_summary(shop_id: str) -> dict | None:
-    path = os.path.join("saved_reports", shop_id, "summary.json")
+    path = os.path.join(config.SAVED_REPORTS_DIR, validate_shop_id(shop_id), "summary.json")
     if not os.path.exists(path):
         return None
     with open(path, encoding="utf-8") as f:

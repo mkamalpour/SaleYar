@@ -23,6 +23,7 @@ import joblib
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import config
+from validation import validate_shop_id
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +69,7 @@ def _load_all_shops():
 
 
 def _load_shop(shop_id: str):
-    shop_dir = os.path.join(config.SHOPS_DIR, shop_id)
+    shop_dir = get_shop_dir(shop_id)
     _SHOP_MODELS[shop_id] = {}
     _LOAD_STATUS[shop_id] = {}
 
@@ -119,7 +120,7 @@ def get_status() -> dict:
 
 
 def get_shop_dir(shop_id: str) -> str:
-    return os.path.join(config.SHOPS_DIR, shop_id)
+    return os.path.join(config.SHOPS_DIR, validate_shop_id(shop_id))
 
 
 def get_shop_metadata(shop_id: str):
@@ -132,6 +133,7 @@ def save_shop_metadata(shop_id: str, metadata: dict) -> None:
     os.makedirs(shop_dir, exist_ok=True)
     with open(os.path.join(shop_dir, "metadata.json"), "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
+    _SHOP_MODELS.setdefault(shop_id, {})["metadata"] = dict(metadata)
 
 
 def clear_shop_models(shop_id: str) -> None:

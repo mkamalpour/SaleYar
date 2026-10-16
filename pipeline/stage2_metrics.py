@@ -21,13 +21,19 @@ import config
 logger = logging.getLogger(__name__)
 
 
+def sales_mask(df):
+    mask = (df["qty"] > 0) & (df["sell_price"] > 0)
+    if "transaction_type" in df.columns:
+        mask &= df["transaction_type"].eq("sale")
+    return mask
+
+
 def run(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate KPIs per product, unified score, and rank."""
     logger.info("Stage 2: calculating KPIs")
 
     # ========== SHOP‑WIDE METRICS ==========
-    sales_mask = (df["qty"] > 0) & (df["sell_price"] > 0)
-    shop_sales_df = df[sales_mask]
+    shop_sales_df = df[sales_mask(df)]
     shop_total_revenue = (shop_sales_df["qty"] * shop_sales_df["sell_price"]).sum()
     shop_total_cost = (shop_sales_df["qty"] * shop_sales_df["buy_price"]).sum()
     shop_avg_margin = ((shop_total_revenue - shop_total_cost) / shop_total_cost * 100) if shop_total_cost > 0 else 0.0
@@ -37,7 +43,7 @@ def run(df: pd.DataFrame) -> pd.DataFrame:
     # ========== PRODUCT‑LEVEL KPIS ==========
     products = []
     for product_name, group in df.groupby("product"):
-        kpi = _calc_product_kpis(product_name, group, df, shop_avg_margin, max_date)
+        kpi = _calc_product_kpis(product_name, group, df, shop_avg_margin, max_date, shop_total_revenue)
         products.append(kpi)
 
     result = pd.DataFrame(products)
@@ -59,17 +65,18 @@ def run(df: pd.DataFrame) -> pd.DataFrame:
         if col in result.columns:
             low = result[col].quantile(clip_low / 100)
             high = result[col].quantile(clip_high / 100)
-            result[col] = result[col].clip(low, high)
+            result[f"{col}_scoring"] = result[col].clip(low, high)
 
     # ========== UNIFIED SCORE (without risk – risk added later) ==========
     # Normalize each metric to 0‑100 using robust scaling (min‑max after clipping)
     metrics_to_normalize = ["profit_margin", "daily_sales", "liquidity_rate"]
     for metric in metrics_to_normalize:
         if metric in result.columns:
-            min_val = result[metric].min()
-            max_val = result[metric].max()
+            scoring = result.get(f"{metric}_scoring", result[metric])
+            min_val = scoring.min()
+            max_val = scoring.max()
             if max_val > min_val:
-                result[f"{metric}_norm"] = (result[metric] - min_val) / (max_val - min_val) * 100
+                result[f"{metric}_norm"] = (scoring - min_val) / (max_val - min_val) * 100
             else:
                 result[f"{metric}_norm"] = 50.0
         else:
@@ -94,17 +101,17 @@ def run(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def _calc_product_kpis(product_name, group, df_all, shop_avg_margin, max_date) -> dict:
+def _calc_product_kpis(product_name, group, df_all, shop_avg_margin, max_date, shop_total_revenue=None) -> dict:
     group = group.sort_values("date")
-    sales_group = group[(group["qty"] > 0) & (group["sell_price"] > 0)]
+    sales_group = group[sales_mask(group)]
 
     total_sold = sales_group["qty"].sum()
     total_revenue = (sales_group["qty"] * sales_group["sell_price"]).sum()
     total_cost = (sales_group["qty"] * sales_group["buy_price"]).sum()
     total_profit = total_revenue - total_cost
 
-    avg_buy = group["buy_price"].mean() if not group.empty else 0
-    avg_sell = group["sell_price"].mean() if not group.empty else 0
+    avg_buy = total_cost / total_sold if total_sold > 0 else group["buy_price"].mean()
+    avg_sell = total_revenue / total_sold if total_sold > 0 else 0
     profit_margin = ((avg_sell - avg_buy) / avg_buy * 100) if avg_buy > 0 else 0.0
 
     # Liquidity rate (stock turnover scaled 0‑100)
@@ -146,8 +153,9 @@ def _calc_product_kpis(product_name, group, df_all, shop_avg_margin, max_date) -
         hope_rate = 0.0
 
     # Portfolio weight (share of total revenue)
-    shop_total_revenue = (df_all[(df_all["qty"] > 0) & (df_all["sell_price"] > 0)]["qty"] *
-                          df_all[(df_all["qty"] > 0) & (df_all["sell_price"] > 0)]["sell_price"]).sum()
+    if shop_total_revenue is None:
+        sales = df_all[sales_mask(df_all)]
+        shop_total_revenue = (sales["qty"] * sales["sell_price"]).sum()
     portfolio_weight = (total_revenue / shop_total_revenue * 100) if shop_total_revenue > 0 else 0.0
 
     # Days since last sale
@@ -180,7 +188,7 @@ def _calc_product_kpis(product_name, group, df_all, shop_avg_margin, max_date) -
         unique_customers = None
 
     # Conversion rate (invoices containing this product)
-    total_invoices = df_all["invoice_id"].nunique()
+    total_invoices = df_all.loc[sales_mask(df_all), "invoice_id"].nunique()
     product_invoices = sales_group["invoice_id"].nunique()
     conversion_rate = (product_invoices / total_invoices * 100) if total_invoices > 0 else 0.0
 

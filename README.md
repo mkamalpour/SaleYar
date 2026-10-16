@@ -1,241 +1,97 @@
-# SaleYar — Shop Advisor
+# SaleYar
 
-**Offline business intelligence for Iranian shops.**
+**Local retail intelligence for Iranian shops.** Analyze Holoo CSV/Excel invoices,
+understand product performance, and plan purchases in English or Persian.
 
-SaleYar reads Holoo invoice exports and tells shop owners what to buy, what to avoid, and why — in plain Persian or English. No cloud. No internet required after install. Your data never leaves your computer.
+[![Tests](https://github.com/mkamalpour/SaleYar/actions/workflows/tests.yml/badge.svg)](https://github.com/mkamalpour/SaleYar/actions/workflows/tests.yml)
 
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║    ███████╗ █████╗ ██╗     ███████╗██╗   ██╗ █████╗ ██████╗  ║
-║    ██╔════╝██╔══██╗██║     ██╔════╝╚██╗ ██╔╝██╔══██╗██╔══██╗ ║
-║    ███████╗███████║██║     █████╗   ╚████╔╝ ███████║██████╔╝ ║
-║    ╚════██║██╔══██║██║     ██╔══╝    ╚██╔╝  ██╔══██║██╔══██╗ ║
-║    ███████║██║  ██║███████╗███████╗   ██║   ██║  ██║██║  ██║ ║
-║    ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ║
-║                                                              ║
-║               ⚡ Offline Business Intelligence ⚡           ║
-║                  ═══ MADE BY KamalAi ═══                     ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
+## Features
 
-## ✨ What It Does
+- Responsive owner dashboard with Persian RTL and nine analysis sections.
+- Product sales, profit, demand forecasts, stock movements, and risk signals.
+- Basket associations, customer groups, and budget-constrained purchase orders.
+- Profit, customer-coverage, and risk optimization goals.
+- Offline keyword advisor and optional configurable local LLM connection.
+- Paginated tables, product search, safe CSV export, upload progress and cancellation.
+- Developer Gradio interface, terminal interface, and authenticated FastAPI endpoints.
 
-- ✅ **Data quality check** – Tells you exactly what to fix before analysis  
-- 📊 **Product KPIs** – Profit margin, sales speed, price changes, best selling season  
-- 🔮 **Demand forecast** – 30, 60, 90 days ahead with confidence bands  
-- 🏷️ **Smart segments** – Star / Reliable / Seasonal / Deadweight / Risky / Outlier  
-- 🛒 **Basket analysis** – Which products are bought together (e.g., rice + oil)  
-- ⚠️ **Risk score** – 0–100 per product, plain English explanation  
-- 💰 **ROI comparison** – Your shop vs bank deposit (23%) vs gold return (35%)  
-- 👥 **Customer groups** – Champions, Loyal, At‑Risk, Lost  
-- 📦 **Shopping list** – Exact whole quantities for your budget  
-- 🎯 **Top 3 actions** – The most important things to do right now  
-- ❤️ **Health score** – 0–100 overall shop health  
+The owner dashboard uses local assets and needs no CDN. Invoice processing stays
+on this machine. If you configure an external LLM endpoint, report summaries are
+sent to that endpoint; leave LLM integration disabled for fully local operation.
 
-No jargon. Every number is explained. If a stage is skipped (not enough data), it tells you why.
+## Quick start
 
----
+Use Python 3.11-3.13 and a virtual environment:
 
-## 🏠 Owner Dashboard – HTML (recommended)
-
-When you run `python run.py` and choose option 1, you get a **pure HTML/CSS/JS dashboard** that runs in your browser and connects to the SaleYar API.
-
-**Features:**
-- **9 tabs:** Overview, Purchase Orders, Forecast, Products, Segments, Basket, Inventory, Customers & ROI, Settings.
-- **Real‑time polling** – Upload file → analysis runs in background, dashboard updates automatically.
-- **Global search** – Filter products, inventory, orders, or forecast by name.
-- **Budget, goal, language, shop ID** controls in the top bar.
-- **Purchase Orders tab:** All products appear. Each shows current stock, recommended quantity (max 500 units), unit cost, total cost, and plain‑language “why”. Copy list / export CSV.
-- **Products tab:** Ranked list (1,2,3…) with unified score, segment, revenue (M), profit (M), margin %, risk score (🟢🟡🔴), stock, last sale, risk explanation. Searchable.
-- **Inventory tab:** Stock levels, days of coverage, status (OUT/LOW/OK/OVERSTOCK), and actions (ORDER NOW, ORDER THIS WEEK, RUN SALE).
-- **LLM Advisor** – floating robot panel:
-  - **Keyword mode** – fast, offline, rule‑based.
-  - **Real LLM mode** – connects to a local LLM (LM Studio or Ollama).
-  - **Talk Mode toggle** (in Settings):
-    - **ON** → ultra‑short conversational answers (max 10 words), uses micro‑summary (health %, revenue/profit in millions, out‑of‑stock count, top seller). Greetings/thanks get no numbers. “How to find X?” → tells exact tab name.
-    - **OFF** → gives 4 bullet points (like Gradio), uses full summary.
-  - **Markdown support** – bot messages render **bold**, *italic*, bullet lists using `marked.js`.
-  - Send button disabled while waiting for response.
-- **Settings tab:** API Base URL, API Key, AI Advisor Mode, Talk Mode. Settings saved in `localStorage`.
-
-Launch with `python run.py --mode owner` (defaults to HTML).
-
----
-
-## 🔧 Developer UI – Gradio
-
-For advanced users and debugging, run `python run.py --mode developer` (option 2). This gives 11 tabs with full data visibility:
-- Health & Quality (charts, column stats, preview)
-- Product Rankings (search + rank column)
-- Forecast, Segments, Basket Rules, Purchase Order
-- ROI & Customers, Inventory, Priority Actions
-- LLM Advisor (always returns 4 bullet points – no Talk Mode)
-- JSON Report
-
----
-
-## ⌨️ Terminal Mode
-
-Run `python run.py --mode terminal` (option 3). Interactive command line with rich tables. No browser needed.
-
----
-
-## 🚀 Quick Start
-
-### 1. Install dependencies
-
-```bash
-conda create -n saleyar python=3.10 -y
-conda activate saleyar
-pip install -r requirements.txt
+```powershell
+python -m venv .venv
+.venv\Scripts\python -m pip install -r requirements.txt
+.venv\Scripts\python run.py --mode owner
 ```
 
-### 2. Configure (optional)
+On macOS/Linux, replace `.venv\Scripts\python` with `.venv/bin/python`.
+The launcher starts loopback-only API and dashboard servers, then opens the
+browser. Use the launcher URL; the HTML depends on its local assets and API.
+
+An API key is generated privately on first use. Optionally copy `.env.example`
+to `.env` and set your own key. Secrets, invoices, reports, and trained models
+are excluded from Git. Set `SALEYAR_API_PORT`/`SALEYAR_WEB_PORT` to change ports.
+
+## Input and analysis
+
+Upload CSV or Excel with invoice ID, date, product, quantity, buy price, and sell
+price. English/Persian headers are mapped automatically. Explicit transaction
+types distinguish sales, purchases, returns, and damaged stock. Without a type,
+rows default to sales, so stock inference may be incomplete. Invalid dates and
+nonfinite numbers are flagged instead of being silently invented.
+
+Budgets must be positive. Shop IDs use 1-64 letters, digits, underscores or
+hyphens and start with a letter or digit. Inferred inventory depends on complete
+transaction history, including opening stock. Forecasts and purchase suggestions
+are estimates, not guarantees. Financial benchmark values in `config.py` are
+illustrative assumptions, not current bank rates or promised gold returns.
+The metric named `profit_margin` is markup relative to purchase cost.
+
+Generate synthetic invoices with `python run.py --generate-data`. The optional
+`python models/train.py` builds the synthetic risk model; rule-based risk scoring
+works without it. Run `python data/invoice_merger.py` for the desktop invoice
+merger (requires Tkinter).
+
+## Other modes
 
 ```bash
-cp .env.example .env
-```
-
-`.env` is git-ignored. Set `API_KEY` to pin your own API key; otherwise one is
-generated automatically on first run. The LLM advisor works offline without it.
-
-### 3. Train the risk model (one time)
-
-```bash
-python models/train.py
-```
-
-### 4. Run the application
-
-```bash
-python run.py
-```
-
-Then choose:
-
-- `1` – **Owner Dashboard (HTML)** – recommended for shop owners  
-- `2` – **Developer UI (Gradio)** – for debugging  
-- `3` – **Terminal mode**  
-- `4` – **Generate sample data**  
-
-Or run directly:
-
-```bash
-python run.py --mode owner
 python run.py --mode developer
 python run.py --mode terminal
+python -m uvicorn api.main:app --host 127.0.0.1 --port 8000
 ```
 
-### 4. Start the API server (optional)
+API clients send `X-API-Key`. `POST /analyze` returns a job ID; poll
+`GET /result/{job_id}`. Other endpoints include `/optimize`, `/basket`, `/risk`,
+`/report/{shop_id}`, `/health/{shop_id}`, `/healthcheck`, and `/llm/ask`.
+Local interactive API documentation is available at `/docs`.
+
+## Development
 
 ```bash
-uvicorn api.main:app --host 0.0.0.0 --port 8000
+python -m pip install -r requirements-dev.txt
+python -m pytest tests -q
+python scripts/check_environment.py
 ```
 
-Then open `http://localhost:8000/docs` for interactive API documentation.
+Tests use synthetic data and isolate shop caches from real models and reports.
+`requirements-lock.txt` records the verified Windows/Python 3.13 environment;
+use `requirements.txt` for installation on other platforms and Python versions.
 
----
+| Directory | Purpose |
+| --- | --- |
+| `api/` | FastAPI authentication, uploads, jobs, and results |
+| `pipeline/` | Import, metrics, forecasts, segments, basket, risk, orders, customers |
+| `ui/` | Owner dashboard assets, server, developer and terminal interfaces |
+| `models/` | Training and loading code; local model files remain ignored |
+| `data/` | Synthetic invoice generator and invoice merger |
+| `output/` | Report assembly, charts, and language templates |
+| `tests/` | Integration checks and behavioral regressions |
+| `docs/` | Architecture and changelog |
 
-## 📂 What You Need
-
-- A **CSV or Excel file** exported from Holoo accounting software  
-- Columns should contain: invoice number, date, product name, quantity, buy price, sell price  
-- Persian or English column names – the system auto‑detects them  
-
----
-
-## ⚙️ How It Works – 9‑Stage Pipeline
-
-| Stage | Name | What it does |
-|-------|------|---------------|
-| 1 | Cleaner | Reads file, validates data, assigns quality score. Stops if <40. |
-| 2 | KPIs | Calculates profit margin, liquidity, volatility, daily sales, data sufficiency. |
-| 3 | Forecast | Predicts 30/60/90‑day sales using AutoTheta, AutoETS, or SeasonalNaive. |
-| 4 | Segments | Groups products into Star, Reliable, Seasonal, Deadweight, Risky, Outlier. |
-| 5 | Basket | Mines frequent itemsets with FP‑Growth; finds critical pairs (≥70% confidence). |
-| 6 | Risk | Hybrid rule‑based + LightGBM risk score (0‑100) and shop ROI vs benchmarks. |
-| 7 | Optimizer | Integer programming (OR‑Tools) – creates exact shopping list for your budget. |
-| 8 | Customers | RFM analysis (MiniBatchKMeans) – segments customers by behaviour. |
-| 9 | Priority | Synthesises all stages into the top 3 actions for the shop owner. |
-
-If there isn’t enough data for a stage, it skips it and explains why – never crashes.
-
----
-
-## 📡 API Endpoints (when server is running)
-
-Every endpoint requires an `X-API-Key` header. There is **no default key**: on first
-run SaleYar generates a random one, stores it in `models/.local_api_key` (git-ignored)
-and prints it in the launcher banner. To pin your own key, set `API_KEY` in `.env`
-(see `.env.example`). Change it before exposing the server on a network.
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/analyze` | Upload file, run full pipeline (async, returns job_id) |
-| GET | `/result/{job_id}` | Poll for completion |
-| POST | `/optimize` | Budget optimizer only (<2s) |
-| POST | `/basket` | Basket analysis only |
-| POST | `/risk` | Risk scoring only |
-| POST | `/llm/ask` | LLM advisor – accepts `question`, `report_summary`, `inventory`, `forecasts`, `language`, `talk` (bool) |
-| GET | `/report/{shop_id}` | Latest saved report (JSON) |
-| GET | `/health/{shop_id}` | Health score only |
-| GET | `/healthcheck` | Server status, loaded models, uptime |
-
----
-
-## 🧪 Testing with Sample Data
-
-Sample data is generated on demand — it is not committed to the repository. Any
-command that needs it (`python run.py`, terminal mode, demo training) creates it
-automatically on first use. To generate it explicitly:
-
-```bash
-python data/generate_data.py --invoices 15000 --customers 500 --seed 42
-```
-
-This creates `data/sample_en.csv` and `data/sample_fa.csv`, which you can upload
-to the dashboard to exercise the whole pipeline.
-
-Run the test suite with:
-
-```bash
-python test_all.py
-```
-
----
-
-## 📦 Project Structure (Simplified)
-
-```
-saleyar/
-├── pipeline/          # 9 stages (stage1_cleaner.py ... stage9_priority.py)
-├── models/            # LightGBM model + per‑shop caches
-├── ui/                # HTML dashboard, Gradio developer UI, terminal
-├── api/               # FastAPI server
-├── output/            # Report generator
-├── llm/               # LLM advisor (talk modes, micro‑summary, tab guide)
-├── data/              # Sample data generator
-├── run.py             # Main launcher
-├── config.py          # All thresholds & financial rates
-```
-
----
-
-## 📄 License
-
-MIT – use freely, modify, and redistribute.
-
----
-
-## 👤 Author
-
-**kamal** – built for Iranian shop owners who want simple, offline analytics.
-
----
-
-## ⭐ Support
-
-If you find SaleYar useful, please ⭐ the repository.  
-For issues or suggestions, open a GitHub issue.
-
-**SaleYar – Your offline shop advisor. No cloud. No fees. No nonsense.**
+See [architecture](docs/architecture.md), [changelog](docs/changelog.md), and
+[contributing](CONTRIBUTING.md).

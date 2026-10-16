@@ -11,6 +11,8 @@ FIXED: Inventory tracking resets each run, matches UI summary calculation.
 FIXED: Damaged goods now correctly reduce inventory.
 """
 
+from validation import shop_serialized
+
 import hashlib
 import logging
 import os
@@ -95,7 +97,7 @@ def calculate_net_change_from_transactions(df: pd.DataFrame) -> dict:
     )
     # Stock out: sales and purchases that were returned.
     frame["qty_out"] = frame["signed_qty"].where(
-        frame["transaction_type"].isin(["sale", "return_purchase"]), 0.0
+        frame["transaction_type"].isin(["sale", "return_purchase", "damaged"]), 0.0
     )
 
     frame["net"] = frame["qty_in"] - frame["qty_out"]
@@ -192,6 +194,7 @@ def _save_shop_cache(shop_id: str, data_hash: str, df_kpis, forecasts: dict) -> 
 # MAIN PIPELINE (unchanged except for inventory call)
 # ============================================================================
 
+@shop_serialized
 def run_pipeline(
     file_bytes: bytes,
     filename:   str,
@@ -204,6 +207,9 @@ def run_pipeline(
     """
     Run all 9 stages and assemble the final report.
     """
+    from validation import validate_shop_id, validate_analysis
+    validate_shop_id(shop_id)
+    validate_analysis(budget, goal, language)
     start_total = time.time()
     stages = {}
     timing = {}
@@ -243,7 +249,7 @@ def run_pipeline(
     
     # Hash calculation
     t_hash = time.time()
-    data_hash = hashlib.md5(file_bytes).hexdigest()
+    data_hash = hashlib.sha256(b"saleyar-analysis-v2:" + file_bytes).hexdigest()
     timing["hash_calculation"] = round(time.time() - t_hash, 2)
     print(f"[{timing['hash_calculation']:>6}s] Stage 0: MD5 Hash calculation")
 
@@ -262,7 +268,6 @@ def run_pipeline(
         timing["stage4_segments"] = 0
         print(f"[CACHED] Skipped Stages 2-4 (using cached data)")
     else:
-        loader.clear_shop_models(shop_id)
         os.makedirs(loader.get_shop_dir(shop_id), exist_ok=True)
 
         # ── Stage 2: KPI calculation ──────────────────────────────
