@@ -221,3 +221,11 @@ def test_api_analysis_pipeline_round_trip_preserves_shop_artifacts():
     assert client.get("/report/round-trip", headers=headers).status_code == 200
     api._jobs.clear()
     api._reports.clear()
+
+
+def test_trend_uses_stable_linear_slope():
+    from pipeline.stage3_forecast import _calculate_trend
+    values = np.arange(1, 31, dtype=float)
+    assert _calculate_trend(pd.DataFrame({"y": values})) == pytest.approx(1 / values.mean())
+    assert _calculate_trend(pd.DataFrame({"y": [5.0] * 30})) == 0.0
+    assert _calculate_trend(pd.DataFrame({"y": [np.nan] * 30})) == 0.0

@@ -277,8 +277,13 @@ def _calculate_trend(ts: pd.DataFrame) -> float:
         y = ts["y"].values
         if len(y) < 14:
             return 0.0
-        x = np.arange(len(y))
-        slope = np.polyfit(x, y, 1)[0]
+        y = np.asarray(y, dtype=float)
+        if not np.isfinite(y).all():
+            return 0.0
+        x = np.arange(len(y), dtype=float)
+        centered_x = x - x.mean()
+        # Closed-form linear slope avoids an unnecessary LAPACK solve and DLL dependency.
+        slope = np.sum(centered_x * (y - y.mean())) / np.sum(centered_x ** 2)
         mean_y = np.mean(y)
         if mean_y == 0:
             return 0.0

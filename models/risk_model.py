@@ -70,7 +70,11 @@ def _read_native(path):
         raise ValueError("Unsupported risk model format/schema; retrain with models/train.py.")
     booster = lgb.Booster(model_str=payload["model_text"])
     result = _validate_booster(booster, payload["feature_cols"])
-    result.update({"source": "native", "training_versions": payload.get("training_versions", {})})
+    target = payload.get("target", "rule_score_0_100")
+    if target not in {"risk_score_0_100", "health_score_0_100", "rule_score_0_100"}:
+        raise ValueError("Unsupported model scoring target.")
+    result.update({"source": "native", "training_versions": payload.get("training_versions", {}),
+                   "target": target, "invert_predictions": target != "risk_score_0_100"})
     return result
 
 
@@ -92,7 +96,9 @@ def _read_legacy(path):
     # Rehydrate the native tree model: prediction no longer uses a pickled sklearn wrapper.
     native = lgb.Booster(model_str=booster.model_to_string())
     result = _validate_booster(native, list(features))
-    result.update({"source": "legacy", "training_versions": payload.get("training_versions", {}) if isinstance(payload, dict) else {}})
+    target = payload.get("target", "health_score_0_100") if isinstance(payload, dict) else "health_score_0_100"
+    result.update({"source": "legacy", "training_versions": payload.get("training_versions", {}) if isinstance(payload, dict) else {},
+                   "target": target, "invert_predictions": target != "risk_score_0_100"})
     return result
 
 
@@ -130,13 +136,13 @@ def status():
         return dict(_status)
 
 
-def save_model(booster, features, training_versions=None):
+def save_model(booster, features, training_versions=None, target="risk_score_0_100"):
     """Atomically save native trees and schema; never overwrite legacy pickle files."""
     _validate_booster(booster, list(features))
     payload = {"format": FORMAT, "schema_version": SCHEMA_VERSION,
                "feature_cols": list(features), "model_text": booster.model_to_string(),
                "training_versions": training_versions or environment_versions(),
-               "target": "rule_score_0_100", "training_source": "synthetic-rule-derived"}
+               "target": target, "training_source": "synthetic-rule-derived"}
     path = native_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
@@ -160,7 +166,7 @@ def save_model(booster, features, training_versions=None):
 def migrate_legacy():
     """Convert a readable trusted legacy model without retraining or deleting it."""
     loaded = _read_legacy(Path(config.LGBM_MODEL_PATH))
-    return save_model(loaded["model"], loaded["feature_cols"], loaded["training_versions"] or environment_versions())
+    return save_model(loaded["model"], loaded["feature_cols"], loaded["training_versions"] or environment_versions(), target=loaded["target"])
 
 
 def predict(frame):
@@ -180,6 +186,8 @@ def predict(frame):
         if values.shape != (len(frame),) or not np.isfinite(values).all():
             raise ValueError("Model returned invalid predictions.")
         # Predictions already represent 0-100 scores; batch min/max scaling changes meaning.
+        if loaded.get("invert_predictions"):
+            values = 100.0 - values
         return np.clip(values, 0, 100).round(1).tolist()
     except Exception as exc:
         logger.warning("Risk model prediction failed; using rules: %s", exc)

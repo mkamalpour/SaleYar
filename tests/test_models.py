@@ -98,3 +98,36 @@ def test_force_training_preserves_unreadable_legacy(fitted, monkeypatch):
         train.train()
     assert train.train(force=True).exists()
     assert legacy.read_bytes() == b"unreadable legacy model"
+
+
+def test_risk_increases_when_business_signals_worsen():
+    frame = pd.DataFrame([
+        {"profit_margin": 40, "liquidity_rate": 80, "price_volatility": 0, "days_since_last_sale": 0, "conversion_rate": 80},
+        {"profit_margin": 0, "liquidity_rate": 0, "price_volatility": 100, "days_since_last_sale": 500, "conversion_rate": 0},
+    ])
+    scores = stage6_risk._score_rule_based_vectorized(frame)
+    assert scores[0] < 30
+    assert scores[1] > 70
+
+
+def test_existing_native_strength_scores_are_adapted(fitted):
+    model, frame = fitted
+    risk_model.save_model(model.booster_, list(frame.columns), target="rule_score_0_100")
+    expected = np.clip(100 - model.booster_.predict(frame, num_threads=1), 0, 100).round(1).tolist()
+    assert risk_model.predict(frame) == expected
+
+
+def test_legacy_migration_preserves_corrected_prediction_direction(fitted):
+    model, frame = fitted
+    joblib.dump({"model": model, "feature_cols": list(frame.columns)}, config.LGBM_MODEL_PATH)
+    expected = risk_model.predict(frame)
+    train.train()
+    assert risk_model.predict(frame) == expected
+    assert risk_model.get_model()["target"] == "health_score_0_100"
+
+
+def test_invalid_legacy_shop_folder_does_not_break_startup(tmp_path):
+    shops = Path(config.SHOPS_DIR)
+    (shops / "old shop name").mkdir(parents=True)
+    loader.load_all()
+    assert loader.is_ready()

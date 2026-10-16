@@ -56,6 +56,11 @@ def _load_all_shops():
     for shop_id in os.listdir(shops_dir):
         shop_path = os.path.join(shops_dir, shop_id)
         if os.path.isdir(shop_path):
+            try:
+                validate_shop_id(shop_id)
+            except ValueError:
+                logger.warning("Skipping shop folder with an unsupported identifier")
+                continue
             _load_shop(shop_id)
 
 

@@ -101,7 +101,8 @@ def _score_rule_based_vectorized(df: pd.DataFrame) -> np.ndarray:
     conversion = df.get("conversion_rate", pd.Series([0]*len(df))).fillna(0).values
     scores += np.minimum(conversion * RISK_CONVERSION_WEIGHT, RISK_CONVERSION_MAX)
 
-    return np.clip(scores, 0.0, 100.0).round(1)
+    # Contributions above measure business strength; risk must increase as strength falls.
+    return (100.0 - np.clip(scores, 0.0, 100.0)).round(1)
 
 
 def _get_model_scores(df: pd.DataFrame):

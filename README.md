@@ -96,7 +96,8 @@ Model setup uses `python models/train.py`. It migrates a readable legacy
 the original. Native files include feature order and training versions. If an old
 pickle cannot load, `python models/train.py --force` builds the synthetic model
 while preserving the old file. Changed models reload automatically; `/healthcheck`
-reports model availability and recovery details.
+reports model availability and recovery details. Higher risk scores mean greater
+business risk; older strength-oriented models are adapted automatically.
 
 | Directory | Purpose |
 | --- | --- |
