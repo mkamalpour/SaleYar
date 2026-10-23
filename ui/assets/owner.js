@@ -338,13 +338,15 @@ function renderCurrentTab() {
           t("60 days", "۶۰ روز"),
           t("90 days", "۹۰ روز"),
           t("Confidence", "اطمینان"),
+          t("Status / method", "\u0648\u0636\u0639\u06cc\u062a / \u0631\u0648\u0634"),
         ],
         (p) => [
           esc(p.product),
-          num(p.forecast.h30),
-          num(p.forecast.h60),
-          num(p.forecast.h90),
-          badge(p.forecast.confidence || "—"),
+          p.forecast.skipped ? "\u2014" : num(p.forecast.h30),
+          p.forecast.skipped ? "\u2014" : num(p.forecast.h60),
+          p.forecast.skipped ? "\u2014" : num(p.forecast.h90),
+          badge(p.forecast.skipped ? t("Unavailable", "\u062f\u0631 \u062f\u0633\u062a\u0631\u0633 \u0646\u06cc\u0633\u062a") : p.forecast.confidence || "\u2014"),
+          esc(p.forecast.skipped ? p.forecast.skip_reason || "No forecast generated" : p.forecast.method || "\u2014"),
         ],
       );
       break;
@@ -775,7 +777,7 @@ function smartAnswer(question) {
   if (contains(["forecast", "future", "demand", "تقاضا", "پیش‌بینی"]))
     return (
       products
-        .filter((p) => p.forecast)
+        .filter((p) => p.forecast && !p.forecast.skipped)
         .map(
           (p) =>
             `${p.product}: ${num(p.forecast.h30)} · ${t("30-day demand", "تقاضای ۳۰ روز")}`,

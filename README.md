@@ -21,24 +21,14 @@ sent to that endpoint; leave LLM integration disabled for fully local operation.
 
 ## Quick start
 
-Use **Python 3.10.19**, matching your existing `saleYar` environment. Activate it first:
-
-```bash
-conda activate saleYar
-# Optional dependency setup; requires explicit permission and connectivity.
-python -m pip install -r requirements.txt
-python models/train.py
-python run.py --mode owner
-```
-
-Or create a virtual environment using a Python 3.10 interpreter:
+Activate an existing compatible environment. The current lightweight suite was verified in Conda `base` with Python 3.13.5; no dedicated environment or model training is required to start the dashboard.
 
 ```powershell
-conda activate base  # Or activate another existing compatible environment.
-# Optional dependency setup; requires explicit permission and connectivity.
-python -m pip install -r requirements.txt
+conda activate base
 python run.py --mode owner
 ```
+
+Dependencies are recorded in `requirements.txt`. Review that specification before any optional installation; the launcher does not install them.
 
 Use `python` from your active compatible environment on other platforms too.
 The launcher starts loopback-only API and dashboard servers, then opens the
@@ -90,9 +80,10 @@ python -m pytest tests -q
 ```
 
 Tests use synthetic data and isolate shop caches from real models and reports.
-`requirements.txt` pins the compatible versions already installed in your Python
-3.10.19 environment, plus `xlrd` for legacy Excel files. Keep this project in its
-own environment; avoid unrestricted upgrades of ML dependencies.
+`requirements.txt` records the original Python 3.10 dependency baseline, plus
+`xlrd` for legacy Excel files. The current lightweight suite also passes with the
+existing base environment. Avoid unrestricted upgrades of ML dependencies; native
+model files require matching training versions.
 
 Model setup uses `python models/train.py`. It migrates a readable legacy
 `models/lgbm_risk.pkl` to native LightGBM `models/lgbm_risk.json` without deleting
@@ -113,4 +104,8 @@ business risk; older strength-oriented models are adapted automatically.
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
 
-Current lightweight check (Windows, existing Conda base / Python 3.13.5): **63 passed**. No dependency installs, model downloads, live publishing, or heavy datasets were used.
+Current lightweight check (Windows, existing Conda base / Python 3.13.5): **66 passed**. No dependency installs, model downloads, live publishing, or heavy datasets were used.
+
+Forecast output distinguishes unavailable predictions from low-confidence estimates and displays the skip reason. The 30/60/90-day totals use at least 90 generated days. Category averages are explicitly labelled fallbacks, not fitted forecasts. Confidence labels are heuristic plausibility indicators, not calibrated probabilities or measured out-of-sample accuracy.
+
+In the current existing base environment, StatsForecast and OR-Tools are absent: statistical forecasts are unavailable and purchasing uses the documented greedy fallback. The deterministic forecast regressions verify output handling with a fixture adapter; they do not validate an installed StatsForecast model. No packages were installed during this review.

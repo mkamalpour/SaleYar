@@ -49,6 +49,7 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
         category_avg = df_kpis.groupby("product_category")["daily_sales"].mean().to_dict()
 
     all_ts = []
+    results = {}
     skipped_count = 0
 
     for product_name, group in df_sales.groupby("product"):
@@ -64,7 +65,7 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
             if ts is None or len(ts) < config.MIN_DAYS_FOR_FORECAST:
                 # Not enough data -> use category fallback
                 cat = kpi_row["product_category"].values[0] if "product_category" in kpi_row.columns else None
-                results = {product_name: _category_fallback(product_name, cat, category_avg)}
+                results[product_name] = _category_fallback(product_name, cat, category_avg)
                 continue
 
             trend = _calculate_trend(ts)
@@ -85,8 +86,6 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
         return {p: _skip("Insufficient sales data") for p in df_kpis["product"].unique()}
 
     logger.info(f"Building forecasts for {len(all_ts)} products ({skipped_count} skipped)")
-
-    results = {}
 
     # Adaptive batch size: larger batches for many products
     total_products = len(all_ts)
@@ -154,7 +153,7 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     sf = StatsForecast(models=[model], freq="D", n_jobs=-1)
-                    forecast_df = sf.forecast(df=batch_subset, h=config.FORECAST_HORIZON, level=[80, 95])
+                    forecast_df = sf.forecast(df=batch_subset, h=max(90, config.FORECAST_HORIZON), level=[80, 95])
 
                 for unique_id in batch_ids:
                     try:
@@ -173,7 +172,8 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
                                 continue
                             vals = preds[forecast_cols[0]].clip(lower=0).values
 
-                        # Apply trend adjustment
+                        # Apply the same trend adjustment to estimates and intervals.
+                        trend_factor = 1.0
                         if getattr(config, 'ENABLE_TREND_ADJUSTMENT', True):
                             product_item = next((item for item in group_items if item["product"] == unique_id), None)
                             if product_item:
@@ -187,11 +187,14 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
                         historical = batch_subset[batch_subset["unique_id"] == unique_id]["y"].values
                         confidence = _calculate_confidence(historical, vals, suff)
 
+                        # StatsForecast prefixes interval columns with the model name.
+                        lo80 = next((c for c in (f"{method_name}-lo-80", "lo-80") if c in preds.columns), None)
+                        hi80 = next((c for c in (f"{method_name}-hi-80", "hi-80") if c in preds.columns), None)
                         results[unique_id] = {
                             "method": method_name,
                             "daily_forecast": vals[:90].tolist(),
-                            "daily_lo80": preds["lo-80"][:90].clip(lower=0).tolist() if "lo-80" in preds.columns else None,
-                            "daily_hi80": preds["hi-80"][:90].clip(lower=0).tolist() if "hi-80" in preds.columns else None,
+                            "daily_lo80": (preds[lo80][:90] * trend_factor).clip(lower=0).tolist() if lo80 else None,
+                            "daily_hi80": (preds[hi80][:90] * trend_factor).clip(lower=0).tolist() if hi80 else None,
                             "h30": round(float(np.sum(vals[:30])), 1),
                             "h60": round(float(np.sum(vals[:60])), 1),
                             "h90": round(float(np.sum(vals[:90])), 1),

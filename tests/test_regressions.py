@@ -229,3 +229,48 @@ def test_trend_uses_stable_linear_slope():
     assert _calculate_trend(pd.DataFrame({"y": values})) == pytest.approx(1 / values.mean())
     assert _calculate_trend(pd.DataFrame({"y": [5.0] * 30})) == 0.0
     assert _calculate_trend(pd.DataFrame({"y": [np.nan] * 30})) == 0.0
+
+
+def test_forecast_empty_sales_and_multiple_category_fallbacks(monkeypatch):
+    from pipeline import stage3_forecast as forecasts
+    monkeypatch.setattr(forecasts, "HAS_STATSFORECAST", True)
+    raw = pd.DataFrame(columns=["product", "transaction_type", "qty", "sell_price"])
+    kpis = pd.DataFrame({"product": ["A", "B"], "sufficiency": ["sparse", "sparse"],
+                         "product_category": ["one", "two"], "daily_sales": [2.0, 3.0]})
+    empty = forecasts.run(raw, kpis)
+    assert set(empty) == {"A", "B"}
+    assert all(row["skipped"] for row in empty.values())
+    raw = pd.DataFrame({"product": ["A", "B"], "transaction_type": ["sale", "sale"],
+                        "qty": [1, 1], "sell_price": [2, 2]})
+    monkeypatch.setattr(forecasts, "_build_timeseries", lambda *a: None)
+    result = forecasts.run(raw, kpis)
+    assert result["A"]["h90"] == 180
+    assert result["B"]["h90"] == 270
+    assert all(row["method"] == "Category Average (Fallback)" for row in result.values())
+
+
+@pytest.mark.parametrize("trend", [0.0, 0.2])
+def test_forecast_ninety_day_totals_and_prefixed_intervals(monkeypatch, trend):
+    from pipeline import stage3_forecast as forecasts
+    monkeypatch.setattr(forecasts, "HAS_STATSFORECAST", True)
+    monkeypatch.setattr(forecasts, "AutoTheta", lambda **k: object(), raising=False)
+    monkeypatch.setattr(forecasts.config, "FORECAST_HORIZON", 60)
+    monkeypatch.setattr(forecasts.config, "TREND_WEIGHT", 0.3)
+    monkeypatch.setattr(forecasts, "_calculate_trend", lambda ts: trend)
+    class FixtureForecast:
+        def __init__(self, **kwargs):
+            pass
+        def forecast(self, df, h, level):
+            assert h >= 90
+            return pd.DataFrame({"unique_id": ["A"] * h, "AutoTheta": [2.0] * h,
+                                 "AutoTheta-lo-80": [1.0] * h, "AutoTheta-hi-80": [3.0] * h})
+    monkeypatch.setattr(forecasts, "StatsForecast", FixtureForecast, raising=False)
+    monkeypatch.setattr(forecasts, "_build_timeseries", lambda *a: pd.DataFrame({
+        "ds": pd.date_range("2026-01-01", periods=14), "y": [2.0] * 14}))
+    raw = pd.DataFrame({"product": ["A"], "transaction_type": ["sale"], "qty": [1], "sell_price": [2]})
+    kpis = pd.DataFrame({"product": ["A"], "sufficiency": ["rich"]})
+    row = forecasts.run(raw, kpis)["A"]
+    factor = 1 + trend * 0.3
+    assert (row["h30"], row["h60"], row["h90"]) == pytest.approx((60 * factor, 120 * factor, 180 * factor))
+    assert row["daily_lo80"] == pytest.approx([factor] * 90)
+    assert row["daily_hi80"] == pytest.approx([3 * factor] * 90)
