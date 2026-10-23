@@ -104,7 +104,7 @@ business risk; older strength-oriented models are adapted automatically.
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
 
-Current lightweight check (Windows, existing Conda base / Python 3.13.5): **84 passed**. No dependency installs, model downloads, live publishing, or heavy datasets were used.
+Current lightweight check (Windows, existing Conda base / Python 3.13.5): **87 passed**. No dependency installs, model downloads, live publishing, or heavy datasets were used.
 
 Forecast output distinguishes unavailable predictions from low-support estimates. All available forecasts include 30/60/90-day totals. When StatsForecast is unavailable or fails, an explicitly labelled local baseline repeats the last observed week (at least 14 daily observations) or uses a recent mean. Its support remains Low; no calibrated interval is invented. Category averages remain separately labelled fallbacks for insufficient history.
 
@@ -115,3 +115,5 @@ Daily series combine same-day timestamps and include zero-sale days through the 
 Basket confidence is directional P(B|A), support includes single-product invoices, and lift is computed against the destination product's overall frequency. Critical pairs require both the confidence and lift thresholds. The cache version prevents reuse of rules calculated with the older denominator. Associations do not establish causation.
 
 Read-only job-status requests retry bounded transient failures without re-uploading the file or starting a duplicate analysis. Authentication failures and cancellation are not retried. The browser check injected a failed read and completed with one upload/two reads. Optional Node-based frontend tests run when Node is already available; Node is not needed to run the Python application.
+
+Analysis caches include an algorithm version, forecast settings and statistical-backend availability. Older cached forecasts and results from a different policy are recomputed without deleting model artifacts or requiring a changed invoice file.

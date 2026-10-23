@@ -12,6 +12,7 @@ FIXED: Damaged goods now correctly reduce inventory.
 """
 
 from saleyar.validation import shop_serialized
+from saleyar import config
 
 import hashlib
 import logging
@@ -148,6 +149,20 @@ def record_purchases_from_optimizer(shop_id: str, order: list):
 # CACHE FUNCTIONS (unchanged)
 # ============================================================================
 
+def _analysis_fingerprint(file_bytes):
+    """Cache identity includes forecast policy, not only unchanged input bytes."""
+    policy = {
+        "algorithm": "saleyar-analysis-v3",
+        "statistical_backend_available": stage3_forecast.HAS_STATSFORECAST,
+        "forecast": {name: getattr(config, name, None) for name in (
+            "FORECAST_HORIZON", "SEASON_LENGTH", "MIN_DAYS_FOR_FORECAST",
+            "ENABLE_TREND_ADJUSTMENT", "TREND_WEIGHT", "MIN_TREND_THRESHOLD",
+            "FORECAST_CONFIDENCE_MAPE_HIGH", "FORECAST_CONFIDENCE_MAPE_LOW")},
+    }
+    encoded = json.dumps(policy, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded + b"\0" + file_bytes).hexdigest()
+
+
 def _shop_cache_path(shop_id: str, filename: str) -> str:
     return os.path.join(loader.get_shop_dir(shop_id), filename)
 
@@ -249,9 +264,9 @@ def run_pipeline(
     
     # Hash calculation
     t_hash = time.time()
-    data_hash = hashlib.sha256(b"saleyar-analysis-v2:" + file_bytes).hexdigest()
+    data_hash = _analysis_fingerprint(file_bytes)
     timing["hash_calculation"] = round(time.time() - t_hash, 2)
-    print(f"[{timing['hash_calculation']:>6}s] Stage 0: MD5 Hash calculation")
+    print(f"[{timing['hash_calculation']:>6}s] Stage 0: SHA-256 analysis fingerprint")
 
     # Cache check
     t_cache = time.time()

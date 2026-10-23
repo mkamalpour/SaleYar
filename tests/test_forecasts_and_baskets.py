@@ -123,3 +123,20 @@ def test_statistical_support_is_based_on_holdout_not_future_history_similarity(m
     assert result["validation"]["wape_percent"] == expected_error and result["confidence"] == expected_support
     assert result["low_confidence"] is (expected_support == "Low")
     assert result["h90"] == 90 * prediction
+
+
+@pytest.mark.parametrize("change", ["legacy", "settings", "backend"])
+def test_analysis_cache_rejects_stale_forecast_policy(monkeypatch, change):
+    import hashlib
+    from pipeline import runner
+    data = b"fictional invoices"
+    current = runner._analysis_fingerprint(data)
+    stored = hashlib.sha256(b"saleyar-analysis-v2:" + data).hexdigest() if change == "legacy" else current
+    runner._save_shop_cache("policy-test", stored, pd.DataFrame({"product": ["A"]}), {"A": {"method": "old"}})
+    if change != "legacy":
+        assert runner._load_shop_cache("policy-test", current) is not None
+    if change == "settings":
+        monkeypatch.setattr(runner.config, "FORECAST_HORIZON", 123)
+    if change == "backend":
+        monkeypatch.setattr(runner.stage3_forecast, "HAS_STATSFORECAST", not runner.stage3_forecast.HAS_STATSFORECAST)
+    assert runner._load_shop_cache("policy-test", runner._analysis_fingerprint(data)) is None
