@@ -74,3 +74,10 @@ desktop.ini
 
 # Local invoice documents, kept outside maintained documentation
 data/private/
+
+# Local secrets, caches and private runtime files
+.cache/
+.streamlit/secrets.toml
+*.db
+*.db-*
+*.sqlite*

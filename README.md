@@ -109,3 +109,5 @@ Current lightweight check (Windows, existing Conda base / Python 3.13.5): **66 p
 Forecast output distinguishes unavailable predictions from low-confidence estimates and displays the skip reason. The 30/60/90-day totals use at least 90 generated days. Category averages are explicitly labelled fallbacks, not fitted forecasts. Confidence labels are heuristic plausibility indicators, not calibrated probabilities or measured out-of-sample accuracy.
 
 In the current existing base environment, StatsForecast and OR-Tools are absent: statistical forecasts are unavailable and purchasing uses the documented greedy fallback. The deterministic forecast regressions verify output handling with a fixture adapter; they do not validate an installed StatsForecast model. No packages were installed during this review.
+
+No license file is included.
