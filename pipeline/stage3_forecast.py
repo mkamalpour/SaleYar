@@ -1,12 +1,7 @@
-"""
-stage3_forecast.py — SMART & ADAPTIVE FORECASTING
+"""Demand forecasts with explicit local fallbacks and chronological validation.
 
-Improvements:
-- Category fallback for products with insufficient history (<7 days)
-- Confidence levels: High (MAPE<20%), Medium (20-50%), Low (>50% or sparse)
-- Adaptive batch size based on number of products
-- Sparse data uses simple average instead of SeasonalNaive
-- All thresholds from config.py
+Future predictions are never scored against past observations. Missing sale days
+are zero only under the declared complete-invoice-history assumption.
 """
 
 import logging
@@ -15,11 +10,11 @@ import warnings
 import pandas as pd
 import numpy as np
 import os
-from datetime import timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from saleyar import config
+from pipeline import forecast_baseline
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +24,12 @@ try:
     HAS_STATSFORECAST = True
 except ImportError:
     HAS_STATSFORECAST = False
-    logger.error("statsforecast not installed — Stage 3 will return empty forecasts")
+    logger.info("statsforecast not installed — using an explicitly labelled local baseline")
 
 
 def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
     """Run adaptive forecasting."""
     logger.info(f"Stage 3: demand forecasting | {df_kpis['product'].nunique()} products")
-
-    if not HAS_STATSFORECAST:
-        return {p: _skip("statsforecast not available") for p in df_kpis["product"].unique()}
 
     # Filter to sales only
     sales_mask = (df_raw["transaction_type"] == "sale") & (df_raw["qty"] > 0) & (df_raw["sell_price"] > 0)
@@ -48,6 +40,7 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
     if "product_category" in df_kpis.columns:
         category_avg = df_kpis.groupby("product_category")["daily_sales"].mean().to_dict()
 
+    observed_end = pd.to_datetime(df_raw["date"], errors="coerce").max() if "date" in df_raw else None
     all_ts = []
     results = {}
     skipped_count = 0
@@ -60,7 +53,7 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
                 continue
 
             sufficiency = kpi_row["sufficiency"].values[0]
-            ts = _build_timeseries(group, product_name)
+            ts = _build_timeseries(group, product_name, observed_end)
 
             if ts is None or len(ts) < config.MIN_DAYS_FOR_FORECAST:
                 # Not enough data -> use category fallback
@@ -68,6 +61,9 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
                 results[product_name] = _category_fallback(product_name, cat, category_avg)
                 continue
 
+            if not HAS_STATSFORECAST:
+                results[product_name] = forecast_baseline.forecast(ts, "StatsForecast is unavailable")
+                continue
             trend = _calculate_trend(ts)
 
             all_ts.append({
@@ -124,18 +120,13 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
         if suff == "rich":
             model = AutoTheta(season_length=season_length)
             method_name = "AutoTheta"
-            low_confidence = False
         elif suff == "medium":
             model = AutoETS(season_length=season_length)
             method_name = "AutoETS"
-            low_confidence = False
         else:
-            # Sparse: use simple average instead of SeasonalNaive (more robust)
-            # We'll handle sparse separately with a simple fallback
-            # Continue with normal batch but later we could override
+            # Sparse but sufficient history: conservative weekly repetition.
             model = SeasonalNaive(season_length=min(season_length, 7))
             method_name = "SeasonalNaive"
-            low_confidence = True
 
         unique_ids = batch["unique_id"].unique()
         n_products = len(unique_ids)
@@ -153,6 +144,7 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     sf = StatsForecast(models=[model], freq="D", n_jobs=-1)
+                    validation = _model_validation(sf, batch_subset, method_name)
                     forecast_df = sf.forecast(df=batch_subset, h=max(90, config.FORECAST_HORIZON), level=[80, 95])
 
                 for unique_id in batch_ids:
@@ -183,9 +175,9 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
                                     vals = vals * trend_factor
                                     vals = np.maximum(vals, 0)
 
-                        # Calculate confidence level based on MAPE (if enough history)
-                        historical = batch_subset[batch_subset["unique_id"] == unique_id]["y"].values
-                        confidence = _calculate_confidence(historical, vals, suff)
+                        # Score only predictions made before seeing the reserved final week.
+                        checked = validation.get(unique_id)
+                        confidence = _calculate_confidence(checked, suff)
 
                         # StatsForecast prefixes interval columns with the model name.
                         lo80 = next((c for c in (f"{method_name}-lo-80", "lo-80") if c in preds.columns), None)
@@ -198,7 +190,9 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
                             "h30": round(float(np.sum(vals[:30])), 1),
                             "h60": round(float(np.sum(vals[:60])), 1),
                             "h90": round(float(np.sum(vals[:90])), 1),
-                            "low_confidence": confidence == "Low",
+                            "validation": checked,
+                            "note": "Support levels summarize a seven-day holdout, not calibrated certainty. Missing sale days are treated as zero.",
+                            "low_confidence": confidence in ("Low", "Unvalidated"),
                             "confidence": confidence,
                             "skipped": False,
                             "skip_reason": None,
@@ -210,7 +204,8 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
             except Exception as e:
                 logger.warning(f"Forecast failed for batch: {e}")
                 for unique_id in batch_ids:
-                    results[unique_id] = _skip(f"Forecast failed: {e}")
+                    history = batch_subset[batch_subset["unique_id"] == unique_id].sort_values("ds")
+                    results[unique_id] = forecast_baseline.forecast(history, "Statistical forecast failed; using the local baseline")
 
     # Fill missing products (including those that were skipped)
     for product in df_kpis["product"].unique():
@@ -230,7 +225,7 @@ def run(df_raw: pd.DataFrame, df_kpis: pd.DataFrame) -> dict:
 def _category_fallback(product_name, category, category_avg):
     """Return a forecast based on category average."""
     avg_daily = category_avg.get(category, 0) if category else 0
-    if avg_daily <= 0:
+    if not np.isfinite(avg_daily) or avg_daily <= 0:
         return _skip(f"No data and no category average for '{product_name}'")
     daily_forecast = [avg_daily] * 90
     return {
@@ -248,30 +243,49 @@ def _category_fallback(product_name, category, category_avg):
     }
 
 
-def _calculate_confidence(historical, forecast, sufficiency):
-    """Calculate confidence level: High, Medium, Low."""
-    # If sparse data or fallback, confidence is Low
-    if sufficiency == "sparse" or len(historical) < 14:
+def _model_validation(model, batch, method):
+    """Forecast a held-out week; never compare future estimates with old observations."""
+    train, actual = [], {}
+    for product, group in batch.groupby("unique_id"):
+        group = group.sort_values("ds")
+        if len(group) >= 21:
+            train.append(group.iloc[:-7])
+            actual[product] = group.iloc[-7:]
+    if not train:
+        return {}
+    try:
+        predictions = model.forecast(df=pd.concat(train, ignore_index=True), h=7, level=[])
+        output = {}
+        for product, heldout in actual.items():
+            rows = predictions[predictions["unique_id"] == product].sort_values("ds")
+            if method not in rows or len(rows) != 7:
+                continue
+            if not np.array_equal(pd.to_datetime(rows["ds"]).values, pd.to_datetime(heldout["ds"]).values):
+                continue
+            values = rows[method].clip(lower=0).to_numpy()
+            training = next(frame for frame in train if frame["unique_id"].iloc[0] == product)
+            trend = _calculate_trend(training)
+            if getattr(config, "ENABLE_TREND_ADJUSTMENT", True) and abs(trend) > getattr(config, "MIN_TREND_THRESHOLD", 0.05):
+                values = np.maximum(0, values * (1 + trend * getattr(config, "TREND_WEIGHT", 0.5)))
+            output[product] = forecast_baseline.scores(heldout["y"], values, method)
+        return output
+    except Exception:
+        logger.warning("Held-out forecast validation unavailable; support will not be rated high")
+        return {}
+
+
+def _calculate_confidence(validation, sufficiency):
+    """Heuristic support band from actual held-out errors, never a probability."""
+    if not validation or validation.get("wape_percent") is None:
+        return "Unvalidated"
+    if sufficiency == "sparse":
         return "Low"
-    # Calculate MAPE on last 14 days (if available)
-    n = min(14, len(historical), len(forecast))
-    if n < 7:
-        return "Medium"
-    hist = historical[-n:]
-    fcst = forecast[:n]
-    # Avoid division by zero
-    mask = hist != 0
-    if mask.sum() == 0:
-        return "Medium"
-    mape = np.mean(np.abs((hist[mask] - fcst[mask]) / hist[mask])) * 100
-    high_thresh = getattr(config, 'FORECAST_CONFIDENCE_MAPE_HIGH', 20)
-    low_thresh = getattr(config, 'FORECAST_CONFIDENCE_MAPE_LOW', 50)
-    if mape < high_thresh:
+    error = validation["wape_percent"]
+    if error < getattr(config, "FORECAST_CONFIDENCE_MAPE_HIGH", 20):
         return "High"
-    elif mape < low_thresh:
+    if error <= getattr(config, "FORECAST_CONFIDENCE_MAPE_LOW", 50):
         return "Medium"
-    else:
-        return "Low"
+    return "Low"
 
 
 def _calculate_trend(ts: pd.DataFrame) -> float:
@@ -327,11 +341,13 @@ def _auto_detect_season_length(batch: pd.DataFrame) -> int:
         return 7
 
 
-def _build_timeseries(group: pd.DataFrame, product_name: str):
+def _build_timeseries(group: pd.DataFrame, product_name: str, observed_end=None):
     """Build daily aggregated time series from sales only."""
     try:
         group = group.copy()
         group["qty"] = pd.to_numeric(group["qty"], errors="coerce").fillna(0)
+        group["date"] = pd.to_datetime(group["date"], errors="coerce").dt.normalize()
+        group = group.dropna(subset=["date"])
         ts = group.groupby("date")["qty"].sum().reset_index()
         ts.columns = ["ds", "y"]
         ts["ds"] = pd.to_datetime(ts["ds"])
@@ -340,7 +356,8 @@ def _build_timeseries(group: pd.DataFrame, product_name: str):
         if len(ts) < config.MIN_DAYS_FOR_FORECAST:
             return None
 
-        full_range = pd.date_range(ts["ds"].min(), ts["ds"].max(), freq="D")
+        end = max(ts["ds"].max(), pd.Timestamp(observed_end).normalize()) if observed_end is not None and not pd.isna(observed_end) else ts["ds"].max()
+        full_range = pd.date_range(ts["ds"].min(), end, freq="D")
         ts = ts.set_index("ds").reindex(full_range, fill_value=0).reset_index()
         ts.columns = ["ds", "y"]
         ts["unique_id"] = product_name

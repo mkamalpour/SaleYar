@@ -104,10 +104,14 @@ business risk; older strength-oriented models are adapted automatically.
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
 
-Current lightweight check (Windows, existing Conda base / Python 3.13.5): **66 passed**. No dependency installs, model downloads, live publishing, or heavy datasets were used.
+Current lightweight check (Windows, existing Conda base / Python 3.13.5): **84 passed**. No dependency installs, model downloads, live publishing, or heavy datasets were used.
 
-Forecast output distinguishes unavailable predictions from low-confidence estimates and displays the skip reason. The 30/60/90-day totals use at least 90 generated days. Category averages are explicitly labelled fallbacks, not fitted forecasts. Confidence labels are heuristic plausibility indicators, not calibrated probabilities or measured out-of-sample accuracy.
+Forecast output distinguishes unavailable predictions from low-support estimates. All available forecasts include 30/60/90-day totals. When StatsForecast is unavailable or fails, an explicitly labelled local baseline repeats the last observed week (at least 14 daily observations) or uses a recent mean. Its support remains Low; no calibrated interval is invented. Category averages remain separately labelled fallbacks for insufficient history.
 
-In the current existing base environment, StatsForecast and OR-Tools are absent: statistical forecasts are unavailable and purchasing uses the documented greedy fallback. The deterministic forecast regressions verify output handling with a fixture adapter; they do not validate an installed StatsForecast model. No packages were installed during this review.
+A seven-day chronological holdout reports MAE and WAPE where sufficient history exists. Statistical support bands use actual held-out predictions, rather than comparing future estimates with past observations. A missing/zero-demand validation denominator is shown as unavailable, not zero error. Optional statistical adapters are checked with fixtures; the installed StatsForecast stack was not exercised. Purchase planning uses the existing greedy fallback when OR-Tools is absent.
 
-No license file is included.
+Daily series combine same-day timestamps and include zero-sale days through the dataset's last date. This assumes a complete invoice history: missing records, closures and stockouts can distort demand. The dashboard shows methods, held-out WAPE and expandable method details. These estimates and short holdouts do not establish real-world predictive accuracy.
+
+Basket confidence is directional P(B|A), support includes single-product invoices, and lift is computed against the destination product's overall frequency. Critical pairs require both the confidence and lift thresholds. The cache version prevents reuse of rules calculated with the older denominator. Associations do not establish causation.
+
+Read-only job-status requests retry bounded transient failures without re-uploading the file or starting a duplicate analysis. Authentication failures and cancellation are not retried. The browser check injected a failed read and completed with one upload/two reads. Optional Node-based frontend tests run when Node is already available; Node is not needed to run the Python application.

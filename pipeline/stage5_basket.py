@@ -1,13 +1,8 @@
-"""
-stage5_basket.py — ADAPTIVE BASKET ANALYSIS
+"""Invoice-based basket associations, with exact pairs for small datasets.
 
-Improvements:
-- Tiny shops (<50 transactions) → simple pair counting (no FP‑Growth)
-- Small shops (50-1000) → FP‑Growth with higher min_support
-- Large shops (>1000) → sample down to 2000 baskets, lower min_support
-- Dynamic product limit based on memory (max 200)
-- Critical pairs: confidence ≥ config.CRITICAL_PAIR_CONFIDENCE AND lift ≥ 2.0
-- Caches rules per shop
+Single-product invoices remain observations. Confidence is directional P(B|A),
+support is P(A and B), and lift compares that confidence with P(B).
+Larger datasets use bounded FP-Growth sampling and product selection.
 """
 
 from saleyar.validation import shop_serialized
@@ -18,7 +13,6 @@ import os
 import sys
 import joblib
 import pandas as pd
-import numpy as np
 from mlxtend.frequent_patterns import fpgrowth, association_rules
 from mlxtend.preprocessing import TransactionEncoder
 import random
@@ -59,7 +53,7 @@ def run(df: pd.DataFrame, shop_id: str = "default") -> dict:
     rules_path = os.path.join(get_shop_dir(shop_id), "basket_rules.pkl")
     fingerprint = hashlib.sha256(pd.util.hash_pandas_object(
         sales_df[["invoice_id", "product", "qty"]], index=False).values.tobytes() +
-        str((config.MIN_BASKET_ROWS, CRITICAL_PAIR_CONFIDENCE, BASKET_MAX_PRODUCTS, BASKET_SAMPLE_SIZE)).encode()).hexdigest()
+        str(('conditional-v2-all-invoices', config.MIN_BASKET_ROWS, CRITICAL_PAIR_CONFIDENCE, BASKET_MAX_PRODUCTS, BASKET_SAMPLE_SIZE)).encode()).hexdigest()
     if os.path.exists(rules_path):
         try:
             data = joblib.load(rules_path)
@@ -84,90 +78,57 @@ def run(df: pd.DataFrame, shop_id: str = "default") -> dict:
     return result
 
 
+def _baskets(df):
+    """Each invoice is one observation, including single-product purchases."""
+    clean = df.dropna(subset=["invoice_id", "product"]).copy()
+    clean["product"] = clean["product"].astype(str).str.strip()
+    clean = clean[~clean["product"].isin(["", "nan", "None", "NaN", "UNKNOWN"])]
+    if "qty" in clean:
+        clean = clean[pd.to_numeric(clean["qty"], errors="coerce") > 0]
+    return [sorted(set(group["product"])) for _, group in clean.groupby("invoice_id")]
+
+
 def _simple_pair_counting(df: pd.DataFrame) -> dict:
-    """Simple pair counting for very small datasets (<50 transactions)."""
-    logger.info("Using simple pair counting (tiny dataset)")
-    # Build baskets
-    baskets = []
-    for _, group in df.groupby("invoice_id"):
-        products = group["product"].unique().tolist()
-        if len(products) >= 2:
-            baskets.append(products)
-
+    """Exact directional pair statistics over all valid invoices."""
+    from collections import Counter
+    from itertools import combinations
+    baskets = _baskets(df)
     if len(baskets) < 2:
-        return {"rules": [], "critical_pairs": [], "skipped": False, "skip_reason": "Not enough baskets with ≥2 items"}
-
-    # Count pair frequencies
-    pair_counts = {}
-    for basket in baskets:
-        for i, a in enumerate(basket):
-            for b in basket[i+1:]:
-                pair = tuple(sorted([a, b]))
-                pair_counts[pair] = pair_counts.get(pair, 0) + 1
-
-    total_baskets = len(baskets)
-    rules = []
-    critical_pairs = []
-    for (a, b), count in pair_counts.items():
-        confidence = count / total_baskets  # simple confidence (P(both)/P(a) approximated)
-        # Note: proper confidence would need P(a) but this is a fallback
-        if confidence >= CRITICAL_PAIR_CONFIDENCE:
+        return {"rules": [], "critical_pairs": [], "skipped": False,
+                "skip_reason": "Need at least two valid invoices for basket rules"}
+    singles = Counter(product for basket in baskets for product in basket)
+    pairs = Counter(pair for basket in baskets for pair in combinations(basket, 2))
+    total = len(baskets)
+    rules, critical_pairs = [], []
+    for (a, b), count in sorted(pairs.items()):
+        support = count / total
+        lift = count * total / (singles[a] * singles[b])
+        critical = False
+        for source, destination in [(a, b), (b, a)]:
+            confidence = count / singles[source]
+            is_critical = confidence >= CRITICAL_PAIR_CONFIDENCE and lift >= 2.0
+            critical |= is_critical
+            rules.append({"antecedent": [source], "consequent": [destination],
+                          "confidence": round(confidence, 3), "lift": round(lift, 2),
+                          "support": round(support, 3), "is_critical": is_critical})
+        if critical:
             critical_pairs.append([a, b])
-        rules.append({
-            "antecedent": [a],
-            "consequent": [b],
-            "confidence": round(confidence, 3),
-            "lift": 1.0,  # lift not computed in simple method
-            "support": round(count / total_baskets, 3),
-            "is_critical": confidence >= CRITICAL_PAIR_CONFIDENCE,
-        })
-        # Also add symmetric rule
-        rules.append({
-            "antecedent": [b],
-            "consequent": [a],
-            "confidence": round(confidence, 3),
-            "lift": 1.0,
-            "support": round(count / total_baskets, 3),
-            "is_critical": confidence >= CRITICAL_PAIR_CONFIDENCE,
-        })
-
-    rules.sort(key=lambda r: r["confidence"], reverse=True)
-    logger.info(f"Simple pair counting: {len(rules)} rules, {len(critical_pairs)} critical pairs")
-    return {"rules": rules, "critical_pairs": critical_pairs, "skipped": False, "skip_reason": None}
+    rules.sort(key=lambda row: (-row["confidence"], row["antecedent"], row["consequent"]))
+    return {"rules": rules, "critical_pairs": critical_pairs, "skipped": False,
+            "skip_reason": None, "invoices_used": total}
 
 
 def _mine_fpgrowth(df: pd.DataFrame) -> dict:
     """Mine association rules using FP-Growth (for normal/large datasets)."""
     try:
-        # Clean products
-        df_clean = df.copy()
-        df_clean["product"] = df_clean["product"].astype(str).str.strip()
-        df_clean = df_clean[df_clean["product"].notna()]
-        df_clean = df_clean[df_clean["product"] != ""]
-        df_clean = df_clean[~df_clean["product"].isin(["nan", "None", "NaN", "UNKNOWN"])]
-
-        if df_clean.empty:
-            return {"rules": [], "critical_pairs": [], "skipped": True,
-                    "skip_reason": "No valid product names after cleaning"}
-
-        # Build baskets (invoices with ≥2 items)
-        baskets = []
-        for _, group in df_clean.groupby("invoice_id"):
-            products = group["product"].unique().tolist()
-            if len(products) >= 2:
-                baskets.append(products)
-
+        baskets = _baskets(df)
         n_baskets = len(baskets)
-        logger.info(f"Built {n_baskets} baskets with >=2 items")
-
         if n_baskets < 10:
-            return {"rules": [], "critical_pairs": [], "skipped": False,
-                    "skip_reason": f"Only {n_baskets} baskets (need at least 10)"}
+            return _simple_pair_counting(df)
 
         # Sample if too many baskets (for performance)
         if n_baskets > BASKET_SAMPLE_SIZE:
-            random.seed(42)
-            baskets = random.sample(baskets, BASKET_SAMPLE_SIZE)
+            baskets = random.Random(42).sample(baskets, BASKET_SAMPLE_SIZE)
             logger.info(f"Sampled down to {BASKET_SAMPLE_SIZE} baskets (seed=42)")
 
         # Limit to most frequent products to avoid memory blow
@@ -176,8 +137,8 @@ def _mine_fpgrowth(df: pd.DataFrame) -> dict:
         product_counts = Counter(all_products)
         top_products = {p for p, _ in product_counts.most_common(BASKET_MAX_PRODUCTS)}
         baskets = [[p for p in basket if p in top_products] for basket in baskets]
-        baskets = [b for b in baskets if len(b) >= 2]
-        if not baskets:
+        # Keep single-item and empty trimmed rows in the probability denominator.
+        if not any(baskets):
             return {"rules": [], "critical_pairs": [], "skipped": False,
                     "skip_reason": f"No baskets after limiting to top {BASKET_MAX_PRODUCTS} products"}
 
@@ -208,7 +169,7 @@ def _mine_fpgrowth(df: pd.DataFrame) -> dict:
             lift = round(row["lift"], 2)
             support = round(row["support"], 3)
 
-            is_critical = (confidence >= CRITICAL_PAIR_CONFIDENCE) and (lift >= 2.0)
+            is_critical = (float(row["confidence"]) >= CRITICAL_PAIR_CONFIDENCE) and (float(row["lift"]) >= 2.0)
 
             rule = {
                 "antecedent": antecedent,

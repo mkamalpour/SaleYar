@@ -695,3 +695,7 @@ p {
   outline: 3px solid #c89625;
   outline-offset: 3px;
 }
+
+.forecast-note { max-width: 28rem; white-space: normal; margin-top: .5rem; }
+.forecast-note summary { cursor: pointer; color: var(--accent, #176963); }
+.forecast-note p { line-height: 1.5; }

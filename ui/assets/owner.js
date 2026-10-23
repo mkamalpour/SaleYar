@@ -330,14 +330,18 @@ function renderCurrentTab() {
       break;
     }
     case "forecast":
-      html = paged(
+      html = "<p>" + esc(t(
+        "Local baselines stay low support even when a short holdout has small errors. Validation is not guaranteed accuracy. Missing sale days are treated as zero; incomplete invoice history can distort demand.",
+        "\u0631\u0648\u0634 \u067e\u0627\u06cc\u0647 \u0645\u0634\u062e\u0635 \u0634\u062f\u0647 \u0627\u0633\u062a. \u0627\u0639\u062a\u0628\u0627\u0631\u0633\u0646\u062c\u06cc \u062a\u0636\u0645\u06cc\u0646 \u062f\u0642\u062a \u0646\u06cc\u0633\u062a. \u0631\u0648\u0632\u0647\u0627\u06cc \u0628\u062f\u0648\u0646 \u0641\u0631\u0648\u0634 \u0635\u0641\u0631 \u0641\u0631\u0636 \u0645\u06cc\u200c\u0634\u0648\u0646\u062f\u061b \u062a\u0627\u0631\u06cc\u062e\u0686\u0647 \u0646\u0627\u0642\u0635 \u0646\u062a\u06cc\u062c\u0647 \u0631\u0627 \u0645\u0646\u062d\u0631\u0641 \u0645\u06cc\u200c\u06a9\u0646\u062f."
+      )) + "</p>" + paged(
         products.filter((p) => p.forecast),
         [
           t("Product", "محصول"),
           t("30-day demand", "تقاضای ۳۰ روز"),
           t("60 days", "۶۰ روز"),
           t("90 days", "۹۰ روز"),
-          t("Confidence", "اطمینان"),
+          t("Validation support", "\u067e\u0634\u062a\u0648\u0627\u0646\u0647 \u0627\u0639\u062a\u0628\u0627\u0631\u0633\u0646\u062c\u06cc"),
+          t("Holdout WAPE", "\u062e\u0637\u0627\u06cc \u062f\u0648\u0631\u0647 \u0622\u0632\u0645\u0648\u0646"),
           t("Status / method", "\u0648\u0636\u0639\u06cc\u062a / \u0631\u0648\u0634"),
         ],
         (p) => [
@@ -346,7 +350,10 @@ function renderCurrentTab() {
           p.forecast.skipped ? "\u2014" : num(p.forecast.h60),
           p.forecast.skipped ? "\u2014" : num(p.forecast.h90),
           badge(p.forecast.skipped ? t("Unavailable", "\u062f\u0631 \u062f\u0633\u062a\u0631\u0633 \u0646\u06cc\u0633\u062a") : p.forecast.confidence || "\u2014"),
-          esc(p.forecast.skipped ? p.forecast.skip_reason || "No forecast generated" : p.forecast.method || "\u2014"),
+          typeof p.forecast.validation?.wape_percent === "number" ? num(p.forecast.validation.wape_percent, 1) + "%" : "\u2014",
+          p.forecast.skipped ? esc(p.forecast.skip_reason || "No forecast generated") :
+            esc(p.forecast.method || "\u2014") + (p.forecast.note ?
+              `<details class="forecast-note"><summary>${esc(t("Details", "\u062c\u0632\u0626\u06cc\u0627\u062a"))}</summary><p>${esc(p.forecast.note)}</p>${p.forecast.data_end ? `<p>${esc(t("Data through", "\u062f\u0627\u062f\u0647 \u062a\u0627"))}: ${esc(p.forecast.data_end)}</p>` : ""}</details>` : ""),
         ],
       );
       break;
@@ -559,10 +566,13 @@ async function request(path, options = {}, signal) {
       headers: { "X-API-Key": apiKey, ...options.headers },
       signal: controller.signal,
     });
-    if (!response.ok)
-      throw new Error(
+    if (!response.ok) {
+      const error = new Error(
         `HTTP ${response.status}: ${response.status === 401 ? "Check your API key in Settings." : response.statusText || "Request failed"}`,
       );
+      error.status = response.status;
+      throw error;
+    }
     return await response.json();
   } finally {
     clearTimeout(timeout);
@@ -583,6 +593,21 @@ function pause(ms, signal) {
     signal.addEventListener("abort", abort, { once: true });
   });
 }
+async function readAnalysisStatus(jobId, signal) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await request("/result/" + encodeURIComponent(jobId), {}, signal);
+    } catch (error) {
+      const transient = error instanceof TypeError || error.name === "AbortError" ||
+        [502, 503, 504].includes(error.status);
+      if (signal.aborted || !transient || attempt === 2) throw error;
+      status(t("Connection interrupted; retrying this analysis without uploading again...",
+        "\u0627\u062a\u0635\u0627\u0644 \u0642\u0637\u0639 \u0634\u062f\u061b \u062a\u0644\u0627\u0634 \u0645\u062c\u062f\u062f \u0628\u062f\u0648\u0646 \u0628\u0627\u0631\u06af\u0630\u0627\u0631\u06cc \u0645\u062c\u062f\u062f..."));
+      await pause(750 * (attempt + 1), signal);
+    }
+  }
+}
+
 async function uploadAndAnalyze(file) {
   if (analysisController) return;
   if (!/\.(csv|xlsx|xls)$/i.test(file.name)) {
@@ -625,11 +650,7 @@ async function uploadAndAnalyze(file) {
     const deadline = Date.now() + 180000;
     while (Date.now() < deadline) {
       status(t("Analyzing sales…", "تحلیل فروش…"));
-      const data = await request(
-        "/result/" + encodeURIComponent(job.job_id),
-        {},
-        controller.signal,
-      );
+      const data = await readAnalysisStatus(job.job_id, controller.signal);
       if (data.status === "done") {
         const result = data.result || data;
         if (result.passed === false)
