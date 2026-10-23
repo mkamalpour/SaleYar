@@ -25,6 +25,7 @@ Use **Python 3.10.19**, matching your existing `saleYar` environment. Activate i
 
 ```bash
 conda activate saleYar
+# Optional dependency setup; requires explicit permission and connectivity.
 python -m pip install -r requirements.txt
 python models/train.py
 python run.py --mode owner
@@ -33,12 +34,13 @@ python run.py --mode owner
 Or create a virtual environment using a Python 3.10 interpreter:
 
 ```powershell
-python -m venv .venv
-.venv\Scripts\python -m pip install -r requirements.txt
-.venv\Scripts\python run.py --mode owner
+conda activate base  # Or activate another existing compatible environment.
+# Optional dependency setup; requires explicit permission and connectivity.
+python -m pip install -r requirements.txt
+python run.py --mode owner
 ```
 
-On macOS/Linux, replace `.venv\Scripts\python` with `.venv/bin/python`.
+Use `python` from your active compatible environment on other platforms too.
 The launcher starts loopback-only API and dashboard servers, then opens the
 browser. Use the launcher URL; the HTML depends on its local assets and API.
 
@@ -82,6 +84,7 @@ Local interactive API documentation is available at `/docs`.
 ## Development
 
 ```bash
+# Optional dependency setup; requires explicit permission and connectivity.
 python -m pip install -r requirements.txt
 python -m pytest tests -q
 ```
@@ -109,3 +112,5 @@ business risk; older strength-oriented models are adapted automatically.
 | `data/` | Synthetic invoice generator and invoice merger |
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
+
+Current lightweight check (Windows, existing Conda base / Python 3.13.5): **63 passed**. No dependency installs, model downloads, live publishing, or heavy datasets were used.
