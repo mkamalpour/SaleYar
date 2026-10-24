@@ -1,9 +1,12 @@
 # SaleYar
 
-**Local retail intelligence for Iranian shops.** Analyze Holoo CSV/Excel invoices,
-understand product performance, and plan purchases in English or Persian.
+Turn Holoo CSV or Excel invoices into product reports and a purchase plan. Review sales, profit, stock movements, and products bought together in English or Persian. The main analysis runs locally; a language-model advisor is optional.
 
 [![Tests](https://github.com/mkamalpour/SaleYar/actions/workflows/tests.yml/badge.svg)](https://github.com/mkamalpour/SaleYar/actions/workflows/tests.yml)
+
+## Try it first
+
+Open the owner dashboard, upload an invoice export, and check the recognized columns before analysis. Review product sales and profit first, then try forecasts and a purchase budget. Keep the original export; downloaded reports are separate files.
 
 ## Features
 
@@ -74,7 +77,7 @@ Local interactive API documentation is available at `/docs`.
 ## Development
 
 ```bash
-# Optional dependency setup; requires explicit permission and connectivity.
+# Install dependencies if they are not already available in your environment.
 python -m pip install -r requirements.txt
 python -m pytest tests -q
 ```
@@ -104,7 +107,7 @@ business risk; older strength-oriented models are adapted automatically.
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
 
-Current lightweight check (Windows, existing Conda base / Python 3.13.5): **87 passed**. No dependency installs, model downloads, live publishing, or heavy datasets were used.
+Checked on Windows with Python 3.13.5 (Conda base): **87 tests passed**.
 
 Forecast output distinguishes unavailable predictions from low-support estimates. All available forecasts include 30/60/90-day totals. When StatsForecast is unavailable or fails, an explicitly labelled local baseline repeats the last observed week (at least 14 daily observations) or uses a recent mean. Its support remains Low; no calibrated interval is invented. Category averages remain separately labelled fallbacks for insufficient history.
 
