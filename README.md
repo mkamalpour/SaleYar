@@ -1,5 +1,7 @@
 # SaleYar
 
+**[Explore the interactive project presentation](docs/overview.html)** — open locally in your browser; works offline.
+
 Turn Holoo CSV or Excel invoices into product reports and a purchase plan. Review sales, profit, stock movements, and products bought together in English or Persian. The main analysis runs locally; a language-model advisor is optional.
 
 [![Tests](https://github.com/mkamalpour/SaleYar/actions/workflows/tests.yml/badge.svg)](https://github.com/mkamalpour/SaleYar/actions/workflows/tests.yml)
