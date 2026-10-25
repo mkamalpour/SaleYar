@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import shutil
+import tempfile
 import sys
 
 import joblib
@@ -130,8 +131,15 @@ def get_shop_metadata(shop_id: str):
 def save_shop_metadata(shop_id: str, metadata: dict) -> None:
     shop_dir = get_shop_dir(shop_id)
     os.makedirs(shop_dir, exist_ok=True)
-    with open(os.path.join(shop_dir, "metadata.json"), "w", encoding="utf-8") as f:
-        json.dump(metadata, f, indent=2)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=shop_dir, suffix=".tmp", delete=False) as handle:
+            temporary = handle.name
+            json.dump(metadata, handle, indent=2, allow_nan=False)
+        os.replace(temporary, os.path.join(shop_dir, "metadata.json"))
+    finally:
+        if temporary is not None and os.path.exists(temporary):
+            os.unlink(temporary)
     _SHOP_MODELS.setdefault(shop_id, {})["metadata"] = dict(metadata)
 
 

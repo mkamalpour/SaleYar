@@ -167,6 +167,13 @@ def _shop_cache_path(shop_id: str, filename: str) -> str:
     return os.path.join(loader.get_shop_dir(shop_id), filename)
 
 
+def _cache_digest(handle):
+    digest = hashlib.sha256()
+    for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+        digest.update(chunk)
+    return digest.hexdigest()
+
+
 def _load_shop_cache(shop_id: str, data_hash: str) -> dict | None:
     metadata = loader.get_shop_metadata(shop_id)
     if not metadata or metadata.get("data_hash") != data_hash:
@@ -178,6 +185,12 @@ def _load_shop_cache(shop_id: str, data_hash: str) -> dict | None:
         return None
 
     try:
+        expected = metadata.get("cache_sha256", {})
+        for path in (segment_path, forecast_path):
+            with open(path, "rb") as handle:
+                digest = _cache_digest(handle)
+            if expected.get(os.path.basename(path)) != digest:
+                return None
         df_kpis = joblib.load(segment_path)
         forecasts = joblib.load(forecast_path)
         logger.info(f"Loaded cached segment and forecast data for shop '{shop_id}'")
@@ -192,11 +205,16 @@ def _save_shop_cache(shop_id: str, data_hash: str, df_kpis, forecasts: dict) -> 
     try:
         joblib.dump(df_kpis, _shop_cache_path(shop_id, CACHE_SEGMENTS))
         joblib.dump(forecasts, _shop_cache_path(shop_id, CACHE_FORECASTS))
+        hashes = {}
+        for filename in (CACHE_SEGMENTS, CACHE_FORECASTS):
+            with open(_shop_cache_path(shop_id, filename), "rb") as handle:
+                hashes[filename] = _cache_digest(handle)
         loader.save_shop_metadata(
             shop_id,
             {
                 "shop_id":   shop_id,
                 "data_hash": data_hash,
+                "cache_sha256": hashes,
                 "cached_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
             },
         )

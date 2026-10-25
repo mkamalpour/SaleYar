@@ -107,7 +107,7 @@ business risk; older strength-oriented models are adapted automatically.
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
 
-Checked on Windows with Python 3.13.5 (Conda base): **87 tests passed**.
+Checked on Windows with Python 3.13.5 (Conda base): **90 tests passed**.
 
 Forecast output distinguishes unavailable predictions from low-support estimates. All available forecasts include 30/60/90-day totals. When StatsForecast is unavailable or fails, an explicitly labelled local baseline repeats the last observed week (at least 14 daily observations) or uses a recent mean. Its support remains Low; no calibrated interval is invented. Category averages remain separately labelled fallbacks for insufficient history.
 
@@ -120,3 +120,5 @@ Basket confidence is directional P(B|A), support includes single-product invoice
 Read-only job-status requests retry bounded transient failures without re-uploading the file or starting a duplicate analysis. Authentication failures and cancellation are not retried. The browser check injected a failed read and completed with one upload/two reads. Optional Node-based frontend tests run when Node is already available; Node is not needed to run the Python application.
 
 Analysis caches include an algorithm version, forecast settings and statistical-backend availability. Older cached forecasts and results from a different policy are recomputed without deleting model artifacts or requiring a changed invoice file.
+
+Analysis cache metadata records hashes of both metrics and forecasts. Mismatched or older unverified cache pairs are recomputed; metadata replacement is atomic and preserves the prior file and memory state on failure.
