@@ -255,7 +255,30 @@ def analyse_owner(file, budget, goal, language, shop_id, use_llm, question):
         return err, "", err
 
 
-with gr.Blocks(title="SaleYar — Shop Advisor") as demo:
+# Keep the existing palette while making small labels and primary actions readable.
+_UI_THEME = gr.themes.Default().set(
+    body_text_color_subdued="#5b6472",
+    body_text_color_subdued_dark="#b6becd",
+    block_label_text_color="#9a3412",
+    block_label_text_color_dark="#fed7aa",
+    block_info_text_color="#9a3412",
+    block_info_text_color_dark="#fed7aa",
+    color_accent="#9a3412",
+    link_text_color="#9a3412",
+    link_text_color_dark="#fdba74",
+    button_primary_background_fill="#c2410c",
+    button_primary_background_fill_hover="#9a3412",
+    button_primary_text_color="#ffffff",
+    button_primary_text_color_hover="#ffffff",
+    button_primary_background_fill_dark="#fdba74",
+    button_primary_background_fill_hover_dark="#fed7aa",
+    button_primary_text_color_dark="#431407",
+    button_primary_text_color_hover_dark="#431407",
+)
+# Supply the dark accent through supported theme CSS, without generated selectors.
+_UI_THEME.custom_css = ":root.dark, :root .dark { --color-accent: #fdba74; }"
+
+with gr.Blocks(title="SaleYar — Shop Advisor", theme=_UI_THEME) as demo:
     gr.Markdown("# 🛍️ SaleYar — Shop Advisor\nA simple dashboard for shop owners. Upload your sales file and get the top actions.")
 
     with gr.Row():

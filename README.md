@@ -10,6 +10,22 @@ Turn Holoo CSV or Excel invoices into product reports and a purchase plan. Revie
 
 Open the owner dashboard, upload an invoice export, and check the recognized columns before analysis. Review product sales and profit first, then try forecasts and a purchase budget. Keep the original export; downloaded reports are separate files.
 
+<details>
+<summary>Using the existing managed Windows workspace</summary>
+
+Assigned environment: **ml** — Python **3.10.19**, using the existing Conda environment `saleYar`. Open `Workspaces/SaleYar.code-workspace` from the workspace folder to select its interpreter.
+
+From this repository folder in PowerShell:
+
+```powershell
+& '..\Launchers\SaleYar.cmd' --check --deep
+& '..\Launchers\SaleYar.cmd'
+```
+
+The launcher activates the assigned environment and checks dependencies. It does not install packages or download models. These launchers belong to the managed parent workspace; for a standalone clone, follow the setup instructions below in your own compatible environment. Keep optional model/provider prerequisites separate from the offline examples.
+
+</details>
+
 ## Features
 
 - Responsive owner dashboard with Persian RTL and nine analysis sections.
@@ -26,10 +42,10 @@ sent to that endpoint; leave LLM integration disabled for fully local operation.
 
 ## Quick start
 
-Activate an existing compatible environment. The current lightweight suite was verified in Conda `base` with Python 3.13.5; no dedicated environment or model training is required to start the dashboard.
+Activate an existing compatible environment. The current lightweight suite was verified in the existing Conda `saleYar` environment with Python 3.10.19; no dedicated environment or model training is required to start the dashboard.
 
 ```powershell
-conda activate base
+conda activate saleYar
 python run.py --mode owner
 ```
 
@@ -109,7 +125,7 @@ business risk; older strength-oriented models are adapted automatically.
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
 
-Checked on Windows with Python 3.13.5 (Conda base): **90 tests passed**.
+Checked on Windows with Python 3.10.19 (existing Conda saleYar, workspace alias ml): **90 tests passed**.
 
 Forecast output distinguishes unavailable predictions from low-support estimates. All available forecasts include 30/60/90-day totals. When StatsForecast is unavailable or fails, an explicitly labelled local baseline repeats the last observed week (at least 14 daily observations) or uses a recent mean. Its support remains Low; no calibrated interval is invented. Category averages remain separately labelled fallbacks for insufficient history.
 

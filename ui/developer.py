@@ -858,7 +858,32 @@ def generate_sample_data():
 # GRADIO INTERFACE
 # ============================================================================
 
-with gr.Blocks(title="SaleYar — Business Intelligence", theme=gr.themes.Soft()) as demo:
+# Keep the existing palette while making small labels and primary actions readable.
+_UI_THEME = gr.themes.Soft().set(
+    body_text_color_subdued="#5b6472",
+    body_text_color_subdued_dark="#b6becd",
+    block_label_text_color="#4338ca",
+    block_label_text_color_dark="#ffffff",
+    block_title_text_color="#4338ca",
+    block_title_text_color_dark="#ffffff",
+    block_info_text_color="#4338ca",
+    block_info_text_color_dark="#ffffff",
+    color_accent="#4338ca",
+    link_text_color="#4338ca",
+    link_text_color_dark="#a5b4fc",
+    button_primary_background_fill="#4338ca",
+    button_primary_background_fill_hover="#3730a3",
+    button_primary_text_color="#ffffff",
+    button_primary_text_color_hover="#ffffff",
+    button_primary_background_fill_dark="#a5b4fc",
+    button_primary_background_fill_hover_dark="#c7d2fe",
+    button_primary_text_color_dark="#1e1b4b",
+    button_primary_text_color_hover_dark="#1e1b4b",
+)
+# Supply the dark accent through supported theme CSS, without generated selectors.
+_UI_THEME.custom_css = ":root.dark, :root .dark { --color-accent: #a5b4fc; }"
+
+with gr.Blocks(title="SaleYar — Business Intelligence", theme=_UI_THEME) as demo:
     gr.Markdown("# 🧠 SaleYar — Business Intelligence\nUpload your Holoo CSV/Excel file and get actionable insights.")
     with gr.Row():
         file_input = gr.File(label="Upload CSV / Excel", file_types=[".csv", ".xlsx", ".xls"])
