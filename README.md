@@ -125,7 +125,7 @@ business risk; older strength-oriented models are adapted automatically.
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
 
-Checked on Windows with Python 3.10.19 (existing Conda saleYar, workspace alias ml): **90 tests passed**.
+Checked on Windows with Python 3.10.19 (existing Conda saleYar, workspace alias ml): **94 tests passed**.
 
 Forecast output distinguishes unavailable predictions from low-support estimates. All available forecasts include 30/60/90-day totals. When StatsForecast is unavailable or fails, an explicitly labelled local baseline repeats the last observed week (at least 14 daily observations) or uses a recent mean. Its support remains Low; no calibrated interval is invented. Category averages remain separately labelled fallbacks for insufficient history.
 

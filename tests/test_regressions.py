@@ -125,6 +125,11 @@ def test_dashboard_server_exposes_only_public_assets(tmp_path):
     thread.start()
     base = f"http://127.0.0.1:{server.server_port}"
     try:
+        foreign = urllib.request.Request(base + "/ui/owner.html", headers={"Host": "foreign.example"})
+        with pytest.raises(urllib.error.HTTPError) as rejected:
+            urllib.request.urlopen(foreign)
+        assert rejected.value.code == 403
+        assert b"test-key" not in rejected.value.read()
         body = urllib.request.urlopen(base + "/ui/owner.html").read().decode()
         assert "8123" in body and "__SALEYAR_RUNTIME_CONFIG__" not in body
         assert "test-key</script>" not in body
@@ -274,3 +279,29 @@ def test_forecast_ninety_day_totals_and_prefixed_intervals(monkeypatch, trend):
     assert (row["h30"], row["h60"], row["h90"]) == pytest.approx((60 * factor, 120 * factor, 180 * factor))
     assert row["daily_lo80"] == pytest.approx([factor] * 90)
     assert row["daily_hi80"] == pytest.approx([3 * factor] * 90)
+
+
+@pytest.mark.parametrize("kind", ["zero_quantity", "missing_product", "header_only"])
+def test_cleaner_rejects_no_usable_transactions(kind):
+    frame = transactions().iloc[[1]].copy()
+    if kind == "zero_quantity": frame["qty"] = 0
+    elif kind == "missing_product": frame["product"] = ""
+    else: frame = frame.iloc[:0]
+    result = stage1_cleaner.run(frame.to_csv(index=False).encode(), "invoice.csv")
+    assert not result["passed"] and result["df"] is None
+    assert result["quality"] == 0
+    assert "No usable transactions" in result["message"]
+
+
+def test_cleaner_quality_counts_rejected_rows_once_and_duplicates_as_info():
+    frame = transactions().iloc[[1, 2]].copy().reset_index(drop=True)
+    frame[["date", "qty", "buy_price"]] = frame[["date", "qty", "buy_price"]].astype(str)
+    frame.loc[1, ["date", "qty", "buy_price"]] = ["invalid", "invalid", "invalid"]
+    result = stage1_cleaner.run(frame.to_csv(index=False).encode(), "invoice.csv")
+    assert result["passed"] and result["quality"] == 50
+    assert len(result["df"]) == 1
+    duplicate = pd.concat([transactions().iloc[[1]]] * 2, ignore_index=True)
+    result = stage1_cleaner.run(duplicate.to_csv(index=False).encode(), "invoice.csv")
+    assert result["passed"] and result["quality"] == 100
+    assert not any(issue.get("severity") == "info" for issue in result["flagged"])
+    assert any("duplicate" in issue for issue in result["issues"])

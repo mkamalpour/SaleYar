@@ -16,6 +16,15 @@ def create_dashboard_handler(project_root, api_key, api_port):
             pass
 
         def do_GET(self):
+            # The page contains the local API key. Reject foreign Host names so
+            # a website cannot read it after rebinding its DNS to loopback.
+            try:
+                host = urlsplit("//" + self.headers.get("Host", "")).hostname
+            except ValueError:
+                host = None
+            if host not in {"localhost", "127.0.0.1", "::1"}:
+                self.send_error(403, "Local dashboard host required")
+                return
             route = urlsplit(self.path).path
             if route in ("/", "/ui/owner.html"):
                 target = html_path

@@ -7,10 +7,10 @@ Handles:
 - Promotions (loss-making) as warnings
 - Tiny shops (<100 rows) → lower quality threshold (30)
 - Large files (>50k rows) → skip fuzzy matching & anomaly detection for speed
-- Unparseable dates → fallback to today (keeps row)
+- Unparseable dates are flagged and excluded
 - Zero quantity rows → removed (warning, not error)
 
-Never crashes, always returns a usable DataFrame.
+Rejects unusable input with an explicit quality result.
 """
 
 import io
@@ -91,7 +91,7 @@ def run(file_bytes: bytes, filename: str, language: str = "en") -> dict:
     else:
         df["transaction_type"] = df["transaction_type"].apply(normalize_transaction_type)
 
-    # 3. Parse dates (smart fallback to today, never leaves NaT)
+    # 3. Parse dates and flag invalid dates for removal
     df, date_issues = _parse_dates(df, language)
 
     # 4. Clean data with business rules (including removal of zero qty rows)
@@ -109,15 +109,14 @@ def run(file_bytes: bytes, filename: str, language: str = "en") -> dict:
             issue_text = issue.get("issue", "")
             if issue.get("severity") == "warning":
                 warnings.append(issue)
-            else:
+            elif issue.get("severity", "error") != "info":
                 real_errors.append(issue)
 
-    n_bad = len(real_errors)
-    original_rows = len(df)
+    bad_idx = {r["row_index"] for r in real_errors if "row_index" in r and r["row_index"] >= 0}
+    n_bad = len(bad_idx)
 
     # Remove rows with real errors
     if real_errors:
-        bad_idx = {r["row_index"] for r in real_errors if "row_index" in r}
         df = df.drop(index=list(bad_idx), errors="ignore").reset_index(drop=True)
 
     # Filter out invalid product names
@@ -132,20 +131,24 @@ def run(file_bytes: bytes, filename: str, language: str = "en") -> dict:
 
     # Recalculate quality after removal
     kept = len(df)
-    quality = max(0, 100 - int((n_bad / max(kept + n_bad, 1)) * 100))
+    quality = max(0, 100 - int((n_bad / max(kept + n_bad, 1)) * 100)) if kept else 0
 
     # ========== ADAPTIVE QUALITY THRESHOLD (small shops get easier pass) ==========
     if kept < SMALL_SHOP_ROWS:
         quality_pass = QUALITY_PASS_SMALL
     else:
         quality_pass = QUALITY_PASS_THRESHOLD
-    passed = quality >= quality_pass
+    passed = kept > 0 and quality >= quality_pass
 
     message = _t(
         language,
         f"{kept} rows ready.\n✓ Kept {len(warnings)} normal business transactions\n✗ Removed {n_bad} errors",
         f"{kept} ردیف آماده است.\n✓ {len(warnings)} تراکنش عادی تجاری نگه داشته شد\n✗ {n_bad} خطای واقعی حذف شد"
     )
+
+    if not kept:
+        message = _t(language, "No usable transactions remain after cleaning. Check product names, dates and quantities.",
+                     "هیچ تراکنشی پس از پاکسازی باقی نماند.")
 
     logger.info(f"Stage 1 complete | quality={quality} | clean_rows={kept} | warnings={len(warnings)} | errors={n_bad}")
 
@@ -154,7 +157,8 @@ def run(file_bytes: bytes, filename: str, language: str = "en") -> dict:
         "quality": quality,
         "flagged": real_errors + warnings,
         "warnings": warnings,
-        "issues": [m for m in all_issues if isinstance(m, str)],
+        "issues": [m if isinstance(m, str) else m["issue"] for m in all_issues
+                   if isinstance(m, str) or m.get("severity") == "info"],
         "passed": passed,
         "message": message,
     }
