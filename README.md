@@ -13,16 +13,18 @@ Open the owner dashboard, upload an invoice export, and check the recognized col
 <details>
 <summary>Using the existing managed Windows workspace</summary>
 
-Assigned environment: **ml** — Python **3.10.19**, using the existing Conda environment `saleYar`. Open `Workspaces/SaleYar.code-workspace` from the workspace folder to select its interpreter.
-
-From this repository folder in PowerShell:
+Assigned environment: **ml**. From this repository folder in PowerShell:
 
 ```powershell
-& '..\Launchers\SaleYar.cmd' --check --deep
-& '..\Launchers\SaleYar.cmd'
+.\run.cmd --check
+.\run.cmd
 ```
 
-The launcher activates the assigned environment and checks dependencies. It does not install packages or download models. These launchers belong to the managed parent workspace; for a standalone clone, follow the setup instructions below in your own compatible environment. Keep optional model/provider prerequisites separate from the offline examples.
+The repo-local launcher selects `G:\AnaConda\install/envs/ml`
+and imports required startup modules. It installs nothing and downloads
+no models. On a standalone clone where that interpreter is absent, it uses your
+active `python`; activate a compatible environment first. `--check` reports the
+actual interpreter; it does not validate optional models or every workflow.
 
 </details>
 
@@ -42,10 +44,10 @@ sent to that endpoint; leave LLM integration disabled for fully local operation.
 
 ## Quick start
 
-Activate an existing compatible environment. The current lightweight suite was verified in the existing Conda `saleYar` environment with Python 3.10.19; no dedicated environment or model training is required to start the dashboard.
+Activate an existing compatible environment. The current lightweight suite was verified in the existing Conda `ml` environment with Python 3.10.19; no dedicated environment or model training is required to start the dashboard.
 
 ```powershell
-conda activate saleYar
+conda activate ml
 python run.py --mode owner
 ```
 
@@ -97,10 +99,14 @@ Local interactive API documentation is available at `/docs`.
 ```bash
 # Install dependencies if they are not already available in your environment.
 python -m pip install -r requirements.txt
-python -m pytest tests -q
+conda activate ml
+python test.py
 ```
 
 Tests use synthetic data and isolate shop caches from real models and reports.
+`test.py` disables unrelated globally installed pytest plugins. Startup registers
+the active environment's existing native-library and `pyarrow.libs` directories
+for this process only; no Conda files are changed or packages downloaded.
 `requirements.txt` records the original Python 3.10 dependency baseline, plus
 `xlrd` for legacy Excel files. The current lightweight suite also passes with the
 existing base environment. Avoid unrestricted upgrades of ML dependencies; native
@@ -125,7 +131,7 @@ business risk; older strength-oriented models are adapted automatically.
 | `output/` | Report assembly, charts, and language templates |
 | `tests/` | Integration checks and behavioral regressions |
 
-Checked on Windows with Python 3.10.19 (existing Conda saleYar, workspace alias ml): **94 tests passed**.
+Checked on Windows with Python 3.10.19 (existing Conda ml, workspace alias ml): **94 tests passed**.
 
 Forecast output distinguishes unavailable predictions from low-support estimates. All available forecasts include 30/60/90-day totals. When StatsForecast is unavailable or fails, an explicitly labelled local baseline repeats the last observed week (at least 14 daily observations) or uses a recent mean. Its support remains Low; no calibrated interval is invented. Category averages remain separately labelled fallbacks for insufficient history.
 
@@ -140,3 +146,6 @@ Read-only job-status requests retry bounded transient failures without re-upload
 Analysis caches include an algorithm version, forecast settings and statistical-backend availability. Older cached forecasts and results from a different policy are recomputed without deleting model artifacts or requiring a changed invoice file.
 
 Analysis cache metadata records hashes of both metrics and forecasts. Mismatched or older unverified cache pairs are recomputed; metadata replacement is atomic and preserves the prior file and memory state on failure.
+
+See the [engineering audit](docs/ENGINEERING_AUDIT.md) for the dated test baseline,
+project assessment, environment assignment and remaining work.

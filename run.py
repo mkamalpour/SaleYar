@@ -10,6 +10,9 @@ import argparse
 import os
 import subprocess
 import sys
+from runtime_setup import configure_runtime
+
+configure_runtime()
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
