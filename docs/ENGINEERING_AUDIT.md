@@ -26,7 +26,7 @@ VS Code's local interpreter settings were aligned with the same assignment.
 
 ## Verification
 
-- **Automated tests:** 94 passed.
+- **Automated tests:** 96 passed; 0 reported skips; 0 private-report cases deselected.
 - **Startup check:** `run.cmd --check` passed from outside the repository;
   required startup modules were imported in the assigned environment.
 - **Tested runtime:** Windows; Conda ml; Python 3.10.19.
@@ -58,3 +58,17 @@ for quality. These are proposed upgrades, not implemented features or measured s
 External assets: No hosted model is needed for core analysis; representative anonymized invoices are needed for business validation.
 
 No root license file is set. No license was selected or changed.
+
+## Additional implementation pass
+
+Demand validation reports include RMSE, signed mean/percentage bias and zero-demand-day counts. Invalid vector shapes, negative demand and invalid horizons fail clearly.
+
+Use: Owner dashboard → Forecasts → Holdout bias (+ overforecast). Existing WAPE and low-support warnings remain.
+
+Verification: the complete offline suite passed in the assigned **ml**
+environment after this change (96 tests). Regression fixtures remain
+temporary/synthetic. Optional real-model/data quality and external integrations
+remain unverified. No packages, models or additional environments were installed.
+
+The earlier numeric scores are subjective historical assessments; new features do
+not automatically establish a higher score or production readiness.

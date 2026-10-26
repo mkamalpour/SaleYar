@@ -149,3 +149,9 @@ Analysis cache metadata records hashes of both metrics and forecasts. Mismatched
 
 See the [engineering audit](docs/ENGINEERING_AUDIT.md) for the dated test baseline,
 project assessment, environment assignment and remaining work.
+
+## Additional workflow improvements
+
+Demand validation reports include RMSE, signed mean/percentage bias and zero-demand-day counts. Invalid vector shapes, negative demand and invalid horizons fail clearly.
+
+Owner dashboard → Forecasts → Holdout bias (+ overforecast). Existing WAPE and low-support warnings remain.

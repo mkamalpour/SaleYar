@@ -342,6 +342,7 @@ function renderCurrentTab() {
           t("90 days", "۹۰ روز"),
           t("Validation support", "\u067e\u0634\u062a\u0648\u0627\u0646\u0647 \u0627\u0639\u062a\u0628\u0627\u0631\u0633\u0646\u062c\u06cc"),
           t("Holdout WAPE", "\u062e\u0637\u0627\u06cc \u062f\u0648\u0631\u0647 \u0622\u0632\u0645\u0648\u0646"),
+          t('Holdout bias (+ overforecast)', 'سوگیری آزمون (+ بیش‌برآورد)'),
           t("Status / method", "\u0648\u0636\u0639\u06cc\u062a / \u0631\u0648\u0634"),
         ],
         (p) => [
@@ -351,6 +352,7 @@ function renderCurrentTab() {
           p.forecast.skipped ? "\u2014" : num(p.forecast.h90),
           badge(p.forecast.skipped ? t("Unavailable", "\u062f\u0631 \u062f\u0633\u062a\u0631\u0633 \u0646\u06cc\u0633\u062a") : p.forecast.confidence || "\u2014"),
           typeof p.forecast.validation?.wape_percent === "number" ? num(p.forecast.validation.wape_percent, 1) + "%" : "\u2014",
+          typeof p.forecast.validation?.bias_percent === 'number' ? num(p.forecast.validation.bias_percent, 1) + '%' : '\u2014',
           p.forecast.skipped ? esc(p.forecast.skip_reason || "No forecast generated") :
             esc(p.forecast.method || "\u2014") + (p.forecast.note ?
               `<details class="forecast-note"><summary>${esc(t("Details", "\u062c\u0632\u0626\u06cc\u0627\u062a"))}</summary><p>${esc(p.forecast.note)}</p>${p.forecast.data_end ? `<p>${esc(t("Data through", "\u062f\u0627\u062f\u0647 \u062a\u0627"))}: ${esc(p.forecast.data_end)}</p>` : ""}</details>` : ""),
